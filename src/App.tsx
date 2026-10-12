@@ -22,6 +22,7 @@ import { LearningPage } from './pages/LearningPage';
 import { CheatSheetsPage } from './pages/CheatSheetsPage';
 import { ComparePage, CommandOfDayPage, ExportImportPage } from './pages/ToolsPages';
 import { PasswordResetPage } from './pages/PasswordResetPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 export function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -55,8 +56,8 @@ export function App() {
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/sign-in" element={<SignInPage />} />
                   <Route path="/sign-up" element={<SignUpPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                   <Route path="/explain" element={<ExplainCommandPage />} />
                   <Route path="/practice-terminal" element={<PracticeTerminalPage />} />
                   <Route path="/learn" element={<LearningPage />} />
