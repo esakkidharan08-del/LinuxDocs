@@ -1,0 +1,3606 @@
+{
+  "categories": [
+    {
+      "id": "file-and-directory",
+      "name": "File & Directory",
+      "section": "linux",
+      "description": "Create, navigate, copy, move, and remove files and directories."
+    },
+    {
+      "id": "permissions-and-ownership",
+      "name": "Permissions & Ownership",
+      "section": "linux",
+      "description": "Manage file permissions, ownership, and access control."
+    },
+    {
+      "id": "text-processing",
+      "name": "Text Processing",
+      "section": "linux",
+      "description": "Search, filter, transform, and format text streams and files."
+    },
+    {
+      "id": "process-management",
+      "name": "Process Management",
+      "section": "linux",
+      "description": "Monitor, signal, background, and control active system processes."
+    },
+    {
+      "id": "networking",
+      "name": "Networking",
+      "section": "linux",
+      "description": "Test connectivity, trace routes, inspect interfaces, and transfer files."
+    },
+    {
+      "id": "package-management",
+      "name": "Package Management",
+      "section": "linux",
+      "description": "Install, update, remove, and query software packages and repositories."
+    },
+    {
+      "id": "disk-and-storage",
+      "name": "Disk & Storage",
+      "section": "linux",
+      "description": "Inspect disk usage, mount filesystems, and manage partitions."
+    },
+    {
+      "id": "archiving-and-compression",
+      "name": "Archiving & Compression",
+      "section": "linux",
+      "description": "Bundle, compress, extract, and unpack archives."
+    },
+    {
+      "id": "users-and-groups",
+      "name": "Users & Groups",
+      "section": "linux",
+      "description": "Manage user accounts, passwords, groups, and privileges."
+    },
+    {
+      "id": "shell-and-scripting",
+      "name": "Shell & Scripting",
+      "section": "linux",
+      "description": "Shell environment, history, aliases, arithmetic, and cron automation."
+    },
+    {
+      "id": "system-info-and-monitoring",
+      "name": "System Info & Monitoring",
+      "section": "linux",
+      "description": "Hardware info, kernel version, uptime, calendar, and system statistics."
+    },
+    {
+      "id": "search-and-find",
+      "name": "Search & Find",
+      "section": "linux",
+      "description": "Locate files and search file contents across the filesystem."
+    },
+    {
+      "id": "services-and-logs",
+      "name": "Services & Logs",
+      "section": "linux",
+      "description": "Control systemd services, inspect journal logs, and view kernel ring buffer."
+    }
+  ],
+  "domains": [
+    {
+      "id": "recon",
+      "name": "Reconnaissance",
+      "description": "Information gathering, port scanning, subdomain enumeration, and service fingerprinting.",
+      "tools": [
+        "nmap",
+        "gobuster",
+        "ffuf",
+        "wfuzz",
+        "nikto",
+        "whatweb",
+        "subfinder",
+        "theHarvester",
+        "whois",
+        "dnsrecon"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "Censys",
+          "url": "https://censys.io/",
+          "description": "Search engine for internet-connected devices and certificates."
+        },
+        {
+          "name": "Shodan",
+          "url": "https://www.shodan.io/",
+          "description": "Search engine for connected devices and open ports."
+        },
+        {
+          "name": "DNS Dumpster",
+          "url": "https://dnsdumpster.com/",
+          "description": "Domain research tool to discover hosts related to a domain."
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "name": "Web Hacking",
+      "description": "HTTP parameter tampering, vulnerability scanning, SQL injection, and web application assessment.",
+      "tools": [
+        "sqlmap",
+        "curl-for-web-testing",
+        "nikto",
+        "gobuster",
+        "ffuf",
+        "wfuzz"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "PortSwigger Academy",
+          "url": "https://portswigger.net/web-security",
+          "description": "Free online web security training labs."
+        },
+        {
+          "name": "Regex101",
+          "url": "https://regex101.com/",
+          "description": "Online regex tester and debugger."
+        },
+        {
+          "name": "HackTricks",
+          "url": "https://book.hacktricks.xyz/",
+          "description": "Comprehensive pentesting and CTF reference guide."
+        }
+      ]
+    },
+    {
+      "id": "crypto",
+      "name": "Cryptography",
+      "description": "Symmetric/asymmetric encryption, hashing, decoding, and cryptographic protocol analysis.",
+      "tools": [
+        "openssl",
+        "hashid",
+        "john",
+        "hashcat",
+        "gpg",
+        "age"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "CyberChef",
+          "url": "https://gchq.github.io/CyberChef/",
+          "description": "The Cyber Swiss Army knife for encryption, encoding, compression, and data analysis."
+        },
+        {
+          "name": "CrackStation",
+          "url": "https://crackstation.net/",
+          "description": "Free rainbow table password hash cracker."
+        },
+        {
+          "name": "dCode.fr",
+          "url": "https://www.dcode.fr/",
+          "description": "Cipher and crypto decoding tools suite."
+        }
+      ]
+    },
+    {
+      "id": "reverse-engineering",
+      "name": "Reverse Engineering",
+      "description": "Decompiling, disassembling, patching, and analyzing compiled binaries and bytecode.",
+      "tools": [
+        "strings",
+        "objdump",
+        "gdb",
+        "ltrace",
+        "strace",
+        "radare2",
+        "binwalk",
+        "checksec",
+        "ROPgadget"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "Ghidra",
+          "url": "https://ghidra-sre.org/",
+          "description": "NSA open-source reverse engineering software suite."
+        },
+        {
+          "name": "Compiler Explorer",
+          "url": "https://godbolt.org/",
+          "description": "Interactive online compiler explorer showing assembly output."
+        },
+        {
+          "name": "Assembly to Machine Code",
+          "url": "https://shell-storm.org/online-assembler/",
+          "description": "Online assembler/disassembler."
+        }
+      ]
+    },
+    {
+      "id": "forensics",
+      "name": "Digital Forensics",
+      "description": "File carving, metadata extraction, memory dump analysis, and hidden data discovery.",
+      "tools": [
+        "binwalk",
+        "exiftool",
+        "steghide",
+        "foremost",
+        "volatility"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "Aperi'Solve",
+          "url": "https://aperisolve.com/",
+          "description": "Online platform for steganography and image analysis."
+        },
+        {
+          "name": "DFIR Training",
+          "url": "https://www.dfir.training/",
+          "description": "Digital forensics and incident response resources."
+        },
+        {
+          "name": "HexEd.it",
+          "url": "https://hexed.it/",
+          "description": "Browser-based hexadecimal editor."
+        }
+      ]
+    },
+    {
+      "id": "pwn",
+      "name": "Binary Exploitation (Pwn)",
+      "description": "Buffer overflows, format string vulnerabilities, shellcode crafting, and ROP chain development.",
+      "tools": [
+        "checksec",
+        "ROPgadget",
+        "gdb",
+        "pwntools-snippets"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "Exploit-DB",
+          "url": "https://www.exploit-db.com/",
+          "description": "Archive of public exploits and vulnerable software."
+        },
+        {
+          "name": "ROP Emporium",
+          "url": "https://ropemporium.com/",
+          "description": "Binary exploitation learning site focusing on ROP."
+        },
+        {
+          "name": "RevShells",
+          "url": "https://www.revshells.com/",
+          "description": "Generate reverse and bind shells instantly."
+        }
+      ]
+    },
+    {
+      "id": "osint",
+      "name": "OSINT",
+      "description": "Open-source intelligence gathering on people, organizations, domains, and infrastructure.",
+      "tools": [
+        "theHarvester",
+        "whois",
+        "dnsrecon",
+        "nmap"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "OSINT Framework",
+          "url": "https://osintframework.com/",
+          "description": "Collection of OSINT tools and resources."
+        },
+        {
+          "name": "Wayback Machine",
+          "url": "https://archive.org/web/",
+          "description": "Digital archive of web pages across time."
+        },
+        {
+          "name": "PwnedOrNot",
+          "url": "https://haveibeenpwned.com/",
+          "description": "Check if email addresses or passwords have been leaked in data breaches."
+        }
+      ]
+    },
+    {
+      "id": "mobile",
+      "name": "Mobile Security",
+      "description": "Android/iOS application analysis, decompilation, and dynamic instrumentation.",
+      "tools": [
+        "adb",
+        "apktool",
+        "jadx"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "MobSF",
+          "url": "https://mobsf.github.io/Mobile-Security-Framework-MobSF/",
+          "description": "Automated mobile application security assessment framework."
+        },
+        {
+          "name": "OWASP MASTG",
+          "url": "https://mas.owasp.org/",
+          "description": "Comprehensive mobile security testing guide."
+        },
+        {
+          "name": "jadx online",
+          "url": "https://www.decompiler.com/",
+          "description": "Online DEX/APK decompiler."
+        }
+      ]
+    },
+    {
+      "id": "cloud",
+      "name": "Cloud Security",
+      "description": "AWS/Azure/GCP permission auditing, misconfiguration detection, and credential enumeration.",
+      "tools": [
+        "aws-cli-enumeration",
+        "trivy"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "CloudGoat",
+          "url": "https://github.com/RhinoSecurityLabs/cloudgoat",
+          "description": "Vulnerable cloud infrastructure generator by Rhino Security Labs."
+        },
+        {
+          "name": "Pacu",
+          "url": "https://github.com/RhinoSecurityLabs/pacu",
+          "description": "Open-source AWS exploitation framework."
+        },
+        {
+          "name": "AWS IAM Policy Simulator",
+          "url": "https://policysim.aws.amazon.com/",
+          "description": "Test and troubleshoot AWS IAM policies."
+        }
+      ]
+    },
+    {
+      "id": "containers",
+      "name": "Container Security",
+      "description": "Docker inspection, container escape vulnerability scanning, and image analysis.",
+      "tools": [
+        "docker-inspect",
+        "trivy"
+      ],
+      "recommendedExternalTools": [
+        {
+          "name": "Trivy Docs",
+          "url": "https://aquasecurity.github.io/trivy/",
+          "description": "Comprehensive security scanner for containers and dependencies."
+        },
+        {
+          "name": "Docker Bench for Security",
+          "url": "https://github.com/docker/docker-bench-security",
+          "description": "Script to check for best-practices in deploying Docker containers."
+        },
+        {
+          "name": "K8s Hardening Guide",
+          "url": "https://www.nsa.gov/Press-Room/News-Highlights/Article/Article/2716980/",
+          "description": "NSA & CISA Kubernetes hardening guidance."
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "slug": "ls",
+      "name": "ls",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "List directory contents.",
+      "syntax": "ls [OPTION]... [FILE]...",
+      "description": "List information about the FILEs (the current directory by default). Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.",
+      "options": [
+        {
+          "flag": "-l",
+          "description": "Use a long listing format showing permissions, links, owner, size, and timestamp.",
+          "example": "ls -l"
+        },
+        {
+          "flag": "-a",
+          "description": "Do not ignore entries starting with . (hidden files).",
+          "example": "ls -la"
+        },
+        {
+          "flag": "-h",
+          "description": "With -l and -s, print sizes like 1K, 234M, 2G etc.",
+          "example": "ls -lh"
+        },
+        {
+          "flag": "-t",
+          "description": "Sort by modification time, newest first.",
+          "example": "ls -lt"
+        },
+        {
+          "flag": "-R",
+          "description": "List subdirectories recursively.",
+          "example": "ls -R"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Basic listing",
+          "command": "ls",
+          "output": "Documents  Downloads  Music  script.sh",
+          "explanation": "Lists files and directories in the current working directory in brief format."
+        },
+        {
+          "title": "Detailed listing with hidden files",
+          "command": "ls -la",
+          "output": "total 32\ndrwxr-xr-x  6 user user 4096 Oct 12 10:00 .\ndrwxr-xr-x 20 user user 4096 Oct 12 09:30 ..\n-rw-r--r--  1 user user  220 Oct 12 09:30 .bashrc\ndrwxr-xr-x  2 user user 4096 Oct 12 09:45 Documents",
+          "explanation": "Shows detailed file attributes including hidden dotfiles."
+        },
+        {
+          "title": "Human readable sizes sorted by time",
+          "command": "ls -lht",
+          "output": "total 12M\n-rw-r--r-- 1 user user 12M Oct 12 10:02 archive.tar.gz\n-rw-r--r-- 1 user user 4K Oct 12 09:50 notes.txt",
+          "explanation": "Combines long listing, human-readable file sizes, and newest-first sorting."
+        }
+      ],
+      "useCases": [
+        "Inspecting directory contents",
+        "Checking file permissions and modification dates",
+        "Finding hidden configuration files"
+      ],
+      "related": [
+        "cd",
+        "pwd",
+        "cp",
+        "mv",
+        "rm"
+      ],
+      "tags": [
+        "files",
+        "directory",
+        "listing"
+      ]
+    },
+    {
+      "slug": "cd",
+      "name": "cd",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Change the shell working directory.",
+      "syntax": "cd [dir]",
+      "description": "Change the current working directory to dir. If dir is not supplied, the value of the HOME shell variable is used.",
+      "options": [
+        {
+          "flag": "..",
+          "description": "Move up one directory level to the parent directory.",
+          "example": "cd .."
+        },
+        {
+          "flag": "~",
+          "description": "Change to the current user's home directory.",
+          "example": "cd ~"
+        },
+        {
+          "flag": "-",
+          "description": "Switch to the previous working directory.",
+          "example": "cd -"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Change to subdirectory",
+          "command": "cd /var/log",
+          "output": "",
+          "explanation": "Navigates directly to the absolute path /var/log."
+        },
+        {
+          "title": "Move up to parent directory",
+          "command": "cd ..",
+          "output": "",
+          "explanation": "Moves up one level in the directory tree."
+        },
+        {
+          "title": "Return to home directory",
+          "command": "cd ~",
+          "output": "",
+          "explanation": "Instantly navigates to your home directory."
+        }
+      ],
+      "useCases": [
+        "Navigating the filesystem tree",
+        "Quickly returning to home directory"
+      ],
+      "related": [
+        "ls",
+        "pwd",
+        "mkdir"
+      ],
+      "tags": [
+        "navigation",
+        "directory",
+        "shell"
+      ]
+    },
+    {
+      "slug": "pwd",
+      "name": "pwd",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Print name of current/working directory.",
+      "syntax": "pwd [OPTION]",
+      "description": "Print the full filename of the current working directory.",
+      "options": [
+        {
+          "flag": "-P",
+          "description": "Avoid all symbolical links; print the physical directory path.",
+          "example": "pwd -P"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Print current directory",
+          "command": "pwd",
+          "output": "/home/user/Documents",
+          "explanation": "Outputs the absolute pathname of the current working directory."
+        }
+      ],
+      "useCases": [
+        "Confirming current working location in scripts and terminal sessions"
+      ],
+      "related": [
+        "cd",
+        "ls"
+      ],
+      "tags": [
+        "directory",
+        "path"
+      ]
+    },
+    {
+      "slug": "cp",
+      "name": "cp",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Copy files and directories.",
+      "syntax": "cp [OPTION]... SOURCE DEST",
+      "description": "Copy SOURCE to DEST, or multiple SOURCE(s) to DIRECTORY.",
+      "options": [
+        {
+          "flag": "-r, -R",
+          "description": "Copy directories recursively.",
+          "example": "cp -r dir1/ dir2/"
+        },
+        {
+          "flag": "-i",
+          "description": "Prompt before overwrite.",
+          "example": "cp -i file.txt backup.txt"
+        },
+        {
+          "flag": "-v",
+          "description": "Explain what is being done.",
+          "example": "cp -v file.txt dest/"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Copy a single file",
+          "command": "cp config.yaml config.yaml.bak",
+          "output": "",
+          "explanation": "Creates an exact duplicate file named config.yaml.bak."
+        },
+        {
+          "title": "Copy directory recursively",
+          "command": "cp -r /etc/nginx /backup/nginx",
+          "output": "",
+          "explanation": "Copies the entire directory tree recursively."
+        }
+      ],
+      "useCases": [
+        "Backing up files",
+        "Duplicating directory structures"
+      ],
+      "related": [
+        "mv",
+        "rm",
+        "mkdir"
+      ],
+      "tags": [
+        "files",
+        "copy"
+      ]
+    },
+    {
+      "slug": "mv",
+      "name": "mv",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Move or rename files and directories.",
+      "syntax": "mv [OPTION]... SOURCE DEST",
+      "description": "Rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY.",
+      "options": [
+        {
+          "flag": "-i",
+          "description": "Prompt before overwrite.",
+          "example": "mv -i file1.txt file2.txt"
+        },
+        {
+          "flag": "-v",
+          "description": "Explain what is being done.",
+          "example": "mv -v *.txt docs/"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Rename a file",
+          "command": "mv old.txt new.txt",
+          "output": "",
+          "explanation": "Changes filename from old.txt to new.txt."
+        },
+        {
+          "title": "Move files to directory",
+          "command": "mv report.pdf /home/user/Documents/",
+          "output": "",
+          "explanation": "Moves report.pdf into the Documents folder."
+        }
+      ],
+      "useCases": [
+        "Renaming files and directories",
+        "Reorganizing directory layouts"
+      ],
+      "related": [
+        "cp",
+        "rm",
+        "mkdir"
+      ],
+      "tags": [
+        "files",
+        "move",
+        "rename"
+      ]
+    },
+    {
+      "slug": "rm",
+      "name": "rm",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Remove files or directories.",
+      "syntax": "rm [OPTION]... [FILE]...",
+      "description": "Remove (unlink) the FILE(s). By default does not remove directories.",
+      "options": [
+        {
+          "flag": "-r, -R",
+          "description": "Remove directories and their contents recursively.",
+          "example": "rm -rf node_modules/"
+        },
+        {
+          "flag": "-f",
+          "description": "Ignore nonexistent files and arguments, never prompt.",
+          "example": "rm -f temp.txt"
+        },
+        {
+          "flag": "-i",
+          "description": "Prompt before every removal.",
+          "example": "rm -i important.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Remove a single file",
+          "command": "rm temp.log",
+          "output": "",
+          "explanation": "Deletes temp.log from the filesystem."
+        },
+        {
+          "title": "Recursively force remove a directory",
+          "command": "rm -rf build/",
+          "output": "",
+          "explanation": "Deletes build directory and all its contents without prompting."
+        }
+      ],
+      "useCases": [
+        "Deleting temporary files",
+        "Cleaning build outputs"
+      ],
+      "warnings": "Using rm -rf without caution can instantly delete critical system files if run with root privileges.",
+      "related": [
+        "rmdir",
+        "cp",
+        "mv"
+      ],
+      "tags": [
+        "files",
+        "delete",
+        "remove"
+      ]
+    },
+    {
+      "slug": "mkdir",
+      "name": "mkdir",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Create directories.",
+      "syntax": "mkdir [OPTION]... DIRECTORY...",
+      "description": "Create the DIRECTORY(ies), if they do not already exist.",
+      "options": [
+        {
+          "flag": "-p",
+          "description": "No error if existing, make parent directories as needed.",
+          "example": "mkdir -p /var/www/html/app"
+        },
+        {
+          "flag": "-m",
+          "description": "Set file mode (permissions), like chmod.",
+          "example": "mkdir -m 755 secure_dir"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Create single directory",
+          "command": "mkdir projects",
+          "output": "",
+          "explanation": "Creates a folder named projects in current directory."
+        },
+        {
+          "title": "Create nested directory structure",
+          "command": "mkdir -p src/components/ui",
+          "output": "",
+          "explanation": "Creates intermediate parent directories automatically."
+        }
+      ],
+      "useCases": [
+        "Setting up project directory structures",
+        "Preparing log or output directories"
+      ],
+      "related": [
+        "rmdir",
+        "touch",
+        "ls"
+      ],
+      "tags": [
+        "directory",
+        "create"
+      ]
+    },
+    {
+      "slug": "rmdir",
+      "name": "rmdir",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Remove empty directories.",
+      "syntax": "rmdir [OPTION]... DIRECTORY...",
+      "description": "Remove the DIRECTORY(ies), if they are empty.",
+      "options": [
+        {
+          "flag": "-p",
+          "description": "Remove DIRECTORY and its ancestors.",
+          "example": "rmdir -p a/b/c"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Remove empty directory",
+          "command": "rmdir old_folder",
+          "output": "",
+          "explanation": "Removes old_folder if it contains no files."
+        }
+      ],
+      "useCases": [
+        "Cleaning up empty directory placeholders"
+      ],
+      "related": [
+        "rm",
+        "mkdir"
+      ],
+      "tags": [
+        "directory",
+        "remove"
+      ]
+    },
+    {
+      "slug": "touch",
+      "name": "touch",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Change file timestamps or create empty files.",
+      "syntax": "touch [OPTION]... FILE...",
+      "description": "Update the access and modification times of each FILE to the current time. A FILE argument that does not exist is created empty.",
+      "options": [
+        {
+          "flag": "-c",
+          "description": "Do not create any files.",
+          "example": "touch -c existing.txt"
+        },
+        {
+          "flag": "-t",
+          "description": "Use specified timestamp instead of current time.",
+          "example": "touch -t 202610121200 file.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Create a new empty file",
+          "command": "touch index.ts",
+          "output": "",
+          "explanation": "Creates index.ts if it does not exist."
+        },
+        {
+          "title": "Update modification timestamp",
+          "command": "touch script.sh",
+          "output": "",
+          "explanation": "Updates script.sh last modified timestamp to current time."
+        }
+      ],
+      "useCases": [
+        "Initializing placeholder source files",
+        "Updating makefile dependency timestamps"
+      ],
+      "related": [
+        "cat",
+        "mkdir"
+      ],
+      "tags": [
+        "files",
+        "timestamp",
+        "create"
+      ]
+    },
+    {
+      "slug": "cat",
+      "name": "cat",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Concatenate files and print on the standard output.",
+      "syntax": "cat [OPTION]... [FILE]...",
+      "description": "Concatenate FILE(s) to standard output.",
+      "options": [
+        {
+          "flag": "-n",
+          "description": "Number all output lines.",
+          "example": "cat -n file.txt"
+        },
+        {
+          "flag": "-b",
+          "description": "Number nonempty output lines.",
+          "example": "cat -b file.txt"
+        },
+        {
+          "flag": "-E",
+          "description": "Display $ at end of each line.",
+          "example": "cat -E file.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Display file contents",
+          "command": "cat README.md",
+          "output": "# LinuxDocs\nReference guide...",
+          "explanation": "Outputs the full contents of README.md to terminal."
+        },
+        {
+          "title": "Combine multiple files",
+          "command": "cat part1.txt part2.txt > combined.txt",
+          "output": "",
+          "explanation": "Concatenates two files into a new file."
+        }
+      ],
+      "useCases": [
+        "Quickly viewing small configuration files",
+        "Concatenating text files"
+      ],
+      "related": [
+        "less",
+        "head",
+        "tail",
+        "grep"
+      ],
+      "tags": [
+        "text",
+        "view",
+        "files"
+      ]
+    },
+    {
+      "slug": "less",
+      "name": "less",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Opposite of more; interactive file pager.",
+      "syntax": "less [OPTION]... [FILE]",
+      "description": "less is a program similar to more, but which allows backward movement in the file as well as forward movement.",
+      "options": [
+        {
+          "flag": "-N",
+          "description": "Cause line numbers to be displayed in each line.",
+          "example": "less -N large_log.txt"
+        },
+        {
+          "flag": "-S",
+          "description": "Causes lines longer than the screen width to be chopped rather than wrapped.",
+          "example": "less -S code.py"
+        }
+      ],
+      "examples": [
+        {
+          "title": "View large log file interactively",
+          "command": "less /var/log/syslog",
+          "output": "(interactive pager view)",
+          "explanation": "Allows scrolling up and down through massive log files without loading all into memory."
+        }
+      ],
+      "useCases": [
+        "Browsing large log files or source code files page by page"
+      ],
+      "related": [
+        "cat",
+        "head",
+        "tail"
+      ],
+      "tags": [
+        "text",
+        "pager",
+        "logs"
+      ]
+    },
+    {
+      "slug": "head",
+      "name": "head",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Output the first part of files.",
+      "syntax": "head [OPTION]... [FILE]...",
+      "description": "Print the first 10 lines of each FILE to standard output. With more than one file, precede each with a header.",
+      "options": [
+        {
+          "flag": "-n",
+          "description": "Print first NUM lines instead of first 10.",
+          "example": "head -n 20 config.conf"
+        },
+        {
+          "flag": "-c",
+          "description": "Print first NUM bytes of each file.",
+          "example": "head -c 100 data.bin"
+        }
+      ],
+      "examples": [
+        {
+          "title": "View first 5 lines",
+          "command": "head -n 5 /etc/passwd",
+          "output": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin",
+          "explanation": "Outputs the top 5 lines of /etc/passwd."
+        }
+      ],
+      "useCases": [
+        "Inspecting file headers or schema definitions"
+      ],
+      "related": [
+        "tail",
+        "cat",
+        "less"
+      ],
+      "tags": [
+        "text",
+        "filter"
+      ]
+    },
+    {
+      "slug": "tail",
+      "name": "tail",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Output the last part of files.",
+      "syntax": "tail [OPTION]... [FILE]...",
+      "description": "Print the last 10 lines of each FILE to standard output. With more than one file, precede each with a header.",
+      "options": [
+        {
+          "flag": "-n",
+          "description": "Output the last NUM lines, instead of last 10.",
+          "example": "tail -n 50 log.txt"
+        },
+        {
+          "flag": "-f",
+          "description": "Output appended data as the file grows (follow mode).",
+          "example": "tail -f /var/log/nginx/access.log"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Follow log file in real time",
+          "command": "tail -f app.log",
+          "output": "[2026-10-12 10:00:00] Server started on port 5000\n[2026-10-12 10:01:23] GET /api/health 200 OK",
+          "explanation": "Continuously streams new lines appended to app.log."
+        }
+      ],
+      "useCases": [
+        "Monitoring active server logs in real time",
+        "Checking recent log entries"
+      ],
+      "related": [
+        "head",
+        "cat",
+        "less",
+        "journalctl"
+      ],
+      "tags": [
+        "text",
+        "logs",
+        "monitor"
+      ]
+    },
+    {
+      "slug": "find",
+      "name": "find",
+      "category": "search-and-find",
+      "section": "linux",
+      "summary": "Search for files in a directory hierarchy.",
+      "syntax": "find [path...] [expression]",
+      "description": "Search for files matching specified criteria across a directory tree.",
+      "options": [
+        {
+          "flag": "-name",
+          "description": "Base of file name matches pattern.",
+          "example": "find . -name \"*.ts\""
+        },
+        {
+          "flag": "-type",
+          "description": "File is of type f (file) or d (directory).",
+          "example": "find /var -type d"
+        },
+        {
+          "flag": "-mtime",
+          "description": "File data was last modified n*24 hours ago.",
+          "example": "find . -mtime -1"
+        },
+        {
+          "flag": "-exec",
+          "description": "Execute command on each matched file.",
+          "example": "find . -name \"*.tmp\" -exec rm {} \\;"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Find all TypeScript files",
+          "command": "find src -name \"*.ts\"",
+          "output": "src/main.tsx\nsrc/App.tsx\nsrc/types.ts",
+          "explanation": "Searches src/ recursively for files ending in .ts."
+        },
+        {
+          "title": "Find directories modified in last day",
+          "command": "find . -type d -mtime -1",
+          "output": "./src\n./src/data",
+          "explanation": "Finds directories modified within the past 24 hours."
+        }
+      ],
+      "useCases": [
+        "Locating misplaced files",
+        "Bulk file cleanups and batch operations"
+      ],
+      "related": [
+        "grep"
+      ],
+      "tags": [
+        "search",
+        "files"
+      ]
+    },
+    {
+      "slug": "grep",
+      "name": "grep",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Print lines matching patterns.",
+      "syntax": "grep [OPTION]... PATTERN [FILE]...",
+      "description": "Search for PATTERN in each FILE. PATTERN is, by default, a basic regular expression (BRE).",
+      "options": [
+        {
+          "flag": "-i",
+          "description": "Ignore case distinctions.",
+          "example": "grep -i \"error\" app.log"
+        },
+        {
+          "flag": "-r, -R",
+          "description": "Read all files under each directory recursively.",
+          "example": "grep -rn \"TODO\" src/"
+        },
+        {
+          "flag": "-v",
+          "description": "Invert match; select non-matching lines.",
+          "example": "grep -v \"#\" config.conf"
+        },
+        {
+          "flag": "-c",
+          "description": "Print only a count of matching lines per file.",
+          "example": "grep -c \"GET\" access.log"
+        },
+        {
+          "flag": "-n",
+          "description": "Prefix each line of output with the 1-based line number.",
+          "example": "grep -n \"interface\" src/"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Search recursively with line numbers",
+          "command": "grep -rn \"function\" src/",
+          "output": "src/App.tsx:7:function App() {\nsrc/data/commands.ts:15:function getCommand() {",
+          "explanation": "Finds all occurrences of \"function\" in src/ with filename and line number."
+        },
+        {
+          "title": "Case-insensitive search",
+          "command": "grep -i \"warning\" system.log",
+          "output": "[WARN] Disk space low\n[Warning] Memory usage high",
+          "explanation": "Matches \"warning\", \"Warning\", or \"WARNING\"."
+        }
+      ],
+      "useCases": [
+        "Searching codebase for keywords",
+        "Filtering log files for error codes"
+      ],
+      "related": [
+        "find",
+        "sed",
+        "awk"
+      ],
+      "tags": [
+        "text",
+        "search",
+        "regex"
+      ]
+    },
+    {
+      "slug": "sed",
+      "name": "sed",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Stream editor for filtering and transforming text.",
+      "syntax": "sed [OPTION]... 'script' [INPUT_FILE]...",
+      "description": "sed is a stream editor used to perform basic text transformations on an input stream (a file or input from a pipeline).",
+      "options": [
+        {
+          "flag": "-i",
+          "description": "Edit files in place (makes changes directly to file).",
+          "example": "sed -i \"s/old/new/g\" file.txt"
+        },
+        {
+          "flag": "-e",
+          "description": "Add the script to the commands to be executed.",
+          "example": "sed -e \"s/a/b/\" -e \"s/c/d/\" file.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Replace string globally",
+          "command": "echo \"hello world\" | sed \"s/world/linux/g\"",
+          "output": "hello linux",
+          "explanation": "Replaces all instances of \"world\" with \"linux\"."
+        },
+        {
+          "title": "Delete comment lines",
+          "command": "sed '/^#/d' config.conf",
+          "output": "port=5000\nhost=localhost",
+          "explanation": "Removes lines starting with #."
+        }
+      ],
+      "useCases": [
+        "Automated text replacement in configuration files",
+        "Stripping comments from code"
+      ],
+      "related": [
+        "awk",
+        "grep"
+      ],
+      "tags": [
+        "text",
+        "stream",
+        "edit"
+      ]
+    },
+    {
+      "slug": "awk",
+      "name": "awk",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Pattern scanning and processing language.",
+      "syntax": "awk 'pattern {action}' [FILE]...",
+      "description": "A powerful text analysis tool that treats each line as records and space-separated fields ($1, $2, etc.).",
+      "options": [
+        {
+          "flag": "-F",
+          "description": "Use fs for input field separator.",
+          "example": "awk -F: '{print $1}' /etc/passwd"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Print specific columns",
+          "command": "ls -l | awk '{print $9, $5}'",
+          "output": "index.html 420\nsrc 4096",
+          "explanation": "Extracts filename ($9) and file size ($5) from ls -l output."
+        },
+        {
+          "title": "Extract usernames from passwd",
+          "command": "awk -F: '{print $1}' /etc/passwd",
+          "output": "root\ndaemon\nuser",
+          "explanation": "Splits by colon delimiter and prints the first field (username)."
+        }
+      ],
+      "useCases": [
+        "Extracting specific columns from tabular text output",
+        "Log analysis and reporting"
+      ],
+      "related": [
+        "sed",
+        "grep"
+      ],
+      "tags": [
+        "text",
+        "processing",
+        "columns"
+      ]
+    },
+    {
+      "slug": "ps",
+      "name": "ps",
+      "category": "process-management",
+      "section": "linux",
+      "summary": "Report a snapshot of current processes.",
+      "syntax": "ps [options]",
+      "description": "Display information about a selection of the active processes.",
+      "options": [
+        {
+          "flag": "aux",
+          "description": "Show all processes across all users with user and start time.",
+          "example": "ps aux"
+        },
+        {
+          "flag": "-ef",
+          "description": "Full format listing of all processes.",
+          "example": "ps -ef"
+        }
+      ],
+      "examples": [
+        {
+          "title": "List all running processes",
+          "command": "ps aux | head -n 3",
+          "output": "USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND\nroot 1 0.0 0.1 168200 11200 ? Ss Oct11 0:01 /sbin/init\nuser 1024 0.5 1.2 2450000 102400 ? Sl Oct11 5:30 node",
+          "explanation": "Shows process status, resource usage, and command arguments."
+        }
+      ],
+      "useCases": [
+        "Identifying rogue or hung processes",
+        "Checking process IDs (PIDs)"
+      ],
+      "related": [
+        "top",
+        "htop",
+        "kill"
+      ],
+      "tags": [
+        "process",
+        "monitoring"
+      ]
+    },
+    {
+      "slug": "top",
+      "name": "top",
+      "category": "process-management",
+      "section": "linux",
+      "summary": "Display Linux processes and system resource usage.",
+      "syntax": "top [options]",
+      "description": "Provide a dynamic real-time view of a running system.",
+      "options": [
+        {
+          "flag": "-u",
+          "description": "Monitor processes for specific user only.",
+          "example": "top -u user"
+        },
+        {
+          "flag": "-d",
+          "description": "Specify delay interval between updates in seconds.",
+          "example": "top -d 2"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Launch top monitor",
+          "command": "top",
+          "output": "(interactive resource monitor dashboard)",
+          "explanation": "Displays live CPU, memory, and task breakdown."
+        }
+      ],
+      "useCases": [
+        "Monitoring real-time CPU and memory load",
+        "Debugging performance spikes"
+      ],
+      "related": [
+        "htop",
+        "ps",
+        "df"
+      ],
+      "tags": [
+        "process",
+        "monitor",
+        "cpu"
+      ]
+    },
+    {
+      "slug": "htop",
+      "name": "htop",
+      "category": "process-management",
+      "section": "linux",
+      "summary": "Interactive process viewer and system monitor.",
+      "syntax": "htop [options]",
+      "description": "An interactive text-mode process viewer designed as a user-friendly alternative to top.",
+      "options": [
+        {
+          "flag": "-u",
+          "description": "Show only processes owned by given user.",
+          "example": "htop -u user"
+        },
+        {
+          "flag": "-d",
+          "description": "Delay between updates in tenths of seconds.",
+          "example": "htop -d 20"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Launch htop",
+          "command": "htop",
+          "output": "(interactive colored terminal dashboard)",
+          "explanation": "Allows mouse interaction, tree view, and signal sending."
+        }
+      ],
+      "useCases": [
+        "Interactive process management and visualization"
+      ],
+      "related": [
+        "top",
+        "ps",
+        "kill"
+      ],
+      "tags": [
+        "process",
+        "monitor",
+        "interactive"
+      ]
+    },
+    {
+      "slug": "kill",
+      "name": "kill",
+      "category": "process-management",
+      "section": "linux",
+      "summary": "Send a signal to a process.",
+      "syntax": "kill [options] <PID>",
+      "description": "Send a termination or custom signal to one or more processes specified by PID.",
+      "options": [
+        {
+          "flag": "-9, -SIGKILL",
+          "description": "Force immediate kill (un-catchable termination signal).",
+          "example": "kill -9 1234"
+        },
+        {
+          "flag": "-15, -SIGTERM",
+          "description": "Graceful termination request (default signal).",
+          "example": "kill 1234"
+        },
+        {
+          "flag": "-l",
+          "description": "List available signal names.",
+          "example": "kill -l"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Gracefully terminate process",
+          "command": "kill 4521",
+          "output": "",
+          "explanation": "Sends SIGTERM allowing process to save state and exit."
+        },
+        {
+          "title": "Force kill unresponsive process",
+          "command": "kill -9 4521",
+          "output": "",
+          "explanation": "Forcefully terminates PID 4521 immediately."
+        }
+      ],
+      "useCases": [
+        "Stopping hung server processes",
+        "Restarting stuck daemons"
+      ],
+      "related": [
+        "ps",
+        "top"
+      ],
+      "tags": [
+        "process",
+        "signal",
+        "stop"
+      ]
+    },
+    {
+      "slug": "ip",
+      "name": "ip",
+      "category": "networking",
+      "section": "linux",
+      "summary": "Routing, network devices, interfaces and tunnels management.",
+      "syntax": "ip [OPTIONS] OBJECT {COMMAND | help}",
+      "description": "Modern replacement for ifconfig and route to show and manipulate routing, network devices, and tunnels.",
+      "options": [
+        {
+          "flag": "addr show",
+          "description": "Display IP addresses and interface details.",
+          "example": "ip addr show"
+        },
+        {
+          "flag": "route show",
+          "description": "Display routing table.",
+          "example": "ip route show"
+        },
+        {
+          "flag": "link set",
+          "description": "Change state of device (up/down).",
+          "example": "ip link set eth0 up"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Show network interfaces",
+          "command": "ip a",
+          "output": "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536...\n2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 inet 192.168.1.50/24",
+          "explanation": "Lists all network interfaces and assigned IP addresses."
+        }
+      ],
+      "useCases": [
+        "Checking local IP configuration",
+        "Troubleshooting network interface status"
+      ],
+      "related": [
+        "ss",
+        "ping"
+      ],
+      "tags": [
+        "networking",
+        "ip",
+        "interfaces"
+      ]
+    },
+    {
+      "slug": "ss",
+      "name": "ss",
+      "category": "networking",
+      "section": "linux",
+      "summary": "Investigate sockets.",
+      "syntax": "ss [options]",
+      "description": "Dump socket statistics; faster and more detailed modern alternative to netstat.",
+      "options": [
+        {
+          "flag": "-t",
+          "description": "Display TCP sockets.",
+          "example": "ss -t -l"
+        },
+        {
+          "flag": "-u",
+          "description": "Display UDP sockets.",
+          "example": "ss -u"
+        },
+        {
+          "flag": "-l",
+          "description": "Display listening sockets.",
+          "example": "ss -tuln"
+        },
+        {
+          "flag": "-p",
+          "description": "Show process using socket.",
+          "example": "ss -p"
+        }
+      ],
+      "examples": [
+        {
+          "title": "List all listening ports with process names",
+          "command": "ss -tulnp",
+          "output": "Netid State Recv-Q Send-Q Local Address:Port Peer Address:Port Process\ntcp LISTEN 0 128 0.0.0.0:22 0.0.0.0:* users:((\"sshd\",pid=789,fd=3))",
+          "explanation": "Shows what services are listening on which ports and their PIDs."
+        }
+      ],
+      "useCases": [
+        "Checking open ports",
+        "Verifying server binding addresses"
+      ],
+      "related": [
+        "ip",
+        "nmap"
+      ],
+      "tags": [
+        "networking",
+        "sockets",
+        "ports"
+      ]
+    },
+    {
+      "slug": "ping",
+      "name": "ping",
+      "category": "networking",
+      "section": "linux",
+      "summary": "Send ICMP ECHO_REQUEST to network hosts.",
+      "syntax": "ping [options] destination",
+      "description": "Test reachability of a host on an Internet Protocol (IP) network and measure round-trip time.",
+      "options": [
+        {
+          "flag": "-c",
+          "description": "Stop after sending count ECHO_REQUEST packets.",
+          "example": "ping -c 4 8.8.8.8"
+        },
+        {
+          "flag": "-i",
+          "description": "Wait interval seconds between sending each packet.",
+          "example": "ping -i 2 192.168.1.1"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Ping host 4 times",
+          "command": "ping -c 4 1.1.1.1",
+          "output": "PING 1.1.1.1 (1.1.1.1) 56(84) bytes of data.\n64 bytes from 1.1.1.1: icmp_seq=1 ttl=57 time=12.4 ms\n--- 1.1.1.1 ping statistics ---\n4 packets transmitted, 4 received, 0% packet loss",
+          "explanation": "Sends 4 ICMP pings and reports latency statistics."
+        }
+      ],
+      "useCases": [
+        "Testing network connectivity and packet loss"
+      ],
+      "related": [
+        "ip"
+      ],
+      "tags": [
+        "networking",
+        "icmp",
+        "test"
+      ]
+    },
+    {
+      "slug": "curl",
+      "name": "curl",
+      "category": "networking",
+      "section": "linux",
+      "summary": "Transfer data from or to a server.",
+      "syntax": "curl [options] [URL]",
+      "description": "Command line tool for transferring data with URL syntax supporting HTTP, HTTPS, FTP, and more.",
+      "options": [
+        {
+          "flag": "-X",
+          "description": "Specify request method (GET, POST, PUT, DELETE).",
+          "example": "curl -X POST https://api.example.com/data"
+        },
+        {
+          "flag": "-H",
+          "description": "Pass custom header(s) to server.",
+          "example": "curl -H \"Authorization: Bearer token\" https://api.example.com"
+        },
+        {
+          "flag": "-d",
+          "description": "Send data in HTTP POST request.",
+          "example": "curl -d \"user=admin\" https://example.com/login"
+        },
+        {
+          "flag": "-o",
+          "description": "Write output to file instead of stdout.",
+          "example": "curl -o file.zip https://example.com/file.zip"
+        },
+        {
+          "flag": "-s",
+          "description": "Silent mode (do not show progress meter).",
+          "example": "curl -s https://api.ipify.org"
+        },
+        {
+          "flag": "-I",
+          "description": "Fetch HTTP headers only.",
+          "example": "curl -I https://google.com"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Fetch webpage content",
+          "command": "curl -s https://icanhazip.com",
+          "output": "203.0.113.45",
+          "explanation": "Makes a silent HTTP GET request and returns public IP."
+        },
+        {
+          "title": "Send JSON POST request",
+          "command": "curl -X POST -H \"Content-Type: application/json\" -d '{\"status\":\"ok\"}' https://api.example.com/status",
+          "output": "{\"success\":true}",
+          "explanation": "Posts JSON payload with custom headers."
+        }
+      ],
+      "useCases": [
+        "Testing REST APIs",
+        "Downloading files from command line",
+        "Debugging HTTP headers"
+      ],
+      "related": [
+        "wget"
+      ],
+      "tags": [
+        "networking",
+        "http",
+        "api"
+      ]
+    },
+    {
+      "slug": "wget",
+      "name": "wget",
+      "category": "networking",
+      "section": "linux",
+      "summary": "The non-interactive network downloader.",
+      "syntax": "wget [options] [URL]",
+      "description": "Download files from the web using HTTP, HTTPS, and FTP protocols with support for resume and recursive mirroring.",
+      "options": [
+        {
+          "flag": "-c",
+          "description": "Resume aborted downloads.",
+          "example": "wget -c https://example.com/large.iso"
+        },
+        {
+          "flag": "-O",
+          "description": "Write document to file filename.",
+          "example": "wget -O output.tar.gz https://example.com/download"
+        },
+        {
+          "flag": "-r",
+          "description": "Specify recursive download (mirroring).",
+          "example": "wget -r https://example.com/docs/"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Download file and save as name",
+          "command": "wget -O release.zip https://github.com/repo/archive/refs/tags/v1.0.zip",
+          "output": "Saving to: 'release.zip'",
+          "explanation": "Downloads zip archive from URL."
+        }
+      ],
+      "useCases": [
+        "Downloading installation packages and archives in headless environments"
+      ],
+      "related": [
+        "curl"
+      ],
+      "tags": [
+        "networking",
+        "download"
+      ]
+    },
+    {
+      "slug": "apt",
+      "name": "apt",
+      "category": "package-management",
+      "section": "linux",
+      "summary": "Advanced Package Tool (package manager for Debian/Ubuntu).",
+      "syntax": "apt [options] [command]",
+      "description": "Command-line interface for package management, handling installation, upgrades, and removal of software packages.",
+      "options": [
+        {
+          "flag": "update",
+          "description": "Download new lists of packages from repositories.",
+          "example": "sudo apt update"
+        },
+        {
+          "flag": "upgrade",
+          "description": "Perform safe upgrade of all installed packages.",
+          "example": "sudo apt upgrade"
+        },
+        {
+          "flag": "install",
+          "description": "Install new package(s).",
+          "example": "sudo apt install nginx"
+        },
+        {
+          "flag": "remove",
+          "description": "Remove package(s).",
+          "example": "sudo apt remove apache2"
+        },
+        {
+          "flag": "search",
+          "description": "Search in package descriptions.",
+          "example": "apt search postgresql"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Install git package",
+          "command": "sudo apt update && sudo apt install -y git",
+          "output": "Reading package lists... Done\nBuilding dependency tree...\nSetting up git (1:2.34.1)...",
+          "explanation": "Updates package index and installs Git non-interactively."
+        }
+      ],
+      "useCases": [
+        "Installing software on Ubuntu/Debian systems",
+        "Keeping system packages patched"
+      ],
+      "related": [
+        "dpkg"
+      ],
+      "tags": [
+        "package",
+        "debian",
+        "ubuntu"
+      ]
+    },
+    {
+      "slug": "dpkg",
+      "name": "dpkg",
+      "category": "package-management",
+      "section": "linux",
+      "summary": "Medium for package management for Debian.",
+      "syntax": "dpkg [options] [action]",
+      "description": "Low-level tool to install, build, remove and manage Debian packages (.deb files).",
+      "options": [
+        {
+          "flag": "-i",
+          "description": "Install package from .deb file.",
+          "example": "sudo dpkg -i package.deb"
+        },
+        {
+          "flag": "-l",
+          "description": "List installed packages matching pattern.",
+          "example": "dpkg -l | grep nginx"
+        },
+        {
+          "flag": "-r",
+          "description": "Remove package.",
+          "example": "sudo dpkg -r package_name"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Install local deb package",
+          "command": "sudo dpkg -i discord.deb",
+          "output": "Selecting previously unselected package discord...",
+          "explanation": "Installs downloaded Debian package file."
+        }
+      ],
+      "useCases": [
+        "Installing downloaded .deb packages directly"
+      ],
+      "related": [
+        "apt"
+      ],
+      "tags": [
+        "package",
+        "debian"
+      ]
+    },
+    {
+      "slug": "df",
+      "name": "df",
+      "category": "disk-and-storage",
+      "section": "linux",
+      "summary": "Report file system disk space usage.",
+      "syntax": "df [OPTION]... [FILE]...",
+      "description": "Display amount of available disk space taken up by file systems.",
+      "options": [
+        {
+          "flag": "-h",
+          "description": "Print sizes in human readable format (e.g., 1K 234M 2G).",
+          "example": "df -h"
+        },
+        {
+          "flag": "-T",
+          "description": "Print file system type for each partition.",
+          "example": "df -Th"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Check disk space",
+          "command": "df -h",
+          "output": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda1        50G   20G   28G  42% /\ntmpfs           3.9G     0  3.9G   0% /dev/shm",
+          "explanation": "Shows disk capacity, used space, and mount points in human-readable sizes."
+        }
+      ],
+      "useCases": [
+        "Checking available storage space on partitions"
+      ],
+      "related": [
+        "du"
+      ],
+      "tags": [
+        "disk",
+        "storage",
+        "filesystem"
+      ]
+    },
+    {
+      "slug": "du",
+      "name": "du",
+      "category": "disk-and-storage",
+      "section": "linux",
+      "summary": "Estimate file space usage.",
+      "syntax": "du [OPTION]... [FILE]...",
+      "description": "Summarize disk usage of each FILE, recursively for directories.",
+      "options": [
+        {
+          "flag": "-h",
+          "description": "Print sizes in human readable format.",
+          "example": "du -sh *"
+        },
+        {
+          "flag": "-s",
+          "description": "Display only a total for each argument.",
+          "example": "du -sh /var/log"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Check size of files and folders in current dir",
+          "command": "du -sh *",
+          "output": "4.2M    src\n120K    package.json\n45M     node_modules",
+          "explanation": "Shows disk consumption per item in current directory."
+        }
+      ],
+      "useCases": [
+        "Finding large folders consuming disk space"
+      ],
+      "related": [
+        "df",
+        "ls",
+        "find"
+      ],
+      "tags": [
+        "disk",
+        "space",
+        "folder"
+      ]
+    },
+    {
+      "slug": "tar",
+      "name": "tar",
+      "category": "archiving-and-compression",
+      "section": "linux",
+      "summary": "An archiving utility.",
+      "syntax": "tar [options] [archive-file] [file-or-directory...]",
+      "description": "Create, extract, or list files from tape archives (tarballs).",
+      "options": [
+        {
+          "flag": "-c",
+          "description": "Create a new archive.",
+          "example": "tar -cvf archive.tar folder/"
+        },
+        {
+          "flag": "-x",
+          "description": "Extract files from an archive.",
+          "example": "tar -xvf archive.tar"
+        },
+        {
+          "flag": "-z",
+          "description": "Filter archive through gzip (compression/decompression).",
+          "example": "tar -czvf archive.tar.gz folder/"
+        },
+        {
+          "flag": "-f",
+          "description": "Use archive file or device.",
+          "example": "tar -tf archive.tar"
+        },
+        {
+          "flag": "-v",
+          "description": "Verbosely list files processed.",
+          "example": "tar -xzvf archive.tar.gz"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Compress directory to tar.gz",
+          "command": "tar -czvf project.tar.gz src/ package.json",
+          "output": "src/\nsrc/App.tsx\npackage.json",
+          "explanation": "Bundles and compresses src/ and package.json into project.tar.gz."
+        },
+        {
+          "title": "Extract tar.gz archive",
+          "command": "tar -xzvf project.tar.gz",
+          "output": "src/\npackage.json",
+          "explanation": "Extracts compressed archive contents."
+        }
+      ],
+      "useCases": [
+        "Backing up source code",
+        "Distributing software packages"
+      ],
+      "related": [
+        "gzip"
+      ],
+      "tags": [
+        "archive",
+        "compress",
+        "tarball"
+      ]
+    },
+    {
+      "slug": "gzip",
+      "name": "gzip",
+      "category": "archiving-and-compression",
+      "section": "linux",
+      "summary": "Compress or expand files.",
+      "syntax": "gzip [OPTION]... [FILE]...",
+      "description": "Compress files using Lempel-Ziv coding (LZ77).",
+      "options": [
+        {
+          "flag": "-d",
+          "description": "Decompress compressed files.",
+          "example": "gzip -d file.txt.gz"
+        },
+        {
+          "flag": "-k",
+          "description": "Keep (don't delete) input files during compression.",
+          "example": "gzip -k file.txt"
+        },
+        {
+          "flag": "-v",
+          "description": "Verbose mode showing compression ratio.",
+          "example": "gzip -v large.sql"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Compress a log file",
+          "command": "gzip -k access.log",
+          "output": "access.log: 75.2% -- replaced with access.log.gz",
+          "explanation": "Compresses access.log into access.log.gz while keeping original."
+        }
+      ],
+      "useCases": [
+        "Compressing log files and single data files"
+      ],
+      "related": [
+        "tar"
+      ],
+      "tags": [
+        "compress",
+        "gzip"
+      ]
+    },
+    {
+      "slug": "useradd",
+      "name": "useradd",
+      "category": "users-and-groups",
+      "section": "linux",
+      "summary": "Create a new user or update default new user information.",
+      "syntax": "useradd [options] LOGIN",
+      "description": "Low-level utility for adding a new user account on Linux systems.",
+      "options": [
+        {
+          "flag": "-m",
+          "description": "Create the user's home directory.",
+          "example": "useradd -m -s /bin/bash newuser"
+        },
+        {
+          "flag": "-s",
+          "description": "Specify login shell for new user.",
+          "example": "useradd -s /bin/zsh dev"
+        },
+        {
+          "flag": "-g",
+          "description": "Specify primary group.",
+          "example": "useradd -g developers user1"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Create user with home directory and bash shell",
+          "command": "sudo useradd -m -s /bin/bash ctfuser",
+          "output": "",
+          "explanation": "Creates user ctfuser with home directory and /bin/bash shell."
+        }
+      ],
+      "useCases": [
+        "Provisioning new user accounts on servers"
+      ],
+      "related": [
+        "passwd"
+      ],
+      "tags": [
+        "users",
+        "admin",
+        "accounts"
+      ]
+    },
+    {
+      "slug": "passwd",
+      "name": "passwd",
+      "category": "users-and-groups",
+      "section": "linux",
+      "summary": "Change user password.",
+      "syntax": "passwd [OPTION] [LOGIN]",
+      "description": "Change user password and account expiration settings.",
+      "options": [
+        {
+          "flag": "-d",
+          "description": "Delete password for user (makes account passwordless).",
+          "example": "sudo passwd -d username"
+        },
+        {
+          "flag": "-l",
+          "description": "Lock account password.",
+          "example": "sudo passwd -l username"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Change current user password",
+          "command": "passwd",
+          "output": "Changing password for user.\nCurrent password:\nNew password:",
+          "explanation": "Prompts for current and new password securely."
+        }
+      ],
+      "useCases": [
+        "Updating account passwords",
+        "Locking compromised accounts"
+      ],
+      "related": [
+        "useradd"
+      ],
+      "tags": [
+        "users",
+        "password",
+        "security"
+      ]
+    },
+    {
+      "slug": "history",
+      "name": "history",
+      "category": "shell-and-scripting",
+      "section": "linux",
+      "summary": "Display or manipulate the command history.",
+      "syntax": "history [n]",
+      "description": "Display the command history list with line numbers.",
+      "options": [
+        {
+          "flag": "-c",
+          "description": "Clear the history list by deleting all entries.",
+          "example": "history -c"
+        },
+        {
+          "flag": "-d",
+          "description": "Delete history entry at offset offset.",
+          "example": "history -d 104"
+        }
+      ],
+      "examples": [
+        {
+          "title": "View last 10 commands",
+          "command": "history 10",
+          "output": " 1001  sudo apt update\n 1002  git status\n 1003  npm run dev",
+          "explanation": "Outputs the last 10 executed shell commands."
+        }
+      ],
+      "useCases": [
+        "Recalling previous complex commands",
+        "Auditing command history"
+      ],
+      "related": [],
+      "tags": [
+        "shell",
+        "history"
+      ]
+    },
+    {
+      "slug": "uname",
+      "name": "uname",
+      "category": "system-info-and-monitoring",
+      "section": "linux",
+      "summary": "Print system information.",
+      "syntax": "uname [OPTION]...",
+      "description": "Print certain system information. With no option, same as -s.",
+      "options": [
+        {
+          "flag": "-a",
+          "description": "Print all information (kernel, hostname, release, machine).",
+          "example": "uname -a"
+        },
+        {
+          "flag": "-r",
+          "description": "Print kernel release.",
+          "example": "uname -r"
+        },
+        {
+          "flag": "-m",
+          "description": "Print machine hardware name (architecture).",
+          "example": "uname -m"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Show kernel version and architecture",
+          "command": "uname -rsm",
+          "output": "Linux 6.8.0-31-generic x86_64",
+          "explanation": "Prints kernel name, release version, and hardware architecture."
+        }
+      ],
+      "useCases": [
+        "Identifying Linux kernel version and CPU architecture"
+      ],
+      "related": [],
+      "tags": [
+        "system",
+        "kernel",
+        "info"
+      ]
+    },
+    {
+      "slug": "whoami",
+      "name": "whoami",
+      "category": "users-and-groups",
+      "section": "linux",
+      "summary": "Print effective userid.",
+      "syntax": "whoami",
+      "description": "Print the user name associated with the current effective user ID.",
+      "options": [],
+      "examples": [
+        {
+          "title": "Print current username",
+          "command": "whoami",
+          "output": "root",
+          "explanation": "Returns current logged-in username."
+        }
+      ],
+      "useCases": [
+        "Verifying privilege level (e.g. root vs normal user)"
+      ],
+      "related": [],
+      "tags": [
+        "users",
+        "identity"
+      ]
+    },
+    {
+      "slug": "systemctl",
+      "name": "systemctl",
+      "category": "services-and-logs",
+      "section": "linux",
+      "summary": "Control the systemd system and service manager.",
+      "syntax": "systemctl [OPTIONS] COMMAND [NAME...",
+      "description": "Query or control the systemd system and service manager state and services.",
+      "options": [
+        {
+          "flag": "start",
+          "description": "Start (activate) one or more units.",
+          "example": "sudo systemctl start nginx"
+        },
+        {
+          "flag": "stop",
+          "description": "Stop (deactivate) one or more units.",
+          "example": "sudo systemctl stop nginx"
+        },
+        {
+          "flag": "restart",
+          "description": "Restart one or more units.",
+          "example": "sudo systemctl restart nginx"
+        },
+        {
+          "flag": "status",
+          "description": "Show terse runtime status of one or more units.",
+          "example": "systemctl status nginx"
+        },
+        {
+          "flag": "enable",
+          "description": "Enable unit(s) to start on boot.",
+          "example": "sudo systemctl enable nginx"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Check status of ssh service",
+          "command": "systemctl status ssh",
+          "output": "● ssh.service - OpenBSD Secure Shell server\n   Loaded: loaded (/lib/systemd/system/ssh.service; enabled)\n   Active: active (running) since Mon 2026-10-12 10:00:00 UTC",
+          "explanation": "Displays systemd service status and recent logs."
+        }
+      ],
+      "useCases": [
+        "Managing system daemons and services",
+        "Configuring auto-start on boot"
+      ],
+      "related": [
+        "journalctl",
+        "ps"
+      ],
+      "tags": [
+        "services",
+        "systemd",
+        "daemon"
+      ]
+    },
+    {
+      "slug": "journalctl",
+      "name": "journalctl",
+      "category": "services-and-logs",
+      "section": "linux",
+      "summary": "Query the systemd journal.",
+      "syntax": "journalctl [OPTIONS]...",
+      "description": "Query logs generated by journald, the systemd logging service.",
+      "options": [
+        {
+          "flag": "-u",
+          "description": "Show messages for the specified systemd unit.",
+          "example": "journalctl -u nginx.service"
+        },
+        {
+          "flag": "-f",
+          "description": "Show journal messages and continuously print new entries as they appear.",
+          "example": "journalctl -f"
+        },
+        {
+          "flag": "-n",
+          "description": "Show the most recent journal entries, specified count.",
+          "example": "journalctl -n 50"
+        }
+      ],
+      "examples": [
+        {
+          "title": "View recent logs for ssh service",
+          "command": "journalctl -u ssh -n 10",
+          "output": "Oct 12 10:00:01 server sshd[789]: Server listening on 0.0.0.0 port 22.",
+          "explanation": "Displays last 10 log entries for ssh."
+        }
+      ],
+      "useCases": [
+        "Troubleshooting system service errors and boot logs"
+      ],
+      "related": [
+        "systemctl",
+        "tail"
+      ],
+      "tags": [
+        "logs",
+        "systemd",
+        "journal"
+      ]
+    },
+    {
+      "slug": "nmap",
+      "name": "nmap",
+      "category": "recon",
+      "section": "ctf",
+      "summary": "Network exploration tool and security / port scanner.",
+      "syntax": "nmap [Scan Type(s)] [Options] {target specification}",
+      "description": "Nmap (\"Network Mapper\") is used for network discovery and vulnerability scanning. It inspects live hosts, open ports, running services, and OS versions.",
+      "options": [
+        {
+          "flag": "-sS",
+          "description": "TCP SYN scan (default stealth scan, requires root).",
+          "example": "sudo nmap -sS 10.10.10.5"
+        },
+        {
+          "flag": "-sV",
+          "description": "Probe open ports to determine service/version info.",
+          "example": "nmap -sV 10.10.10.5"
+        },
+        {
+          "flag": "-A",
+          "description": "Enable OS detection, version detection, script scanning, and traceroute.",
+          "example": "nmap -A 10.10.10.5"
+        },
+        {
+          "flag": "-p-",
+          "description": "Scan all 65535 ports.",
+          "example": "nmap -p- 10.10.10.5"
+        },
+        {
+          "flag": "--script",
+          "description": "Run Nmap Scripting Engine (NSE) scripts.",
+          "example": "nmap --script vuln 10.10.10.5"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Comprehensive version scan on target IP",
+          "command": "nmap -sC -sV -T4 10.10.11.120",
+          "output": "Starting Nmap 7.94 ( https://nmap.org )\nPORT   STATE SERVICE VERSION\n22/tcp open  ssh     OpenSSH 8.9p1\n80/tcp open  http    nginx 1.18.0",
+          "explanation": "Runs default scripts (-sC), version detection (-sV), and aggressive timing (-T4)."
+        }
+      ],
+      "useCases": [
+        "CTF initial recon and enumeration",
+        "Discovering open ports and outdated vulnerable software services"
+      ],
+      "warnings": "Scanning networks without explicit authorization is illegal and unethical.",
+      "related": [
+        "gobuster",
+        "ffuf"
+      ],
+      "tags": [
+        "ctf",
+        "recon",
+        "scanning",
+        "network"
+      ]
+    },
+    {
+      "slug": "gobuster",
+      "name": "gobuster",
+      "category": "recon",
+      "section": "ctf",
+      "summary": "Directory/file & DNS busting tool written in Go.",
+      "syntax": "gobuster <mode> [options]",
+      "description": "Gobuster is used to brute-force URIs (directories and files) in web sites and DNS subdomains.",
+      "options": [
+        {
+          "flag": "dir",
+          "description": "Use directory / file brute-forcing mode.",
+          "example": "gobuster dir -u http://target.htb -w /usr/share/wordlists/dirb/common.txt"
+        },
+        {
+          "flag": "dns",
+          "description": "Use DNS subdomain brute-forcing mode.",
+          "example": "gobuster dns -d target.com -w subdomains.txt"
+        },
+        {
+          "flag": "-t",
+          "description": "Number of concurrent threads.",
+          "example": "gobuster dir -u http://target.htb -w wordlist.txt -t 50"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Bust directories on web target",
+          "command": "gobuster dir -u http://10.10.10.15/ -w /usr/share/wordlists/seclists/Discovery/Web-Content/common.txt",
+          "output": "/admin                (Status: 301)\n/index.php            (Status: 200)\n/robots.txt           (Status: 200)",
+          "explanation": "Discovers hidden directories and endpoints on a web server."
+        }
+      ],
+      "useCases": [
+        "Finding hidden administrative panels during CTF web challenges"
+      ],
+      "related": [
+        "ffuf",
+        "sqlmap"
+      ],
+      "tags": [
+        "ctf",
+        "web",
+        "recon",
+        "bruteforce"
+      ]
+    },
+    {
+      "slug": "ffuf",
+      "name": "ffuf",
+      "category": "web",
+      "section": "ctf",
+      "summary": "Fast web fuzzer written in Go.",
+      "syntax": "ffuf [options]",
+      "description": "A fast web fuzzer used for discovering directories, virtual hosts, and parameters using keyword injection.",
+      "options": [
+        {
+          "flag": "-u",
+          "description": "Target URL with FUZZ keyword placeholder.",
+          "example": "ffuf -u http://target.htb/FUZZ -w wordlist.txt"
+        },
+        {
+          "flag": "-H",
+          "description": "Header(s) for HTTP requests.",
+          "example": "ffuf -u http://target.htb -H \"Host: FUZZ.target.htb\" -w subs.txt"
+        },
+        {
+          "flag": "-fc",
+          "description": "Filter out specified HTTP status codes.",
+          "example": "ffuf -u http://target.htb/FUZZ -w list.txt -fc 404"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Fuzz web directories",
+          "command": "ffuf -u http://10.10.11.50/FUZZ -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -fc 404",
+          "output": ":: Method       : GET\n:: URL          : http://10.10.11.50/FUZZ\n:: Wordlist     : ...\n/login                  [Status: 200]\n/assets                 [Status: 301]",
+          "explanation": "High-speed discovery of web paths."
+        }
+      ],
+      "useCases": [
+        "Web enumeration",
+        "Virtual host discovery",
+        "Parameter fuzzing"
+      ],
+      "related": [
+        "gobuster",
+        "sqlmap"
+      ],
+      "tags": [
+        "ctf",
+        "web",
+        "fuzzing"
+      ]
+    },
+    {
+      "slug": "sqlmap",
+      "name": "sqlmap",
+      "category": "web",
+      "section": "ctf",
+      "summary": "Automatic SQL injection and database takeover tool.",
+      "syntax": "sqlmap [options]",
+      "description": "An open source penetration testing tool that automates the process of detecting and exploiting SQL injection flaws and taking over database servers.",
+      "options": [
+        {
+          "flag": "-u",
+          "description": "Target URL.",
+          "example": "sqlmap -u \"http://target.com/page.php?id=1\""
+        },
+        {
+          "flag": "--dbs",
+          "description": "Enumerate DBMS databases.",
+          "example": "sqlmap -u \"http://target.com/page.php?id=1\" --dbs"
+        },
+        {
+          "flag": "--dump",
+          "description": "Dump DBMS database table entries.",
+          "example": "sqlmap -u \"http://target.com/page.php?id=1\" -D ctf -T users --dump"
+        },
+        {
+          "flag": "--batch",
+          "description": "Never ask for user input, use default behavior.",
+          "example": "sqlmap -u \"http://target.com/page.php?id=1\" --batch --dbs"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Automated SQLi enumeration",
+          "command": "sqlmap -u \"http://10.10.10.20/vuln.php?id=1\" --current-db --dump",
+          "output": "[INFO] fetching current database: ctf_db\n[INFO] fetching tables for database: 'ctf_db'",
+          "explanation": "Automatically tests parameters and dumps database content."
+        }
+      ],
+      "useCases": [
+        "Exploiting SQL injection vulnerabilities in web CTF challenges"
+      ],
+      "warnings": "Only use against authorized test labs and CTF targets.",
+      "related": [
+        "gobuster",
+        "ffuf"
+      ],
+      "tags": [
+        "ctf",
+        "web",
+        "sqli",
+        "database"
+      ]
+    },
+    {
+      "slug": "john",
+      "name": "john",
+      "category": "crypto",
+      "section": "ctf",
+      "summary": "John the Ripper password cracker.",
+      "syntax": "john [options] [FILE]",
+      "description": "Fast password cracker designed to detect weak Unix and application passwords from password hashes.",
+      "options": [
+        {
+          "flag": "--wordlist",
+          "description": "Specify wordlist file to use.",
+          "example": "john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt"
+        },
+        {
+          "flag": "--format",
+          "description": "Force specific hash format (e.g. raw-md5, bcrypt).",
+          "example": "john --format=raw-sha256 hash.txt"
+        },
+        {
+          "flag": "--show",
+          "description": "Show cracked passwords for hash file.",
+          "example": "john --show hash.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Crack password hashes with rockyou wordlist",
+          "command": "john --wordlist=rockyou.txt passwd.hash",
+          "output": "Loaded 1 password hash (sha512crypt [sha512 32/64 XOP])\npassword123      (user1)\n1 password cracked, 0 left",
+          "explanation": "Cracks Unix password hash using dictionary attack."
+        }
+      ],
+      "useCases": [
+        "Cracking captured password hashes in CTF challenges"
+      ],
+      "related": [
+        "hashcat"
+      ],
+      "tags": [
+        "ctf",
+        "crypto",
+        "passwords",
+        "cracker"
+      ]
+    },
+    {
+      "slug": "hashcat",
+      "name": "hashcat",
+      "category": "crypto",
+      "section": "ctf",
+      "summary": "World's fastest and most advanced password recovery utility.",
+      "syntax": "hashcat [options]... hash|hashfile|hccapx [wordlist|mask|directory]...",
+      "description": "High-performance GPU-accelerated password recovery tool supporting hundreds of hash types.",
+      "options": [
+        {
+          "flag": "-m",
+          "description": "Hash type ID (e.g. 0 = MD5, 1000 = NTLM, 1800 = sha512crypt).",
+          "example": "hashcat -m 0 -a 0 hash.txt wordlist.txt"
+        },
+        {
+          "flag": "-a",
+          "description": "Attack mode (0 = Dictionary, 3 = Brute-force/Mask).",
+          "example": "hashcat -m 1000 -a 3 ntlm.hash ?l?l?l?l?l?l"
+        },
+        {
+          "flag": "--show",
+          "description": "Review previously cracked hashes.",
+          "example": "hashcat -m 0 hash.txt --show"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Crack MD5 hash using GPU acceleration",
+          "command": "hashcat -m 0 -a 0 md5hash.txt rockyou.txt",
+          "output": "5d41402abc4b2a76b9719d911017c592:hello",
+          "explanation": "Cracks MD5 hash against rockyou wordlist."
+        }
+      ],
+      "useCases": [
+        "High-speed password cracking using GPU power in CTFs"
+      ],
+      "related": [
+        "john"
+      ],
+      "tags": [
+        "ctf",
+        "crypto",
+        "gpu",
+        "passwords"
+      ]
+    },
+    {
+      "slug": "strings",
+      "name": "strings",
+      "category": "reverse-engineering",
+      "section": "ctf",
+      "summary": "Print the printable strings in a binary file.",
+      "syntax": "strings [options] file...",
+      "description": "For each file given, GNU strings prints the printable character sequences that are of at least the specified length (default 4).",
+      "options": [
+        {
+          "flag": "-n",
+          "description": "Specify minimum string length (default is 4).",
+          "example": "strings -n 6 binary"
+        },
+        {
+          "flag": "-t",
+          "description": "Print the offset within the file before each string.",
+          "example": "strings -t x binary"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Extract embedded strings from binary",
+          "command": "strings challenge_binary | grep \"FLAG\"",
+          "output": "FLAG{str1ngs_ar3_3asy}",
+          "explanation": "Searches compiled binary for readable text or flags."
+        }
+      ],
+      "useCases": [
+        "Quick CTF reversing triage to find hardcoded flags, URLs, or keys"
+      ],
+      "related": [
+        "objdump",
+        "gdb",
+        "binwalk"
+      ],
+      "tags": [
+        "ctf",
+        "reversing",
+        "binary",
+        "strings"
+      ]
+    },
+    {
+      "slug": "objdump",
+      "name": "objdump",
+      "category": "reverse-engineering",
+      "section": "ctf",
+      "summary": "Display information about object files.",
+      "syntax": "objdump [option(s)] [file(s)]",
+      "description": "Disassembles executable files to inspect machine code instructions and section headers.",
+      "options": [
+        {
+          "flag": "-d",
+          "description": "Disassemble executable sections into assembly.",
+          "example": "objdump -d binary"
+        },
+        {
+          "flag": "-M",
+          "description": "Pass specific disassembler options (e.g. intel syntax).",
+          "example": "objdump -M intel -d binary"
+        },
+        {
+          "flag": "-t",
+          "description": "Print symbol table entries.",
+          "example": "objdump -t binary"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Disassemble binary in Intel syntax",
+          "command": "objdump -M intel -d pwn1 | grep -A 20 \"<main>:\"",
+          "output": "<main>:\n  push   rbp\n  mov    rbp,rsp\n  sub    rsp,0x30",
+          "explanation": "Disassembles main function instructions."
+        }
+      ],
+      "useCases": [
+        "Analyzing compiled binary instructions and function symbols in CTF pwn/reversing"
+      ],
+      "related": [
+        "gdb",
+        "strings",
+        "checksec"
+      ],
+      "tags": [
+        "ctf",
+        "reversing",
+        "disassemble"
+      ]
+    },
+    {
+      "slug": "gdb",
+      "name": "gdb",
+      "category": "reverse-engineering",
+      "section": "ctf",
+      "summary": "The GNU Debugger.",
+      "syntax": "gdb [options] [binary [core|pid]]",
+      "description": "Allows you to inspect what is happening \"inside\" another program while it executes, inspect registers, memory, and set breakpoints.",
+      "options": [
+        {
+          "flag": "-q",
+          "description": "Quiet mode (suppress introductory copyright banner).",
+          "example": "gdb -q ./binary"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Start GDB and run binary",
+          "command": "gdb -q ./pwn_chall",
+          "output": "(gdb) run\nStarting program: /home/user/pwn_chall\nProgram received signal SIGSEGV, Segmentation fault.",
+          "explanation": "Debugging binary execution flow and inspecting crashes."
+        }
+      ],
+      "useCases": [
+        "Debugging buffer overflows and examining registers in pwn challenges"
+      ],
+      "related": [
+        "objdump"
+      ],
+      "tags": [
+        "ctf",
+        "debugging",
+        "pwn",
+        "reversing"
+      ]
+    },
+    {
+      "slug": "binwalk",
+      "name": "binwalk",
+      "category": "forensics",
+      "section": "ctf",
+      "summary": "Firmware analysis tool for searching binary images for embedded files and executable code.",
+      "syntax": "binwalk [options] <file>",
+      "description": "Binwalk is designed for searching given files for embedded files and executables (e.g. ZIP archives inside JPEGs or firmware images).",
+      "options": [
+        {
+          "flag": "-e",
+          "description": "Extract known file types automatically.",
+          "example": "binwalk -e image.png"
+        },
+        {
+          "flag": "-M",
+          "description": "Recursively extract extracted files.",
+          "example": "binwalk -Me firmware.bin"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Scan and extract embedded files",
+          "command": "binwalk -e suspect.jpg",
+          "output": "DECIMAL       HEXADECIMAL     DESCRIPTION\n-----------------------------------------------------------------\n0             0x0             JPEG image data, JFIF standard 1.01\n4523          0x11AB          Zip archive data, v2.0 to extract, compressed size: 120 bytes",
+          "explanation": "Identifies hidden zip archive inside JPEG and extracts it."
+        }
+      ],
+      "useCases": [
+        "Forensics steganography and extracting hidden payloads from firmware or images"
+      ],
+      "related": [
+        "exiftool",
+        "steghide",
+        "strings"
+      ],
+      "tags": [
+        "ctf",
+        "forensics",
+        "steganography",
+        "firmware"
+      ]
+    },
+    {
+      "slug": "exiftool",
+      "name": "exiftool",
+      "category": "forensics",
+      "section": "ctf",
+      "summary": "Read and write meta information in a wide variety of files.",
+      "syntax": "exiftool [options] file...",
+      "description": "ExifTool is a platform-independent Perl library plus command-line application for reading, writing and editing meta information in a wide variety of files.",
+      "options": [
+        {
+          "flag": "-a",
+          "description": "Allow duplicate tags in output.",
+          "example": "exiftool -a photo.jpg"
+        },
+        {
+          "flag": "-u",
+          "description": "Extract unknown tags.",
+          "example": "exiftool -u image.png"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Inspect image metadata",
+          "command": "exiftool flag.jpg",
+          "output": "ExifTool Version Number     : 12.50\nFile Name                   : flag.jpg\nComment                     : Pass: secret_flag_123",
+          "explanation": "Reveals hidden comments or GPS metadata embedded in image files."
+        }
+      ],
+      "useCases": [
+        "Finding hidden CTF flags stored in image metadata comments"
+      ],
+      "related": [
+        "binwalk",
+        "steghide",
+        "strings"
+      ],
+      "tags": [
+        "ctf",
+        "forensics",
+        "metadata",
+        "images"
+      ]
+    },
+    {
+      "slug": "steghide",
+      "name": "steghide",
+      "category": "forensics",
+      "section": "ctf",
+      "summary": "Steganography program that hides data in various kinds of image and audio files.",
+      "syntax": "steghide [command] [options]",
+      "description": "Steghide embeds a file in another file by replacing some of the least significant bits with data from the first file.",
+      "options": [
+        {
+          "flag": "embed",
+          "description": "Embed secret file into cover file.",
+          "example": "steghide embed -cf image.jpg -ef secret.txt"
+        },
+        {
+          "flag": "extract",
+          "description": "Extract embedded file from cover file.",
+          "example": "steghide extract -sf image.jpg"
+        },
+        {
+          "flag": "-p",
+          "description": "Specify passphrase for embedding/extraction.",
+          "example": "steghide extract -sf image.jpg -p secret123"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Extract hidden file with passphrase",
+          "command": "steghide extract -sf ctf_image.jpg -p \"password\"",
+          "output": "wrote extracted data to \"flag.txt\".",
+          "explanation": "Extracts concealed flag.txt from ctf_image.jpg."
+        }
+      ],
+      "useCases": [
+        "Solving steganography challenges in CTF competitions"
+      ],
+      "related": [
+        "binwalk",
+        "exiftool"
+      ],
+      "tags": [
+        "ctf",
+        "forensics",
+        "steganography"
+      ]
+    },
+    {
+      "slug": "checksec",
+      "name": "checksec",
+      "category": "pwn",
+      "section": "ctf",
+      "summary": "Check binary security properties (RELRO, stack canary, NX, PIE).",
+      "syntax": "checksec [options] --file=<binary>",
+      "description": "Evaluates binary security mitigations such as NX (No-Execute), ASLR, PIE, Stack Canaries, and RELRO.",
+      "options": [
+        {
+          "flag": "--file",
+          "description": "Specify binary file to check.",
+          "example": "checksec --file=pwn_chall"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Check binary protections",
+          "command": "checksec --file=pwn1",
+          "output": "    RELRO: Partial RELRO\n    Stack Canary: No canary found\n    NX: NX enabled\n    PIE: No PIE (0x400000)",
+          "explanation": "Reveals missing stack canary and disabled PIE, indicating exploitable buffer overflow."
+        }
+      ],
+      "useCases": [
+        "Determining exploitation strategy for binary pwn challenges"
+      ],
+      "related": [
+        "gdb",
+        "objdump"
+      ],
+      "tags": [
+        "ctf",
+        "pwn",
+        "security",
+        "mitigations"
+      ]
+    },
+    {
+      "slug": "ropgadget",
+      "name": "ropgadget",
+      "category": "pwn",
+      "section": "ctf",
+      "summary": "Framework for finding gadget chains in binaries.",
+      "syntax": "ropgadget [options]",
+      "description": "Searches binaries for gadgets (short instruction sequences ending in ret) used in Return-Oriented Programming (ROP) exploitation.",
+      "options": [
+        {
+          "flag": "--binary",
+          "description": "Specify binary to analyze.",
+          "example": "ropgadget --binary vuln_bin"
+        },
+        {
+          "flag": "--ropchain",
+          "description": "Generate a ROP chain for common system calls.",
+          "example": "ropgadget --binary vuln_bin --ropchain"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Find gadgets in binary",
+          "command": "ropgadget --binary pwn_chall --only \"pop|ret\"",
+          "output": "0x00401163 : pop rdi ; ret\n0x00401161 : pop rsi ; pop r15 ; ret",
+          "explanation": "Locates useful ROP gadgets for exploit construction."
+        }
+      ],
+      "useCases": [
+        "Building ROP chains to bypass NX/DEP protection in binary exploitation"
+      ],
+      "related": [
+        "checksec",
+        "gdb",
+        "objdump"
+      ],
+      "tags": [
+        "ctf",
+        "pwn",
+        "rop",
+        "exploit"
+      ]
+    },
+    {
+      "slug": "theharvester",
+      "name": "theharvester",
+      "category": "osint",
+      "section": "ctf",
+      "summary": "E-mail, subdomain and people gathering tool.",
+      "syntax": "theHarvester [options]",
+      "description": "Gather emails, subdomains, hosts, employee names from public sources (search engines, PGP key servers, Shodan).",
+      "options": [
+        {
+          "flag": "-d",
+          "description": "Company name or domain to search.",
+          "example": "theHarvester -d target.com -b google"
+        },
+        {
+          "flag": "-b",
+          "description": "Data source (google, linkedin, shodan, all).",
+          "example": "theHarvester -d target.com -b all"
+        },
+        {
+          "flag": "-l",
+          "description": "Limit results to browser/search engine count.",
+          "example": "theHarvester -d target.com -l 100 -b baidu"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Gather OSINT emails and subdomains",
+          "command": "theHarvester -d example.com -b google -l 50",
+          "output": "[-] Searching Google...\n[+] Found 3 emails:\n    admin@example.com\n[+] Found 5 subdomains:\n    mail.example.com",
+          "explanation": "Harvests exposed emails and hostnames from search indexes."
+        }
+      ],
+      "useCases": [
+        "Initial OSINT reconnaissance and attack surface mapping"
+      ],
+      "related": [
+        "whois",
+        "nmap"
+      ],
+      "tags": [
+        "ctf",
+        "osint",
+        "recon",
+        "emails"
+      ]
+    },
+    {
+      "slug": "whois",
+      "name": "whois",
+      "category": "osint",
+      "section": "ctf",
+      "summary": "Client for the whois directory service.",
+      "syntax": "whois [options] object",
+      "description": "Query database stores holding registration details of domains, IP blocks, and Autonomous Systems.",
+      "options": [],
+      "examples": [
+        {
+          "title": "Query domain registration details",
+          "command": "whois example.com",
+          "output": "Domain Name: EXAMPLE.COM\nRegistry Domain ID: 2336799_DOMAIN_COM-VRSN\nRegistrar: Reserved Domain Name",
+          "explanation": "Retrieves domain ownership, registrar, and nameserver details."
+        }
+      ],
+      "useCases": [
+        "Finding domain registration records and contact info in OSINT"
+      ],
+      "related": [
+        "theharvester"
+      ],
+      "tags": [
+        "ctf",
+        "osint",
+        "domain",
+        "whois"
+      ]
+    },
+    {
+      "slug": "adb",
+      "name": "adb",
+      "category": "mobile",
+      "section": "ctf",
+      "summary": "Android Debug Bridge client.",
+      "syntax": "adb [options] command",
+      "description": "Versatile command-line tool that lets you communicate with an Android device emulator or connected phone.",
+      "options": [
+        {
+          "flag": "devices",
+          "description": "List all connected device instances.",
+          "example": "adb devices"
+        },
+        {
+          "flag": "shell",
+          "description": "Open remote interactive shell on device.",
+          "example": "adb shell"
+        },
+        {
+          "flag": "install",
+          "description": "Push and install an APK package.",
+          "example": "adb install app.apk"
+        },
+        {
+          "flag": "pull",
+          "description": "Copy file/dir from device.",
+          "example": "adb pull /sdcard/data.db ."
+        }
+      ],
+      "examples": [
+        {
+          "title": "List connected Android devices",
+          "command": "adb devices",
+          "output": "List of devices attached\nemulator-5554   device",
+          "explanation": "Confirms ADB connection to emulator or device."
+        }
+      ],
+      "useCases": [
+        "Inspecting Android application file structures and databases during mobile CTFs"
+      ],
+      "related": [
+        "apktool"
+      ],
+      "tags": [
+        "ctf",
+        "mobile",
+        "android",
+        "adb"
+      ]
+    },
+    {
+      "slug": "apktool",
+      "name": "apktool",
+      "category": "mobile",
+      "section": "ctf",
+      "summary": "Tool for reverse engineering 3rd party, closed, binary Android apps.",
+      "syntax": "apktool [options] <command> <file>",
+      "description": "Decodes resources to nearly original form (Manifest, XMLs, smali bytecode) and rebuilds them after modification.",
+      "options": [
+        {
+          "flag": "d",
+          "description": "Decode APK file.",
+          "example": "apktool d app.apk"
+        },
+        {
+          "flag": "b",
+          "description": "Build decoded directory back into APK.",
+          "example": "apktool b app_folder"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Decode Android APK",
+          "command": "apktool d app.apk",
+          "output": "I: Using Apktool 2.7.0 on app.apk\nI: Loading resource table...\nI: Copying assets and lib...",
+          "explanation": "Extracts AndroidManifest.xml and resources for analysis."
+        }
+      ],
+      "useCases": [
+        "Decompiling Android app resources and inspecting manifests for security flaws"
+      ],
+      "related": [
+        "adb"
+      ],
+      "tags": [
+        "ctf",
+        "mobile",
+        "android",
+        "reverse"
+      ]
+    },
+    {
+      "slug": "trivy",
+      "name": "trivy",
+      "category": "containers",
+      "section": "ctf",
+      "summary": "Comprehensive vulnerability scanner for container images, filesystems, and Git repos.",
+      "syntax": "trivy [options] <target>",
+      "description": "Finds security vulnerabilities, misconfigurations, secrets, and software licenses in container images and filesystems.",
+      "options": [
+        {
+          "flag": "image",
+          "description": "Scan container image.",
+          "example": "trivy image python:3.9"
+        },
+        {
+          "flag": "fs",
+          "description": "Scan local filesystem for vulnerabilities/secrets.",
+          "example": "trivy fs ."
+        }
+      ],
+      "examples": [
+        {
+          "title": "Scan Docker image for vulnerabilities",
+          "command": "trivy image nginx:latest",
+          "output": "nginx:latest (debian 11.6)\n=========================\nTotal: 15 (UNKNOWN: 0, LOW: 10, MEDIUM: 3, HIGH: 2, CRITICAL: 0)",
+          "explanation": "Reports known CVE vulnerabilities in container packages."
+        }
+      ],
+      "useCases": [
+        "Auditing container image security in cloud & container CTF challenges"
+      ],
+      "related": [],
+      "tags": [
+        "ctf",
+        "containers",
+        "security",
+        "docker",
+        "scanner"
+      ]
+    },
+    {
+      "slug": "chmod",
+      "name": "chmod",
+      "category": "permissions-and-ownership",
+      "section": "linux",
+      "summary": "Change file mode bits and permissions.",
+      "syntax": "chmod [OPTION]... MODE[,MODE]... FILE...",
+      "description": "Change the access permissions of each FILE according to MODE, using symbolic or octal notation.",
+      "options": [
+        {
+          "flag": "-R",
+          "description": "Change files and directories recursively.",
+          "example": "chmod -R u+rwX,go+rX project/"
+        },
+        {
+          "flag": "--reference=RFILE",
+          "description": "Use the mode of RFILE instead of MODE.",
+          "example": "chmod --reference=template.conf app.conf"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Add execute permission for the owner",
+          "command": "chmod u+x deploy.sh",
+          "output": "",
+          "explanation": "Allows the file owner to execute the deployment script."
+        },
+        {
+          "title": "Set a private key to owner-read only",
+          "command": "chmod 600 id_ed25519",
+          "output": "",
+          "explanation": "Restricts the key to its owner, as SSH expects."
+        },
+        {
+          "title": "Make a project tree readable and traversable",
+          "command": "chmod -R u+rwX,go+rX project/",
+          "output": "",
+          "explanation": "Adds owner write access and read/traverse access for other users."
+        }
+      ],
+      "useCases": [
+        "Securing private keys",
+        "Making scripts executable",
+        "Applying permissions to a project tree"
+      ],
+      "related": [
+        "chown",
+        "chgrp",
+        "umask",
+        "ls"
+      ],
+      "tags": [
+        "permissions",
+        "mode",
+        "security"
+      ]
+    },
+    {
+      "slug": "chown",
+      "name": "chown",
+      "category": "permissions-and-ownership",
+      "section": "linux",
+      "summary": "Change file owner and group.",
+      "syntax": "chown [OPTION]... [OWNER][:[GROUP]] FILE...",
+      "description": "Change the user and optionally the group ownership of each FILE.",
+      "options": [
+        {
+          "flag": "-R",
+          "description": "Operate on files and directories recursively.",
+          "example": "chown -R www-data:www-data /srv/www"
+        },
+        {
+          "flag": "--reference=RFILE",
+          "description": "Use the owner and group of RFILE.",
+          "example": "chown --reference=template.conf app.conf"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Assign a web directory to its service account",
+          "command": "sudo chown -R www-data:www-data /srv/www",
+          "output": "",
+          "explanation": "Transfers ownership of the document root to the web service account."
+        },
+        {
+          "title": "Change only the owner",
+          "command": "sudo chown alice report.txt",
+          "output": "",
+          "explanation": "Changes the user owner while retaining the existing group."
+        },
+        {
+          "title": "Change only the group",
+          "command": "sudo chown :developers build.log",
+          "output": "",
+          "explanation": "Assigns the file to the developers group without changing its owner."
+        }
+      ],
+      "useCases": [
+        "Assigning service directory ownership",
+        "Repairing ownership after extraction",
+        "Sharing files with a group"
+      ],
+      "related": [
+        "chmod",
+        "chgrp",
+        "ls",
+        "getfacl"
+      ],
+      "tags": [
+        "ownership",
+        "users",
+        "groups"
+      ]
+    },
+    {
+      "slug": "chgrp",
+      "name": "chgrp",
+      "category": "permissions-and-ownership",
+      "section": "linux",
+      "summary": "Change the group ownership of files.",
+      "syntax": "chgrp [OPTION]... GROUP FILE...",
+      "description": "Change the group ownership of each FILE to GROUP.",
+      "options": [
+        {
+          "flag": "-R",
+          "description": "Operate on files and directories recursively.",
+          "example": "chgrp -R developers shared/"
+        },
+        {
+          "flag": "--reference=RFILE",
+          "description": "Use the group of RFILE.",
+          "example": "chgrp --reference=template.conf app.conf"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Share a file with a team",
+          "command": "chgrp developers design.md",
+          "output": "",
+          "explanation": "Sets the file group to developers."
+        },
+        {
+          "title": "Update a shared directory",
+          "command": "sudo chgrp -R developers /srv/project",
+          "output": "",
+          "explanation": "Changes group ownership throughout the project tree."
+        },
+        {
+          "title": "Copy a reference group",
+          "command": "chgrp --reference=README.md notes.txt",
+          "output": "",
+          "explanation": "Uses the group owner of README.md for notes.txt."
+        }
+      ],
+      "useCases": [
+        "Maintaining team-shared files",
+        "Preparing group-based access",
+        "Repairing extracted archive ownership"
+      ],
+      "related": [
+        "chown",
+        "chmod",
+        "getfacl",
+        "ls"
+      ],
+      "tags": [
+        "groups",
+        "ownership",
+        "sharing"
+      ]
+    },
+    {
+      "slug": "umask",
+      "name": "umask",
+      "category": "permissions-and-ownership",
+      "section": "linux",
+      "summary": "Set the default file creation permission mask.",
+      "syntax": "umask [-p] [-S] [mode]",
+      "description": "Set or display the file mode creation mask used by the shell for newly created files and directories.",
+      "options": [
+        {
+          "flag": "-S",
+          "description": "Print the mask in symbolic form.",
+          "example": "umask -S"
+        },
+        {
+          "flag": "-p",
+          "description": "Print the mask in a reusable shell command form.",
+          "example": "umask -p"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Display the current mask",
+          "command": "umask",
+          "output": "0022",
+          "explanation": "Shows the octal mask applied to new files and directories."
+        },
+        {
+          "title": "Use a private default",
+          "command": "umask 077",
+          "output": "",
+          "explanation": "Makes newly created files private to the current user by default."
+        },
+        {
+          "title": "Inspect symbolic permissions",
+          "command": "umask -S",
+          "output": "u=rwx,g=rx,o=rx",
+          "explanation": "Displays the effective default permission mask symbolically."
+        }
+      ],
+      "useCases": [
+        "Setting secure shell defaults",
+        "Protecting newly created credentials",
+        "Configuring login profiles"
+      ],
+      "related": [
+        "chmod",
+        "touch",
+        "mkdir"
+      ],
+      "tags": [
+        "permissions",
+        "defaults",
+        "shell"
+      ]
+    },
+    {
+      "slug": "setfacl",
+      "name": "setfacl",
+      "category": "permissions-and-ownership",
+      "section": "linux",
+      "summary": "Modify access control lists for files and directories.",
+      "syntax": "setfacl [OPTION]... { -m | -M } ACL... FILE...",
+      "description": "Sets or removes extended ACL entries without replacing the traditional owner, group, and mode model.",
+      "options": [
+        {
+          "flag": "-m",
+          "description": "Modify or add ACL entries.",
+          "example": "setfacl -m u:alice:rw report.csv"
+        },
+        {
+          "flag": "-x",
+          "description": "Remove ACL entries.",
+          "example": "setfacl -x u:alice report.csv"
+        },
+        {
+          "flag": "-R",
+          "description": "Apply changes recursively.",
+          "example": "setfacl -R -m g:developers:rX project/"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Grant one user read/write access",
+          "command": "setfacl -m u:alice:rw report.csv",
+          "output": "",
+          "explanation": "Adds an ACL entry for Alice without changing the owning group."
+        },
+        {
+          "title": "Grant a group directory access",
+          "command": "setfacl -R -m g:developers:rX project/",
+          "output": "",
+          "explanation": "Gives developers read and directory traversal access throughout the tree."
+        },
+        {
+          "title": "Remove a user ACL",
+          "command": "setfacl -x u:alice report.csv",
+          "output": "",
+          "explanation": "Removes Alice’s named ACL entry."
+        }
+      ],
+      "useCases": [
+        "Fine-grained shared access",
+        "Granting exceptions to standard modes",
+        "Managing project directory permissions"
+      ],
+      "related": [
+        "getfacl",
+        "chmod",
+        "chown",
+        "chgrp"
+      ],
+      "tags": [
+        "acl",
+        "permissions",
+        "access-control"
+      ]
+    },
+    {
+      "slug": "getfacl",
+      "name": "getfacl",
+      "category": "permissions-and-ownership",
+      "section": "linux",
+      "summary": "Display file access control lists.",
+      "syntax": "getfacl [OPTION]... FILE...",
+      "description": "Prints the access ACL and default ACL for each FILE, including the effective permissions after mask calculation.",
+      "options": [
+        {
+          "flag": "-R",
+          "description": "List ACLs recursively.",
+          "example": "getfacl -R project/"
+        },
+        {
+          "flag": "-e",
+          "description": "Print all effective rights, including rights masked by the ACL mask.",
+          "example": "getfacl -e report.csv"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Inspect a file ACL",
+          "command": "getfacl report.csv",
+          "output": "# file: report.csv\n# owner: alice\n# group: developers\nuser::rw-\ngroup::r--\nmask::rw-\nother::---",
+          "explanation": "Shows owner, group, named entries, and the ACL mask."
+        },
+        {
+          "title": "Inspect a project tree",
+          "command": "getfacl -R project/",
+          "output": "# file: project/\n# owner: alice\n# group: developers\nuser::rwx\ngroup::r-x\nother::---",
+          "explanation": "Reports ACLs for every item below project."
+        },
+        {
+          "title": "Show effective rights",
+          "command": "getfacl -e report.csv",
+          "output": "user:alice:rw-\nuser:bob:r--\nmask::rw-",
+          "explanation": "Includes effective permissions after the mask is applied."
+        }
+      ],
+      "useCases": [
+        "Auditing shared access",
+        "Verifying setfacl changes",
+        "Troubleshooting unexpected permissions"
+      ],
+      "related": [
+        "setfacl",
+        "ls",
+        "chmod"
+      ],
+      "tags": [
+        "acl",
+        "audit",
+        "permissions"
+      ]
+    },
+    {
+      "slug": "chattr",
+      "name": "chattr",
+      "category": "permissions-and-ownership",
+      "section": "linux",
+      "summary": "Change extended filesystem attributes.",
+      "syntax": "chattr [ -RVf ] [ -+=AacdeijPsStu ] file...",
+      "description": "Changes Linux filesystem attributes on ext-family filesystems and other filesystems that support them.",
+      "options": [
+        {
+          "flag": "-R",
+          "description": "Recursively change attributes.",
+          "example": "sudo chattr -R +i archive/"
+        },
+        {
+          "flag": "+i",
+          "description": "Set the immutable attribute.",
+          "example": "sudo chattr +i release.txt"
+        },
+        {
+          "flag": "-i",
+          "description": "Clear the immutable attribute.",
+          "example": "sudo chattr -i release.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Protect a release file",
+          "command": "sudo chattr +i release.txt",
+          "output": "",
+          "explanation": "Marks the file immutable until the attribute is cleared."
+        },
+        {
+          "title": "Allow updates again",
+          "command": "sudo chattr -i release.txt",
+          "output": "",
+          "explanation": "Clears the immutable attribute."
+        },
+        {
+          "title": "Protect an archive tree",
+          "command": "sudo chattr -R +i archive/",
+          "output": "",
+          "explanation": "Sets immutable on each item in the archive tree."
+        }
+      ],
+      "useCases": [
+        "Protecting audit artifacts",
+        "Preventing accidental changes",
+        "Investigating filesystem attributes"
+      ],
+      "related": [
+        "lsattr",
+        "chmod"
+      ],
+      "tags": [
+        "filesystem",
+        "attributes",
+        "immutable"
+      ]
+    },
+    {
+      "slug": "lsattr",
+      "name": "lsattr",
+      "category": "permissions-and-ownership",
+      "section": "linux",
+      "summary": "List extended filesystem attributes.",
+      "syntax": "lsattr [ -RVadlpv ] [ files... ]",
+      "description": "Displays the filesystem attributes of files and directories on supported filesystems.",
+      "options": [
+        {
+          "flag": "-R",
+          "description": "Recursively list attributes.",
+          "example": "lsattr -R archive/"
+        },
+        {
+          "flag": "-d",
+          "description": "List directory attributes rather than directory contents.",
+          "example": "lsattr -d archive/"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Inspect a file",
+          "command": "lsattr release.txt",
+          "output": "----i---------e---- release.txt",
+          "explanation": "Shows immutable and extent-related attributes when present."
+        },
+        {
+          "title": "Inspect a directory itself",
+          "command": "lsattr -d archive/",
+          "output": "------------------ archive/",
+          "explanation": "Reports attributes on the directory entry."
+        },
+        {
+          "title": "Inspect a tree",
+          "command": "lsattr -R archive/",
+          "output": "archive/:\n------------------ archive/2026.log",
+          "explanation": "Lists attributes recursively below archive."
+        }
+      ],
+      "useCases": [
+        "Auditing immutable files",
+        "Checking filesystem metadata",
+        "Verifying chattr operations"
+      ],
+      "related": [
+        "chattr",
+        "ls",
+        "getfacl"
+      ],
+      "tags": [
+        "filesystem",
+        "attributes",
+        "audit"
+      ]
+    }
+  ],
+  "needsHumanReview": [
+    "pwd",
+    "cp",
+    "mv",
+    "rm",
+    "mkdir",
+    "rmdir",
+    "touch",
+    "cat",
+    "less",
+    "head",
+    "tail",
+    "find",
+    "grep",
+    "sed",
+    "awk",
+    "ps",
+    "top",
+    "htop",
+    "kill",
+    "ip",
+    "ss",
+    "ping",
+    "curl",
+    "wget",
+    "apt",
+    "dpkg",
+    "df",
+    "du",
+    "tar",
+    "gzip",
+    "useradd",
+    "passwd",
+    "history",
+    "uname",
+    "whoami",
+    "systemctl",
+    "journalctl",
+    "nmap",
+    "gobuster",
+    "ffuf",
+    "sqlmap",
+    "john",
+    "hashcat",
+    "strings",
+    "objdump",
+    "gdb",
+    "binwalk",
+    "exiftool",
+    "steghide",
+    "checksec",
+    "ropgadget",
+    "theharvester",
+    "whois",
+    "adb",
+    "apktool",
+    "trivy"
+  ]
+}

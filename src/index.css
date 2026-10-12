@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg: #0d1117;
+    --bg-surface: #161b22;
+    --bg-surface-elevated: #21262d;
+    --bg-surface-hover: #30363d;
+    --border: #30363d;
+    --border-subtle: #21262d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-heading: #f0f6fc;
+
+    --terminal-green: #00ff9c;
+    --terminal-green-dim: #00cc7d;
+    --terminal-green-bg: rgba(0, 255, 156, 0.08);
+
+    --amber-warning: #ffb86c;
+    --amber-warning-bg: rgba(255, 184, 108, 0.1);
+
+    --ctf-red: #ff5555;
+    --ctf-red-dim: #e04444;
+    --ctf-red-bg: rgba(255, 85, 85, 0.1);
+
+    --code-bg: #090d13;
+    --code-border: #21262d;
+
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  html.light {
+    --bg: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: #f1f5f9;
+    --bg-surface-hover: #e2e8f0;
+    --border: #cbd5e1;
+    --border-subtle: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-heading: #020617;
+
+    --terminal-green: #059669;
+    --terminal-green-dim: #047857;
+    --terminal-green-bg: rgba(5, 150, 105, 0.1);
+
+    --amber-warning: #d97706;
+    --amber-warning-bg: rgba(217, 119, 6, 0.12);
+
+    --ctf-red: #dc2626;
+    --ctf-red-dim: #b91c1c;
+    --ctf-red-bg: rgba(220, 38, 38, 0.1);
+
+    --code-bg: #f1f5f9;
+    --code-border: #cbd5e1;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-subtle);
+}
