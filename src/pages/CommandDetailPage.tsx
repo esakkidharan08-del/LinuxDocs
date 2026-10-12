@@ -6,6 +6,8 @@ import { TableOfContents } from '../components/TableOfContents';
 import { CodeBlock } from '../components/CodeBlock';
 import { Terminal, Shield, AlertTriangle, Tag, Bookmark, BookmarkCheck, Save, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { commandBuilderSpecs } from '../data/commandBuilders';
+import { CommandBuilder } from '../components/CommandBuilder';
 
 export const CommandDetailPage = () => {
   const { slug } = useParams<{ category?: string; domain?: string; slug?: string }>();
@@ -215,6 +217,8 @@ const saveTimeoutRef = useRef<number | null>(null);
               )}
             </section>
           )}
+
+          {commandBuilderSpecs[command.slug] && <CommandBuilder spec={commandBuilderSpecs[command.slug]} />}
 
           {/* Overview Section */}
           <section id="overview" className="space-y-3">
