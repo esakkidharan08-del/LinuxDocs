@@ -16,6 +16,7 @@ import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ExplainCommandPage } from './pages/ExplainCommandPage';
 
 export function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -41,6 +42,7 @@ export function App() {
                   <Route path="/sign-up" element={<SignUpPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/explain" element={<ExplainCommandPage />} />
                   <Route path="/linux/:categoryId" element={<CategoryPage />} />
                   <Route path="/linux/:categoryId/:slug" element={<CommandDetailPage />} />
                   <Route path="/ctf" element={<CTFHomePage />} />
