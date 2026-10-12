@@ -179,6 +179,7 @@ export const SignInPage = () => {
                 Sign up
               </Link>
             </p>
+            <p className="mt-3 text-center text-sm font-mono"><Link to="/password-reset" className="text-[var(--terminal-green)] hover:underline">Forgot password?</Link></p>
           </div>
         </div>
       </div>

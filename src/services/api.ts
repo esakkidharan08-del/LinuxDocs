@@ -68,6 +68,12 @@ export const authApi = {
 
   me: () =>
     request<{ user: User }>('/auth/me'),
+
+  requestPasswordReset: (email: string) =>
+    request<{ message: string }>('/auth/request-password-reset', { method: 'POST', body: JSON.stringify({ email }) }),
+
+  resetPassword: (data: { token: string; password: string; confirm_password: string }) =>
+    request<{ message: string }>('/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 export const userApi = {

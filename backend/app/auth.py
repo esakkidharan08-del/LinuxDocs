@@ -1,9 +1,10 @@
 import re
+from datetime import timedelta
 from flask import Blueprint, request, jsonify, current_app, make_response
 from flask_jwt_extended import (
     create_access_token, create_refresh_token,
     jwt_required, get_jwt_identity, set_refresh_cookies, unset_jwt_cookies,
-    verify_jwt_in_request
+    verify_jwt_in_request, decode_token
 )
 from app import db, bcrypt
 from app.models import User
@@ -50,11 +51,7 @@ def validate_register(data):
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    import sys
-    print(f"DEBUG: Request content-type: {request.content_type}", file=sys.stderr)
-    print(f"DEBUG: Request data: {request.get_data()}", file=sys.stderr)
     data = request.get_json(silent=True) or {}
-    print(f"DEBUG: Parsed JSON: {data}", file=sys.stderr)
     errors = validate_register(data)
 
     if User.query.filter_by(username=data.get('username', '').strip()).first():
@@ -79,6 +76,46 @@ def register():
     }), 201)
     set_refresh_cookies(resp, refresh_token)
     return resp
+
+
+@auth_bp.route('/request-password-reset', methods=['POST'])
+def request_password_reset():
+    # Keep the response identical for known and unknown addresses.
+    data = request.get_json(silent=True) or {}
+    email = data.get('email', '').strip().lower()
+    user = User.query.filter_by(email=email).first()
+    if user:
+        token = create_access_token(identity=str(user.id), additional_claims={'purpose': 'password_reset'}, expires_delta=timedelta(hours=1))
+        current_app.logger.info('Password reset token generated for %s: %s', email, token)
+    return jsonify({'message': 'If an account exists for that email, a reset link will be sent.'}), 202
+
+
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json(silent=True) or {}
+    try:
+        claims = decode_token(data.get('token', ''))
+        if claims.get('purpose') != 'password_reset':
+            raise ValueError('wrong token purpose')
+        user = User.query.get(claims['sub'])
+    except Exception:
+        return jsonify({'errors': {'token': 'Reset link is invalid or expired'}}), 400
+    if not user:
+        return jsonify({'errors': {'token': 'Reset link is invalid or expired'}}), 400
+    password = data.get('password', '')
+    confirm = data.get('confirm_password', '')
+    errors = {}
+    if not password or len(password) < 10:
+        errors['password'] = 'Password must be at least 10 characters'
+    elif not re.search(r'[A-Z]', password) or not re.search(r'[a-z]', password) or not re.search(r'\d', password) or not re.search(r'[^A-Za-z0-9]', password):
+        errors['password'] = 'Password must contain uppercase, lowercase, digit, and special character'
+    if password != confirm:
+        errors['confirm_password'] = 'Passwords do not match'
+    if errors:
+        return jsonify({'errors': errors}), 400
+    user.set_password(password)
+    db.session.commit()
+    return jsonify({'message': 'Password reset successfully'}), 200
 
 
 @auth_bp.route('/login', methods=['POST'])

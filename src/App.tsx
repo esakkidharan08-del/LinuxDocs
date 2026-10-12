@@ -21,6 +21,7 @@ import { PracticeTerminalPage } from './pages/PracticeTerminalPage';
 import { LearningPage } from './pages/LearningPage';
 import { CheatSheetsPage } from './pages/CheatSheetsPage';
 import { ComparePage, CommandOfDayPage, ExportImportPage } from './pages/ToolsPages';
+import { PasswordResetPage } from './pages/PasswordResetPage';
 
 export function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -63,6 +64,7 @@ export function App() {
                   <Route path="/compare" element={<ComparePage />} />
                   <Route path="/command-of-the-day" element={<CommandOfDayPage />} />
                   <Route path="/export-import" element={<ExportImportPage />} />
+                  <Route path="/password-reset" element={<PasswordResetPage />} />
                   <Route path="/linux/:categoryId" element={<CategoryPage />} />
                   <Route path="/linux/:categoryId/:slug" element={<CommandDetailPage />} />
                   <Route path="/ctf" element={<CTFHomePage />} />
