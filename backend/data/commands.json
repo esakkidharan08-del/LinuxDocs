@@ -1171,7 +1171,8 @@
       ],
       "related": [
         "awk",
-        "grep"
+        "grep",
+        "tr"
       ],
       "tags": [
         "text",
@@ -1214,6 +1215,7 @@
       ],
       "related": [
         "sed",
+        "cut",
         "grep"
       ],
       "tags": [
@@ -4450,7 +4452,8 @@
       "related": [
         "csplit",
         "cat",
-        "dd"
+        "dd",
+        "wc"
       ],
       "tags": [
         "split",
@@ -4633,6 +4636,1261 @@
         "size",
         "sparse"
       ]
+    },
+    {
+      "slug": "cut",
+      "name": "cut",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Remove sections from each line of input.",
+      "syntax": "cut OPTION... [FILE]...",
+      "description": "Selects columns, fields, or byte ranges from lines of files and standard input.",
+      "options": [
+        {
+          "flag": "-d DELIM",
+          "description": "Use DELIM instead of tab as the field delimiter.",
+          "example": "cut -d: -f1 /etc/passwd"
+        },
+        {
+          "flag": "-f LIST",
+          "description": "Select the specified fields.",
+          "example": "cut -d, -f1,3 data.csv"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Extract usernames",
+          "command": "cut -d: -f1 /etc/passwd",
+          "output": "root\ndaemon\nbin",
+          "explanation": "Selects the first colon-delimited field."
+        },
+        {
+          "title": "Select CSV columns",
+          "command": "cut -d, -f1,3 users.csv",
+          "output": "id,role\n1,admin\n2,viewer",
+          "explanation": "Prints the first and third comma-separated fields."
+        },
+        {
+          "title": "Select a byte range",
+          "command": "printf 'abcdef\\n' | cut -b 2-4",
+          "output": "bcd",
+          "explanation": "Extracts bytes two through four."
+        }
+      ],
+      "useCases": [
+        "Extracting fields from system files",
+        "Selecting CSV columns",
+        "Building shell pipelines"
+      ],
+      "related": [
+        "awk",
+        "paste",
+        "sort",
+        "tr"
+      ],
+      "tags": [
+        "fields",
+        "columns",
+        "text"
+      ]
+    },
+    {
+      "slug": "paste",
+      "name": "paste",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Merge lines of files side by side.",
+      "syntax": "paste [OPTION]... [FILE]...",
+      "description": "Writes corresponding lines from input files separated by tabs or a chosen delimiter.",
+      "options": [
+        {
+          "flag": "-d LIST",
+          "description": "Reuse characters from LIST as delimiters.",
+          "example": "paste -d, names.txt ids.txt"
+        },
+        {
+          "flag": "-s",
+          "description": "Paste one file at a time instead of in parallel.",
+          "example": "paste -s -d, values.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Join two columns",
+          "command": "paste names.txt ids.txt",
+          "output": "alice\t1001\nbob\t1002",
+          "explanation": "Combines corresponding lines with tabs."
+        },
+        {
+          "title": "Create CSV-like output",
+          "command": "paste -d, names.txt ids.txt",
+          "output": "alice,1001\nbob,1002",
+          "explanation": "Uses commas between corresponding values."
+        },
+        {
+          "title": "Join a list into one line",
+          "command": "paste -s -d, values.txt",
+          "output": "red,green,blue",
+          "explanation": "Serializes all lines from one file."
+        }
+      ],
+      "useCases": [
+        "Combining parallel reports",
+        "Creating simple delimited output",
+        "Joining pipeline columns"
+      ],
+      "related": [
+        "cut",
+        "join",
+        "column",
+        "awk"
+      ],
+      "tags": [
+        "columns",
+        "merge",
+        "text"
+      ]
+    },
+    {
+      "slug": "join",
+      "name": "join",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Join lines of two files on a shared field.",
+      "syntax": "join [OPTION]... FILE1 FILE2",
+      "description": "Performs a relational-style join of two sorted files using a common field.",
+      "options": [
+        {
+          "flag": "-1 FIELD",
+          "description": "Join on FIELD in FILE1.",
+          "example": "join -1 1 -2 1 users.txt roles.txt"
+        },
+        {
+          "flag": "-t CHAR",
+          "description": "Use CHAR as the input and output field separator.",
+          "example": "join -t, users.csv roles.csv"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Join two sorted tables",
+          "command": "join users.txt roles.txt",
+          "output": "1001 alice admin\n1002 bob viewer",
+          "explanation": "Matches the default first field in both sorted files."
+        },
+        {
+          "title": "Join CSV files",
+          "command": "join -t, -1 1 -2 1 users.csv roles.csv",
+          "output": "1001,alice,admin\n1002,bob,viewer",
+          "explanation": "Uses the first comma-delimited field as the key."
+        },
+        {
+          "title": "Keep unmatched records",
+          "command": "join -a 1 users.txt roles.txt",
+          "output": "1001 alice admin\n1002 bob viewer\n1003 carol",
+          "explanation": "Includes records found only in the first file."
+        }
+      ],
+      "useCases": [
+        "Combining sorted reports",
+        "Matching IDs to metadata",
+        "Building shell-based data joins"
+      ],
+      "related": [
+        "sort",
+        "cut",
+        "paste",
+        "awk"
+      ],
+      "tags": [
+        "join",
+        "fields",
+        "data"
+      ]
+    },
+    {
+      "slug": "sort",
+      "name": "sort",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Sort lines of text files.",
+      "syntax": "sort [OPTION]... [FILE]...",
+      "description": "Writes a sorted concatenation of all input files to standard output.",
+      "options": [
+        {
+          "flag": "-n",
+          "description": "Compare strings as numerical values.",
+          "example": "sort -n scores.txt"
+        },
+        {
+          "flag": "-k KEYDEF",
+          "description": "Sort using a key field definition.",
+          "example": "sort -k2,2 users.txt"
+        },
+        {
+          "flag": "-r",
+          "description": "Reverse the comparison result.",
+          "example": "sort -nr scores.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Sort names alphabetically",
+          "command": "sort names.txt",
+          "output": "alice\nbob\ncarol",
+          "explanation": "Sorts lines using the locale comparison."
+        },
+        {
+          "title": "Sort numeric values",
+          "command": "sort -n scores.txt",
+          "output": "2\n10\n100",
+          "explanation": "Compares values numerically rather than lexically."
+        },
+        {
+          "title": "Sort by a column descending",
+          "command": "sort -k2,2nr report.txt",
+          "output": "alice 98\ncarol 87\nbob 74",
+          "explanation": "Uses the second field as a numeric reverse-order key."
+        }
+      ],
+      "useCases": [
+        "Ordering reports",
+        "Preparing input for join",
+        "Finding highest or lowest values"
+      ],
+      "related": [
+        "uniq",
+        "join",
+        "comm",
+        "wc"
+      ],
+      "tags": [
+        "sort",
+        "order",
+        "text"
+      ]
+    },
+    {
+      "slug": "uniq",
+      "name": "uniq",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Report or omit repeated adjacent lines.",
+      "syntax": "uniq [OPTION]... [INPUT [OUTPUT]]",
+      "description": "Filters adjacent matching lines; sort input first when duplicates may be separated.",
+      "options": [
+        {
+          "flag": "-c",
+          "description": "Prefix lines by occurrence counts.",
+          "example": "sort events.log | uniq -c"
+        },
+        {
+          "flag": "-d",
+          "description": "Print only duplicated lines.",
+          "example": "sort names.txt | uniq -d"
+        },
+        {
+          "flag": "-u",
+          "description": "Print only unique lines.",
+          "example": "sort names.txt | uniq -u"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Remove adjacent duplicates",
+          "command": "uniq events.txt",
+          "output": "login\nlogout\nlogin",
+          "explanation": "Collapses only consecutive equal lines."
+        },
+        {
+          "title": "Count event types",
+          "command": "sort events.txt | uniq -c",
+          "output": "      2 login\n      1 logout",
+          "explanation": "Sorts first, then counts each repeated line."
+        },
+        {
+          "title": "Show duplicates only",
+          "command": "sort names.txt | uniq -d",
+          "output": "alice",
+          "explanation": "Reports names appearing more than once."
+        }
+      ],
+      "useCases": [
+        "Counting repeated events",
+        "Finding duplicate records",
+        "Reducing sorted output"
+      ],
+      "related": [
+        "sort",
+        "wc",
+        "comm",
+        "grep"
+      ],
+      "tags": [
+        "deduplicate",
+        "count",
+        "text"
+      ]
+    },
+    {
+      "slug": "wc",
+      "name": "wc",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Count lines, words, and bytes.",
+      "syntax": "wc [OPTION]... [FILE]...",
+      "description": "Prints newline, word, character, or byte counts for each input file.",
+      "options": [
+        {
+          "flag": "-l",
+          "description": "Print newline counts.",
+          "example": "wc -l access.log"
+        },
+        {
+          "flag": "-w",
+          "description": "Print word counts.",
+          "example": "wc -w README.md"
+        },
+        {
+          "flag": "-c",
+          "description": "Print byte counts.",
+          "example": "wc -c image.bin"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Count source lines",
+          "command": "wc -l src/main.ts",
+          "output": "84 src/main.ts",
+          "explanation": "Reports the number of newline characters."
+        },
+        {
+          "title": "Count words in documentation",
+          "command": "wc -w README.md",
+          "output": "412 README.md",
+          "explanation": "Counts whitespace-delimited words."
+        },
+        {
+          "title": "Count bytes in a file",
+          "command": "wc -c payload.bin",
+          "output": "4096 payload.bin",
+          "explanation": "Reports the exact byte length."
+        }
+      ],
+      "useCases": [
+        "Measuring files",
+        "Counting log records",
+        "Checking generated output sizes"
+      ],
+      "related": [
+        "sort",
+        "uniq",
+        "cut",
+        "du"
+      ],
+      "tags": [
+        "count",
+        "lines",
+        "files"
+      ]
+    },
+    {
+      "slug": "tr",
+      "name": "tr",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Translate or delete characters.",
+      "syntax": "tr [OPTION]... SET1 [SET2]",
+      "description": "Copies standard input to standard output while translating, squeezing, or deleting characters.",
+      "options": [
+        {
+          "flag": "-d",
+          "description": "Delete characters in SET1.",
+          "example": "tr -d '\\r' < windows.txt"
+        },
+        {
+          "flag": "-s",
+          "description": "Squeeze repeated characters in the result.",
+          "example": "tr -s ' ' < input.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Convert lowercase to uppercase",
+          "command": "printf 'linux\\n' | tr 'a-z' 'A-Z'",
+          "output": "LINUX",
+          "explanation": "Maps each lowercase letter to its uppercase counterpart."
+        },
+        {
+          "title": "Remove carriage returns",
+          "command": "tr -d '\\r' < windows.txt > unix.txt",
+          "output": "",
+          "explanation": "Strips CR characters from a text stream."
+        },
+        {
+          "title": "Collapse repeated spaces",
+          "command": "printf 'a    b\\n' | tr -s ' '",
+          "output": "a b",
+          "explanation": "Squeezes runs of spaces into one."
+        }
+      ],
+      "useCases": [
+        "Normalizing text",
+        "Removing control characters",
+        "Converting simple character sets"
+      ],
+      "related": [
+        "sed",
+        "cut",
+        "tee",
+        "fold"
+      ],
+      "tags": [
+        "translate",
+        "characters",
+        "text"
+      ]
+    },
+    {
+      "slug": "tee",
+      "name": "tee",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Copy standard input to files and standard output.",
+      "syntax": "tee [OPTION]... [FILE]...",
+      "description": "Reads standard input and writes it both to standard output and to one or more files.",
+      "options": [
+        {
+          "flag": "-a",
+          "description": "Append to files instead of overwriting them.",
+          "example": "make 2>&1 | tee -a build.log"
+        },
+        {
+          "flag": "-i",
+          "description": "Ignore interrupts.",
+          "example": "long-command | tee -i output.log"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Save and view command output",
+          "command": "make 2>&1 | tee build.log",
+          "output": "cc -c main.c\ncc -o app main.o",
+          "explanation": "Displays build output while saving a copy."
+        },
+        {
+          "title": "Append to a log",
+          "command": "date | tee -a deploy.log",
+          "output": "Mon Oct 12 10:00:00 UTC 2026",
+          "explanation": "Adds the timestamp to an existing log."
+        },
+        {
+          "title": "Write to two files",
+          "command": "printf 'ready\\n' | tee status.txt audit.txt",
+          "output": "ready",
+          "explanation": "Writes the same stream to both files and the terminal."
+        }
+      ],
+      "useCases": [
+        "Capturing diagnostics",
+        "Auditing pipelines",
+        "Writing one stream to multiple destinations"
+      ],
+      "related": [
+        "xargs",
+        "tr",
+        "cat"
+      ],
+      "tags": [
+        "pipeline",
+        "logging",
+        "output"
+      ]
+    },
+    {
+      "slug": "xargs",
+      "name": "xargs",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Build and execute commands from standard input.",
+      "syntax": "xargs [OPTION]... [COMMAND [INITIAL-ARGS]]",
+      "description": "Constructs command lines from items read from standard input, with controls for batching and placement.",
+      "options": [
+        {
+          "flag": "-n MAX-ARGS",
+          "description": "Use at most MAX-ARGS input items per command line.",
+          "example": "printf 'a\\nb\\n' | xargs -n1 printf '<%s>\\n'"
+        },
+        {
+          "flag": "-0",
+          "description": "Expect NUL-delimited input.",
+          "example": "find . -print0 | xargs -0 -n1 file"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Run a command for each item",
+          "command": "printf 'a\\nb\\n' | xargs -n1 printf 'item=%s\\n'",
+          "output": "item=a\nitem=b",
+          "explanation": "Builds one printf invocation per input item."
+        },
+        {
+          "title": "Handle filenames safely",
+          "command": "find . -type f -print0 | xargs -0 file",
+          "output": "./README.md: ASCII text\n./app.bin: ELF 64-bit LSB executable",
+          "explanation": "Uses NUL delimiters so spaces do not split names."
+        },
+        {
+          "title": "Pass many arguments in batches",
+          "command": "printf '1\\n2\\n3\\n' | xargs -n2 echo batch",
+          "output": "batch 1 2\nbatch 3",
+          "explanation": "Limits each invocation to two input arguments."
+        }
+      ],
+      "useCases": [
+        "Applying commands to search results",
+        "Batching arguments",
+        "Building safe file pipelines"
+      ],
+      "related": [
+        "find",
+        "tee"
+      ],
+      "tags": [
+        "pipeline",
+        "batch",
+        "arguments"
+      ]
+    },
+    {
+      "slug": "diff",
+      "name": "diff",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Compare files line by line.",
+      "syntax": "diff [OPTION]... FILES",
+      "description": "Compares two files and reports changes needed to transform the first into the second.",
+      "options": [
+        {
+          "flag": "-u",
+          "description": "Output unified context format.",
+          "example": "diff -u old.conf new.conf"
+        },
+        {
+          "flag": "-r",
+          "description": "Recursively compare directories.",
+          "example": "diff -ru release-1 release-2"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Compare configuration versions",
+          "command": "diff -u old.conf new.conf",
+          "output": "--- old.conf\n+++ new.conf\n@@ -1 +1 @@\n-port=80\n+port=8080",
+          "explanation": "Shows a compact patch-style difference."
+        },
+        {
+          "title": "Compare directories",
+          "command": "diff -ru src-old src-new",
+          "output": "Only in src-new: parser.ts",
+          "explanation": "Reports changed and newly added files recursively."
+        },
+        {
+          "title": "Check identical files",
+          "command": "diff -q a.txt b.txt",
+          "output": "Files a.txt and b.txt differ",
+          "explanation": "Prints only whether files differ."
+        }
+      ],
+      "useCases": [
+        "Reviewing configuration changes",
+        "Generating patches",
+        "Comparing release trees"
+      ],
+      "related": [
+        "cmp",
+        "comm"
+      ],
+      "tags": [
+        "compare",
+        "diff",
+        "review"
+      ]
+    },
+    {
+      "slug": "cmp",
+      "name": "cmp",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Compare two files byte by byte.",
+      "syntax": "cmp [OPTION]... FILE1 [FILE2 [SKIP1 [SKIP2]]]",
+      "description": "Reports the first byte and line where two files differ, or confirms that they match.",
+      "options": [
+        {
+          "flag": "-l",
+          "description": "Print byte numbers and differing byte values.",
+          "example": "cmp -l image-a image-b"
+        },
+        {
+          "flag": "-s",
+          "description": "Produce no output and report status only.",
+          "example": "cmp -s file-a file-b"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Find the first difference",
+          "command": "cmp image-a image-b",
+          "output": "image-a image-b differ: byte 129, line 4",
+          "explanation": "Reports the first mismatch."
+        },
+        {
+          "title": "Check equality in a script",
+          "command": "cmp -s expected.bin actual.bin; echo $?",
+          "output": "0",
+          "explanation": "Uses the exit status to indicate identical files."
+        },
+        {
+          "title": "List all differing bytes",
+          "command": "cmp -l a.bin b.bin",
+          "output": "129  12  14",
+          "explanation": "Lists byte positions and values for differences."
+        }
+      ],
+      "useCases": [
+        "Verifying binary copies",
+        "Testing generated artifacts",
+        "Checking exact equality"
+      ],
+      "related": [
+        "diff",
+        "comm",
+        "xxd"
+      ],
+      "tags": [
+        "compare",
+        "binary",
+        "verify"
+      ]
+    },
+    {
+      "slug": "comm",
+      "name": "comm",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Compare two sorted files line by line.",
+      "syntax": "comm [OPTION]... FILE1 FILE2",
+      "description": "Produces three columns for lines unique to the first file, unique to the second, and common to both.",
+      "options": [
+        {
+          "flag": "-1",
+          "description": "Suppress the first output column.",
+          "example": "comm -1 users-a users-b"
+        },
+        {
+          "flag": "-3",
+          "description": "Suppress the common-lines column.",
+          "example": "comm -3 users-a users-b"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Show all comparison columns",
+          "command": "comm a.txt b.txt",
+          "output": "alice\n\t\tbob\n\tcarol",
+          "explanation": "Displays unique-first, unique-second, and common lines as columns."
+        },
+        {
+          "title": "Find additions",
+          "command": "comm -23 old.txt new.txt",
+          "output": "",
+          "explanation": "Suppresses columns to show lines only in the new file."
+        },
+        {
+          "title": "Find lines removed",
+          "command": "comm -13 old.txt new.txt",
+          "output": "legacy-entry",
+          "explanation": "Shows entries present only in the old file."
+        }
+      ],
+      "useCases": [
+        "Comparing sorted inventories",
+        "Finding additions and removals",
+        "Auditing user lists"
+      ],
+      "related": [
+        "sort",
+        "diff",
+        "uniq",
+        "join"
+      ],
+      "tags": [
+        "compare",
+        "sorted",
+        "sets"
+      ]
+    },
+    {
+      "slug": "fmt",
+      "name": "fmt",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Reformat paragraph text.",
+      "syntax": "fmt [OPTION]... [FILE]...",
+      "description": "Fills and joins lines to create readable paragraphs while preserving indentation conventions.",
+      "options": [
+        {
+          "flag": "-w WIDTH",
+          "description": "Set the target output width.",
+          "example": "fmt -w 72 README.txt"
+        },
+        {
+          "flag": "-s",
+          "description": "Split long lines but do not join short lines.",
+          "example": "fmt -s -w 80 notes.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Wrap documentation",
+          "command": "fmt -w 72 README.txt",
+          "output": "LinuxDocs is a reference for commands and authorized security\ntraining tools.",
+          "explanation": "Reflows paragraphs to a target width."
+        },
+        {
+          "title": "Format standard input",
+          "command": "printf 'one two three four\\n' | fmt -w 7",
+          "output": "one two\nthree\nfour",
+          "explanation": "Wraps the input at the selected width."
+        },
+        {
+          "title": "Split only long lines",
+          "command": "fmt -s -w 20 report.txt",
+          "output": "A short line remains\nwrapped at twenty\ncolumns.",
+          "explanation": "Avoids joining existing short lines."
+        }
+      ],
+      "useCases": [
+        "Formatting plain-text documentation",
+        "Wrapping generated reports",
+        "Normalizing paragraph layout"
+      ],
+      "related": [
+        "fold",
+        "column",
+        "expand",
+        "sed"
+      ],
+      "tags": [
+        "format",
+        "wrap",
+        "text"
+      ]
+    },
+    {
+      "slug": "fold",
+      "name": "fold",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Wrap each input line to a fixed width.",
+      "syntax": "fold [OPTION]... [FILE]...",
+      "description": "Writes input lines with a maximum width, breaking long lines without paragraph reflow.",
+      "options": [
+        {
+          "flag": "-w WIDTH",
+          "description": "Use WIDTH as the maximum line width.",
+          "example": "fold -w 80 README.md"
+        },
+        {
+          "flag": "-s",
+          "description": "Break at spaces when possible.",
+          "example": "fold -s -w 72 paragraph.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Wrap a long line",
+          "command": "printf 'abcdefghijklmnopqrstuvwxyz\\n' | fold -w 10",
+          "output": "abcdefghij\nklmnopqrst\nuvwxyz",
+          "explanation": "Breaks the line every ten columns."
+        },
+        {
+          "title": "Prefer word boundaries",
+          "command": "printf 'alpha beta gamma\\n' | fold -s -w 10",
+          "output": "alpha beta\ngamma",
+          "explanation": "Breaks at a space instead of splitting a word."
+        },
+        {
+          "title": "Wrap a file",
+          "command": "fold -w 72 README.md | head -n 2",
+          "output": "LinuxDocs is a reference for Linux commands and authorized\nsecurity training tools.",
+          "explanation": "Limits displayed line width."
+        }
+      ],
+      "useCases": [
+        "Preparing text for narrow terminals",
+        "Wrapping generated output",
+        "Checking line-length limits"
+      ],
+      "related": [
+        "fmt",
+        "column",
+        "expand",
+        "tr"
+      ],
+      "tags": [
+        "wrap",
+        "width",
+        "text"
+      ]
+    },
+    {
+      "slug": "column",
+      "name": "column",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Format input into aligned columns.",
+      "syntax": "column [OPTION]... [FILE]...",
+      "description": "Formats delimited text into columns suitable for terminal display.",
+      "options": [
+        {
+          "flag": "-t",
+          "description": "Create a table by determining column widths.",
+          "example": "column -t -s, users.csv"
+        },
+        {
+          "flag": "-s SEP",
+          "description": "Use SEP as the input delimiter.",
+          "example": "column -t -s: /etc/passwd"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Align whitespace data",
+          "command": "printf 'name score\\nalice 98\\nbob 74\\n' | column -t",
+          "output": "name  score\nalice 98\nbob   74",
+          "explanation": "Aligns fields by their widest value."
+        },
+        {
+          "title": "Display CSV as a table",
+          "command": "column -t -s, users.csv",
+          "output": "id  name   role\n1   alice  admin\n2   bob    viewer",
+          "explanation": "Uses commas to split and align columns."
+        },
+        {
+          "title": "Format passwd fields",
+          "command": "cut -d: -f1,7 /etc/passwd | column -t -s:",
+          "output": "root    /bin/bash\ndaemon  /usr/sbin/nologin",
+          "explanation": "Combines cut and column for readable output."
+        }
+      ],
+      "useCases": [
+        "Making reports readable",
+        "Inspecting delimited files",
+        "Formatting command output"
+      ],
+      "related": [
+        "cut",
+        "paste",
+        "expand",
+        "sort"
+      ],
+      "tags": [
+        "columns",
+        "table",
+        "format"
+      ]
+    },
+    {
+      "slug": "expand",
+      "name": "expand",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Convert tabs to spaces.",
+      "syntax": "expand [OPTION]... [FILE]...",
+      "description": "Writes files with tab characters replaced by spaces using configurable tab stops.",
+      "options": [
+        {
+          "flag": "-t LIST",
+          "description": "Use the specified tab stops.",
+          "example": "expand -t 4,8,12 source.txt"
+        },
+        {
+          "flag": "-i",
+          "description": "Do not convert tabs after non-blank characters.",
+          "example": "expand -i Makefile"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Expand source tabs",
+          "command": "expand -t 4 source.txt",
+          "output": "int main(void) {\n    return 0;\n}",
+          "explanation": "Uses four-column tab stops."
+        },
+        {
+          "title": "Expand standard input",
+          "command": "printf '\\titem\\n' | expand",
+          "output": "        item",
+          "explanation": "Replaces the leading tab with spaces."
+        },
+        {
+          "title": "Preserve indentation semantics",
+          "command": "expand -i Makefile",
+          "output": "target: deps\n\tcommand",
+          "explanation": "Leaves tabs after non-blank characters unchanged."
+        }
+      ],
+      "useCases": [
+        "Normalizing text for review",
+        "Preparing source for tools without tab support",
+        "Inspecting indentation"
+      ],
+      "related": [
+        "column",
+        "fold",
+        "sed"
+      ],
+      "tags": [
+        "tabs",
+        "spaces",
+        "format"
+      ]
+    },
+    {
+      "slug": "rev",
+      "name": "rev",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Reverse characters on each line.",
+      "syntax": "rev [file...]",
+      "description": "Copies files to standard output with the characters in each line reversed.",
+      "options": [],
+      "examples": [
+        {
+          "title": "Reverse a word",
+          "command": "printf 'linux\\n' | rev",
+          "output": "xunil",
+          "explanation": "Reverses the characters without changing line order."
+        },
+        {
+          "title": "Reverse each record",
+          "command": "printf 'alpha\\nbeta\\n' | rev",
+          "output": "ahpla\nateb",
+          "explanation": "Processes every input line independently."
+        },
+        {
+          "title": "Inspect a reversed field",
+          "command": "printf 'abc:def\\n' | rev",
+          "output": "fed:cba",
+          "explanation": "Reverses the complete line, including punctuation."
+        }
+      ],
+      "useCases": [
+        "Simple text transformations",
+        "Testing palindrome logic",
+        "Inspecting reversed records"
+      ],
+      "related": [
+        "tr",
+        "tac",
+        "awk",
+        "sed"
+      ],
+      "tags": [
+        "reverse",
+        "characters",
+        "text"
+      ]
+    },
+    {
+      "slug": "egrep",
+      "name": "egrep",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Search text using extended regular expressions.",
+      "syntax": "egrep [OPTION]... PATTERNS [FILE]...",
+      "description": "Historical name for grep -E; searches using extended regular expressions. Prefer grep -E in new scripts.",
+      "options": [
+        {
+          "flag": "-i",
+          "description": "Ignore case distinctions.",
+          "example": "egrep -i 'warning|error' app.log"
+        },
+        {
+          "flag": "-n",
+          "description": "Prefix matching lines with line numbers.",
+          "example": "egrep -n '^(GET|POST) ' access.log"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Find warnings or errors",
+          "command": "egrep -i 'warning|error' app.log",
+          "output": "warning: cache miss\nERROR: request failed",
+          "explanation": "Uses alternation in an extended regular expression."
+        },
+        {
+          "title": "Match HTTP methods",
+          "command": "egrep -n '^(GET|POST) ' access.log",
+          "output": "4:GET /health\n9:POST /login",
+          "explanation": "Matches either method at the beginning of a line."
+        },
+        {
+          "title": "Count matching lines",
+          "command": "egrep -c '^#' config.ini",
+          "output": "8",
+          "explanation": "Counts comment lines."
+        }
+      ],
+      "useCases": [
+        "Searching logs with alternation",
+        "Filtering structured text",
+        "Maintaining older shell scripts"
+      ],
+      "related": [
+        "grep",
+        "fgrep",
+        "sed",
+        "awk"
+      ],
+      "tags": [
+        "regex",
+        "search",
+        "text"
+      ]
+    },
+    {
+      "slug": "fgrep",
+      "name": "fgrep",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Search for fixed strings without regular expressions.",
+      "syntax": "fgrep [OPTION]... PATTERNS [FILE]...",
+      "description": "Historical name for grep -F; treats patterns as literal strings. Prefer grep -F in new scripts.",
+      "options": [
+        {
+          "flag": "-i",
+          "description": "Ignore case distinctions.",
+          "example": "fgrep -i 'connection refused' app.log"
+        },
+        {
+          "flag": "-n",
+          "description": "Prefix matching lines with line numbers.",
+          "example": "fgrep -n 'TODO[' source.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Find a literal message",
+          "command": "fgrep 'connection refused' app.log",
+          "output": "2026-10-12 connection refused from 192.0.2.4",
+          "explanation": "Searches the exact phrase without regex interpretation."
+        },
+        {
+          "title": "Match regex punctuation literally",
+          "command": "fgrep 'TODO[' source.txt",
+          "output": "TODO[review]",
+          "explanation": "Treats the opening bracket as an ordinary character."
+        },
+        {
+          "title": "Read patterns from a file",
+          "command": "fgrep -f needles.txt report.txt",
+          "output": "service: ssh\nservice: nginx",
+          "explanation": "Uses each line of needles.txt as a fixed pattern."
+        }
+      ],
+      "useCases": [
+        "Searching literal messages",
+        "Matching user-provided text safely",
+        "Filtering logs with punctuation"
+      ],
+      "related": [
+        "grep",
+        "egrep",
+        "sed",
+        "cut"
+      ],
+      "tags": [
+        "fixed-string",
+        "search",
+        "text"
+      ]
+    },
+    {
+      "slug": "ripgrep",
+      "name": "ripgrep",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Fast recursive search tool for code and text.",
+      "syntax": "rg [OPTIONS] PATTERN [PATH ...]",
+      "description": "Searches recursively while respecting ignore files and presenting concise, colored results.",
+      "options": [
+        {
+          "flag": "-n",
+          "description": "Show line numbers.",
+          "example": "rg -n 'TODO' src/"
+        },
+        {
+          "flag": "-g GLOB",
+          "description": "Include or exclude files matching a glob.",
+          "example": "rg -g '*.ts' 'fetch\\(' src/"
+        },
+        {
+          "flag": "-i",
+          "description": "Ignore case distinctions.",
+          "example": "rg -i 'timeout' logs/"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Search source recursively",
+          "command": "rg -n 'TODO' src/",
+          "output": "src/App.tsx:42: // TODO: add loading state",
+          "explanation": "Finds matches while honoring project ignore files."
+        },
+        {
+          "title": "Search only TypeScript",
+          "command": "rg -g '*.ts' 'fetch\\(' src/",
+          "output": "src/services/api.ts:4:const response = await fetch(url);",
+          "explanation": "Restricts the search to matching files."
+        },
+        {
+          "title": "Search case-insensitively",
+          "command": "rg -i 'timeout' logs/",
+          "output": "logs/app.log:18:request timeout after 5s",
+          "explanation": "Matches any capitalization of the term."
+        }
+      ],
+      "useCases": [
+        "Searching source trees",
+        "Finding configuration references",
+        "Inspecting logs quickly"
+      ],
+      "related": [
+        "grep",
+        "find",
+        "sed"
+      ],
+      "tags": [
+        "search",
+        "regex",
+        "code"
+      ]
+    },
+    {
+      "slug": "jq",
+      "name": "jq",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Process JSON data from the command line.",
+      "syntax": "jq [options] filter [files...]",
+      "description": "Parses JSON and transforms it with a filter language, producing valid JSON or raw text output.",
+      "options": [
+        {
+          "flag": "-r",
+          "description": "Output strings without JSON quotes.",
+          "example": "jq -r '.name' package.json"
+        },
+        {
+          "flag": "-c",
+          "description": "Print compact JSON output.",
+          "example": "jq -c '.items[]' data.json"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Read a JSON field",
+          "command": "printf '{\"name\":\"LinuxDocs\"}\\n' | jq -r '.name'",
+          "output": "LinuxDocs",
+          "explanation": "Extracts a string as plain text."
+        },
+        {
+          "title": "List array values",
+          "command": "printf '{\"items\":[1,2]}\\n' | jq '.items[]'",
+          "output": "1\n2",
+          "explanation": "Iterates over each array element."
+        },
+        {
+          "title": "Select objects",
+          "command": "jq '.users[] | select(.active == true) | .email' users.json",
+          "output": "\"alice@example.test\"",
+          "explanation": "Filters objects and selects a field."
+        }
+      ],
+      "useCases": [
+        "Inspecting API responses",
+        "Transforming configuration JSON",
+        "Filtering structured logs"
+      ],
+      "related": [
+        "yq",
+        "grep",
+        "sort",
+        "column"
+      ],
+      "tags": [
+        "json",
+        "data",
+        "query"
+      ]
+    },
+    {
+      "slug": "yq",
+      "name": "yq",
+      "category": "text-processing",
+      "section": "linux",
+      "summary": "Process YAML and related structured data.",
+      "syntax": "yq [options] <filter> [file...]",
+      "description": "Reads and transforms YAML using a jq-like expression language while preserving structured data semantics.",
+      "options": [
+        {
+          "flag": "-r",
+          "description": "Output scalar strings without quotes.",
+          "example": "yq -r '.server.host' config.yml"
+        },
+        {
+          "flag": "-i",
+          "description": "Edit files in place.",
+          "example": "yq -i '.server.port = 8080' config.yml"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Read a YAML value",
+          "command": "printf 'server:\\n  host: localhost\\n' | yq -r '.server.host'",
+          "output": "localhost",
+          "explanation": "Extracts a nested scalar from YAML."
+        },
+        {
+          "title": "List YAML array entries",
+          "command": "yq '.services[].name' compose.yml",
+          "output": "api\nworker",
+          "explanation": "Iterates over service objects."
+        },
+        {
+          "title": "Update a configuration file",
+          "command": "yq -i '.server.port = 8080' config.yml",
+          "output": "",
+          "explanation": "Edits the YAML file in place."
+        }
+      ],
+      "useCases": [
+        "Inspecting deployment YAML",
+        "Updating configuration in scripts",
+        "Converting structured data"
+      ],
+      "related": [
+        "jq",
+        "grep",
+        "sed",
+        "sort"
+      ],
+      "tags": [
+        "yaml",
+        "data",
+        "query"
+      ]
     }
   ],
   "needsHumanReview": [
@@ -4691,6 +5949,7 @@
     "whois",
     "adb",
     "apktool",
-    "trivy"
+    "trivy",
+    "rev"
   ]
 }
