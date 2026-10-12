@@ -18,6 +18,7 @@ interface AuthContextType {
   saveNote: (slug: string, text: string) => Promise<void>;
   deleteNote: (slug: string) => Promise<void>;
   addHistory: (slug: string) => Promise<void>;
+  importData: (data: { bookmarks: string[]; notes: { command_slug: string; text: string }[] }) => Promise<void>;
   changePassword: (data: { current_password: string; new_password: string; confirm_password: string }) => Promise<{ errors?: Record<string, string> }>;
   deleteAccount: (confirm: string) => Promise<{ errors?: Record<string, string> }>;
 }
@@ -157,6 +158,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const importData = async (data: { bookmarks: string[]; notes: { command_slug: string; text: string }[] }) => {
+    if (!user) return;
+    await userApi.importData(data);
+    await refreshUserData();
+  };
+
   const changePassword = async (data: { current_password: string; new_password: string; confirm_password: string }) => {
     try {
       await userApi.changePassword(data);
@@ -193,6 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         saveNote,
         deleteNote,
         addHistory,
+        importData,
         changePassword,
         deleteAccount,
       }}

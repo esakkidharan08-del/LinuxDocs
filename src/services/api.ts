@@ -110,6 +110,9 @@ export const userApi = {
       body: JSON.stringify({ command_slug: commandSlug }),
     }),
 
+  importData: (data: { bookmarks: string[]; notes: { command_slug: string; text: string }[] }) =>
+    request<{ message: string }>('/user/data/import', { method: 'POST', body: JSON.stringify(data) }),
+
   changePassword: (data: { current_password: string; new_password: string; confirm_password: string }) =>
     request<{ message: string }>('/user/change-password', {
       method: 'POST',

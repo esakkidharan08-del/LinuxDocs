@@ -117,6 +117,36 @@ def add_history():
     return jsonify({'message': 'Recorded'}), 200
 
 
+@user_bp.route('/data/import', methods=['POST'])
+@jwt_required()
+def import_data():
+    user_id = get_jwt_identity()
+    data = request.get_json(silent=True) or {}
+    bookmarks = data.get('bookmarks', [])
+    notes = data.get('notes', [])
+    if not isinstance(bookmarks, list) or not isinstance(notes, list):
+        return jsonify({'error': 'bookmarks and notes must be arrays'}), 400
+    for slug in bookmarks:
+        if isinstance(slug, str) and slug.strip():
+            existing = Bookmark.query.filter_by(user_id=user_id, command_slug=slug.strip()).first()
+            if not existing:
+                db.session.add(Bookmark(user_id=user_id, command_slug=slug.strip()))
+    for item in notes:
+        if not isinstance(item, dict) or not isinstance(item.get('command_slug'), str) or not isinstance(item.get('text'), str):
+            continue
+        slug = item['command_slug'].strip()
+        text = item['text'].strip()
+        if not slug or not text or len(text) > 10000:
+            continue
+        note = UserNote.query.filter_by(user_id=user_id, command_slug=slug).first()
+        if note:
+            note.text = text
+        else:
+            db.session.add(UserNote(user_id=user_id, command_slug=slug, text=text))
+    db.session.commit()
+    return jsonify({'message': 'Data imported'}), 200
+
+
 # --- CHANGE PASSWORD ---
 @user_bp.route('/change-password', methods=['POST'])
 @jwt_required()
