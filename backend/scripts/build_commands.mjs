@@ -148,10 +148,13 @@ const permissions = [
     related: ['chattr', 'stat', 'ls', 'getfacl'], tags: ['filesystem', 'attributes', 'audit']
   }
 ];
+const existingSlugs = new Set(sandbox.result.commands.map((command) => command.slug));
+const files = JSON.parse(fs.readFileSync(path.join(root, 'backend', 'data', 'batch2.json'), 'utf8'))
+  .filter((command) => !existingSlugs.has(command.slug));
 
 const categories = sandbox.result.categories;
 const domains = sandbox.result.domains;
-const commands = [...sandbox.result.commands.filter((command) => command.section === 'linux' || command.section === 'ctf'), ...permissions];
+const commands = [...sandbox.result.commands.filter((command) => command.section === 'linux' || command.section === 'ctf'), ...permissions, ...files];
 const knownSlugs = new Set(commands.map((command) => command.slug));
 const needsHumanReview = [];
 for (const command of commands) {

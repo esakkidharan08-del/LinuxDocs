@@ -3302,7 +3302,8 @@
       "related": [
         "chmod",
         "touch",
-        "mkdir"
+        "mkdir",
+        "stat"
       ],
       "tags": [
         "permissions",
@@ -3420,6 +3421,7 @@
       "related": [
         "setfacl",
         "ls",
+        "stat",
         "chmod"
       ],
       "tags": [
@@ -3480,7 +3482,8 @@
       ],
       "related": [
         "lsattr",
-        "chmod"
+        "chmod",
+        "stat"
       ],
       "tags": [
         "filesystem",
@@ -3535,6 +3538,7 @@
       ],
       "related": [
         "chattr",
+        "stat",
         "ls",
         "getfacl"
       ],
@@ -3542,6 +3546,1092 @@
         "filesystem",
         "attributes",
         "audit"
+      ]
+    },
+    {
+      "slug": "more",
+      "name": "more",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Page through text one screen at a time.",
+      "syntax": "more [options] file...",
+      "description": "Displays text files a screen at a time and pauses when the terminal is full.",
+      "options": [
+        {
+          "flag": "-d",
+          "description": "Prompt with helpful navigation text.",
+          "example": "more -d README.md"
+        },
+        {
+          "flag": "-s",
+          "description": "Squeeze multiple blank lines into one.",
+          "example": "more -s notes.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Read a manual page file",
+          "command": "more README.md",
+          "output": "--More--(12%)",
+          "explanation": "Opens README.md in a simple terminal pager."
+        },
+        {
+          "title": "Squeeze blank lines",
+          "command": "more -s notes.txt",
+          "output": "Project notes\n\nNext task: review permissions",
+          "explanation": "Reduces runs of blank lines while paging."
+        },
+        {
+          "title": "Use helpful prompts",
+          "command": "more -d CHANGELOG",
+          "output": "--More--(34%) [Press space to continue, q to quit.]",
+          "explanation": "Shows navigation guidance while viewing the changelog."
+        }
+      ],
+      "useCases": [
+        "Reading files without opening an editor",
+        "Reviewing long command output",
+        "Paging logs over a remote shell"
+      ],
+      "related": [
+        "less",
+        "cat",
+        "head",
+        "tail"
+      ],
+      "tags": [
+        "pager",
+        "text",
+        "terminal"
+      ]
+    },
+    {
+      "slug": "tac",
+      "name": "tac",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Concatenate files in reverse line order.",
+      "syntax": "tac [OPTION]... [FILE]...",
+      "description": "Writes each file to standard output with the last line first.",
+      "options": [
+        {
+          "flag": "-s STRING",
+          "description": "Use STRING as the record separator.",
+          "example": "tac -s ':' /etc/passwd"
+        },
+        {
+          "flag": "-r",
+          "description": "Treat the separator as a regular expression.",
+          "example": "tac -r -s '[[:space:]]' report.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Read the newest log line first",
+          "command": "tac app.log | head -n 3",
+          "output": "2026-10-12 INFO shutdown\n2026-10-12 INFO request complete\n2026-10-12 INFO server started",
+          "explanation": "Reverses a log before limiting the output."
+        },
+        {
+          "title": "Reverse a short list",
+          "command": "printf 'one\\ntwo\\nthree\\n' | tac",
+          "output": "three\ntwo\none",
+          "explanation": "Prints lines from bottom to top."
+        },
+        {
+          "title": "Inspect reverse passwd order",
+          "command": "tac /etc/passwd | head -n 1",
+          "output": "backup:x:998:998:backup:/var/backups:/usr/sbin/nologin",
+          "explanation": "Shows the final record first."
+        }
+      ],
+      "useCases": [
+        "Inspecting newest log entries",
+        "Reversing line-oriented reports",
+        "Processing records from the end"
+      ],
+      "related": [
+        "tail",
+        "cat",
+        "head"
+      ],
+      "tags": [
+        "reverse",
+        "lines",
+        "text"
+      ]
+    },
+    {
+      "slug": "nl",
+      "name": "nl",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Number lines of files.",
+      "syntax": "nl [OPTION]... [FILE]...",
+      "description": "Writes files to standard output with configurable line numbering.",
+      "options": [
+        {
+          "flag": "-b a",
+          "description": "Number all lines, including blank lines.",
+          "example": "nl -b a config.ini"
+        },
+        {
+          "flag": "-ba",
+          "description": "Equivalent shorthand for numbering all lines.",
+          "example": "nl -ba script.sh"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Number source lines",
+          "command": "nl script.sh",
+          "output": "     1  #!/bin/sh\n     2  echo ready",
+          "explanation": "Adds numbers to non-empty lines by default."
+        },
+        {
+          "title": "Number blank lines too",
+          "command": "nl -ba config.ini",
+          "output": "     1  [server]\n     2\n     3  port=8080",
+          "explanation": "Makes every line addressable during review."
+        },
+        {
+          "title": "Number a pipeline",
+          "command": "printf 'alpha\\nbeta\\n' | nl -ba",
+          "output": "     1  alpha\n     2  beta",
+          "explanation": "Numbers standard input as well as files."
+        }
+      ],
+      "useCases": [
+        "Referencing source lines",
+        "Reviewing configuration files",
+        "Creating readable diagnostics"
+      ],
+      "related": [
+        "cat",
+        "less",
+        "head",
+        "tail"
+      ],
+      "tags": [
+        "line-numbers",
+        "text",
+        "review"
+      ]
+    },
+    {
+      "slug": "od",
+      "name": "od",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Dump files in octal and other formats.",
+      "syntax": "od [OPTION]... [FILE]...",
+      "description": "Displays file contents as numeric bytes, words, characters, or other representations.",
+      "options": [
+        {
+          "flag": "-An",
+          "description": "Suppress the offset field.",
+          "example": "od -An -t x1 image.bin"
+        },
+        {
+          "flag": "-t TYPE",
+          "description": "Select the output type, such as x1 for hexadecimal bytes.",
+          "example": "od -t x1 header.bin"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Inspect hexadecimal bytes",
+          "command": "printf 'Hi\\n' | od -An -t x1",
+          "output": " 48 69 0a",
+          "explanation": "Displays the byte values for a short string."
+        },
+        {
+          "title": "Inspect a binary header",
+          "command": "od -Ax -t x1 firmware.bin | head -n 2",
+          "output": "000000 7f 45 4c 46 02 01 01 00\n000008 00 00 00 00 00 00 00 00",
+          "explanation": "Shows offsets and hexadecimal bytes."
+        },
+        {
+          "title": "Display octal values",
+          "command": "printf '\\001\\002' | od -b",
+          "output": "0000000 001 002\n0000002",
+          "explanation": "Uses traditional octal byte output."
+        }
+      ],
+      "useCases": [
+        "Inspecting binary headers",
+        "Comparing raw byte sequences",
+        "Debugging file formats"
+      ],
+      "related": [
+        "xxd",
+        "hexdump",
+        "file",
+        "strings"
+      ],
+      "tags": [
+        "binary",
+        "bytes",
+        "hex"
+      ]
+    },
+    {
+      "slug": "xxd",
+      "name": "xxd",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Make a hexadecimal dump or reverse it.",
+      "syntax": "xxd [options] [infile [outfile]]",
+      "description": "Creates a hexadecimal representation of a file and can convert a hexadecimal dump back to binary.",
+      "options": [
+        {
+          "flag": "-r",
+          "description": "Reverse a hexadecimal dump into binary.",
+          "example": "xxd -r dump.hex restored.bin"
+        },
+        {
+          "flag": "-l LEN",
+          "description": "Stop after LEN bytes.",
+          "example": "xxd -l 64 image.bin"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Dump a file header",
+          "command": "xxd -l 16 image.bin",
+          "output": "00000000: 8950 4e47 0d0a 1a0a 0000 000d 4948 4452  .PNG........IHDR",
+          "explanation": "Shows the first 16 bytes with offsets and printable text."
+        },
+        {
+          "title": "Create a reversible dump",
+          "command": "printf 'hello\\n' | xxd",
+          "output": "00000000: 6865 6c6c 6f0a                           hello.",
+          "explanation": "Converts standard input to hexadecimal."
+        },
+        {
+          "title": "Restore bytes",
+          "command": "printf '6869 0a\\n' | xxd -r -p",
+          "output": "hi",
+          "explanation": "Reverses a plain hexadecimal stream."
+        }
+      ],
+      "useCases": [
+        "Inspecting binary files",
+        "Making reviewable hex patches",
+        "Checking file signatures"
+      ],
+      "related": [
+        "od",
+        "hexdump",
+        "file",
+        "strings"
+      ],
+      "tags": [
+        "hex",
+        "binary",
+        "dump"
+      ]
+    },
+    {
+      "slug": "hexdump",
+      "name": "hexdump",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Display file contents in hexadecimal and other formats.",
+      "syntax": "hexdump [options] file...",
+      "description": "Displays file contents in a user-specified format, commonly as hexadecimal bytes with an ASCII column.",
+      "options": [
+        {
+          "flag": "-C",
+          "description": "Canonical hex plus ASCII display.",
+          "example": "hexdump -C packet.bin"
+        },
+        {
+          "flag": "-n LENGTH",
+          "description": "Interpret only LENGTH input bytes.",
+          "example": "hexdump -C -n 32 image.bin"
+        }
+      ],
+      "examples": [
+        {
+          "title": "View a binary header",
+          "command": "hexdump -C -n 16 image.bin",
+          "output": "00000000  89 50 4e 47 0d 0a 1a 0a  00 00 00 0d 49 48 44 52  |.PNG........IHDR|",
+          "explanation": "Uses canonical output for quick signature inspection."
+        },
+        {
+          "title": "Inspect a packet capture fragment",
+          "command": "hexdump -C packet.bin | head -n 2",
+          "output": "00000000  45 00 00 3c 1c 46 40 00  40 06 a6 ec c0 a8 01 02  |E..<.F@.@.......|",
+          "explanation": "Shows raw bytes alongside printable characters."
+        },
+        {
+          "title": "Read decimal bytes",
+          "command": "printf 'ABC' | hexdump -v -e '1/1 \"%u \"'",
+          "output": "65 66 67",
+          "explanation": "Uses a format string to print unsigned byte values."
+        }
+      ],
+      "useCases": [
+        "Inspecting binary formats",
+        "Reviewing packet bytes",
+        "Comparing raw data"
+      ],
+      "related": [
+        "xxd",
+        "od",
+        "file",
+        "strings"
+      ],
+      "tags": [
+        "hex",
+        "binary",
+        "inspection"
+      ]
+    },
+    {
+      "slug": "file",
+      "name": "file",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Determine file type from its contents.",
+      "syntax": "file [OPTION...] [FILE...]",
+      "description": "Classifies files using filesystem tests, magic numbers, and language or encoding checks.",
+      "options": [
+        {
+          "flag": "-b",
+          "description": "Do not prepend file names to output.",
+          "example": "file -b archive.tar"
+        },
+        {
+          "flag": "-i",
+          "description": "Print MIME type information.",
+          "example": "file -i upload.bin"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Identify an archive",
+          "command": "file backup.tar.gz",
+          "output": "backup.tar.gz: gzip compressed data, original size modulo 2^32 10240",
+          "explanation": "Reports the detected compression format."
+        },
+        {
+          "title": "Inspect MIME type",
+          "command": "file -i image.png",
+          "output": "image.png: image/png; charset=binary",
+          "explanation": "Prints a MIME-oriented classification."
+        },
+        {
+          "title": "Classify standard input",
+          "command": "printf '#!/bin/sh\\necho ok\\n' | file -",
+          "output": "/dev/stdin: POSIX shell script, ASCII text executable",
+          "explanation": "Reads content from standard input when given a dash."
+        }
+      ],
+      "useCases": [
+        "Checking uploads before processing",
+        "Identifying unknown artifacts",
+        "Verifying generated files"
+      ],
+      "related": [
+        "stat",
+        "xxd",
+        "strings",
+        "ls"
+      ],
+      "tags": [
+        "file-type",
+        "mime",
+        "inspection"
+      ]
+    },
+    {
+      "slug": "stat",
+      "name": "stat",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Display file or filesystem status.",
+      "syntax": "stat [OPTION]... FILE...",
+      "description": "Reports metadata such as permissions, ownership, size, timestamps, and inode information.",
+      "options": [
+        {
+          "flag": "-c FORMAT",
+          "description": "Use a custom output format.",
+          "example": "stat -c '%n %s bytes %a' report.txt"
+        },
+        {
+          "flag": "-f",
+          "description": "Report filesystem status instead of file status.",
+          "example": "stat -f /var/log"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Inspect file metadata",
+          "command": "stat report.txt",
+          "output": "  File: report.txt\n  Size: 128\tBlocks: 8\tIO Block: 4096 regular file\nAccess: (0644/-rw-r--r--)  Uid: (1000/alice)",
+          "explanation": "Shows standard metadata in a readable report."
+        },
+        {
+          "title": "Print selected fields",
+          "command": "stat -c '%n %s %a' report.txt",
+          "output": "report.txt 128 644",
+          "explanation": "Formats the name, size, and mode for scripts."
+        },
+        {
+          "title": "Inspect filesystem status",
+          "command": "stat -f /var/log",
+          "output": "  File: /var/log\n    ID: 7b4c... Namelen: 255 Type: ext2/ext3",
+          "explanation": "Reports filesystem-level information."
+        }
+      ],
+      "useCases": [
+        "Auditing timestamps and modes",
+        "Writing metadata checks",
+        "Inspecting filesystem capacity details"
+      ],
+      "related": [
+        "ls",
+        "file",
+        "chmod",
+        "chown"
+      ],
+      "tags": [
+        "metadata",
+        "inode",
+        "filesystem"
+      ]
+    },
+    {
+      "slug": "ln",
+      "name": "ln",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Create links between files.",
+      "syntax": "ln [OPTION]... [-T] TARGET LINK_NAME",
+      "description": "Creates hard links or symbolic links to files and directories.",
+      "options": [
+        {
+          "flag": "-s",
+          "description": "Create a symbolic link instead of a hard link.",
+          "example": "ln -s /opt/app/current app"
+        },
+        {
+          "flag": "-f",
+          "description": "Remove existing destination files before linking.",
+          "example": "ln -sf release-2 current"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Create a symbolic link",
+          "command": "ln -s /var/log/app.log app.log",
+          "output": "",
+          "explanation": "Creates a convenient path to the log file."
+        },
+        {
+          "title": "Create a hard link",
+          "command": "ln report.txt report.backup",
+          "output": "",
+          "explanation": "Creates another directory entry for the same file data."
+        },
+        {
+          "title": "Update a release pointer",
+          "command": "ln -sfn release-2 current",
+          "output": "",
+          "explanation": "Replaces a symbolic link with a new target."
+        }
+      ],
+      "useCases": [
+        "Maintaining release pointers",
+        "Creating alternate file names",
+        "Exposing logs at stable paths"
+      ],
+      "related": [
+        "readlink",
+        "realpath",
+        "cp",
+        "mv"
+      ],
+      "tags": [
+        "links",
+        "symlink",
+        "filesystem"
+      ]
+    },
+    {
+      "slug": "readlink",
+      "name": "readlink",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Read the value of a symbolic link.",
+      "syntax": "readlink [OPTION]... FILE...",
+      "description": "Prints a symbolic link target or resolves a path according to the selected option.",
+      "options": [
+        {
+          "flag": "-f",
+          "description": "Canonicalize by following every symlink and resolving components.",
+          "example": "readlink -f current"
+        },
+        {
+          "flag": "-e",
+          "description": "Canonicalize and require every component to exist.",
+          "example": "readlink -e config"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Print a link target",
+          "command": "readlink current",
+          "output": "release-2",
+          "explanation": "Displays the target stored in the symbolic link."
+        },
+        {
+          "title": "Resolve an absolute path",
+          "command": "readlink -f ./current/bin/app",
+          "output": "/srv/releases/release-2/bin/app",
+          "explanation": "Follows links and normalizes path components."
+        },
+        {
+          "title": "Resolve an existing path",
+          "command": "readlink -e /etc/alternatives/editor",
+          "output": "/usr/bin/vim.basic",
+          "explanation": "Requires the resolved path to exist."
+        }
+      ],
+      "useCases": [
+        "Inspecting release links",
+        "Normalizing paths in scripts",
+        "Troubleshooting alternatives"
+      ],
+      "related": [
+        "ln",
+        "realpath",
+        "basename",
+        "dirname"
+      ],
+      "tags": [
+        "symlink",
+        "path",
+        "resolve"
+      ]
+    },
+    {
+      "slug": "basename",
+      "name": "basename",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Strip directory and suffix components from a path.",
+      "syntax": "basename NAME [SUFFIX]",
+      "description": "Prints the final component of a pathname, optionally removing a matching suffix.",
+      "options": [
+        {
+          "flag": "-a",
+          "description": "Support multiple names.",
+          "example": "basename -a /tmp/a.txt /tmp/b.txt"
+        },
+        {
+          "flag": "-s SUFFIX",
+          "description": "Remove a trailing SUFFIX from each name.",
+          "example": "basename -s .log app.log db.log"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Get a filename",
+          "command": "basename /var/log/nginx/access.log",
+          "output": "access.log",
+          "explanation": "Extracts the final path component."
+        },
+        {
+          "title": "Remove a suffix",
+          "command": "basename /tmp/report.csv .csv",
+          "output": "report",
+          "explanation": "Removes the specified suffix from the result."
+        },
+        {
+          "title": "Process several paths",
+          "command": "basename -a /tmp/a.txt /tmp/b.txt",
+          "output": "a.txt\nb.txt",
+          "explanation": "Prints one basename per input name."
+        }
+      ],
+      "useCases": [
+        "Naming output files in scripts",
+        "Extracting extensions safely",
+        "Building command-line messages"
+      ],
+      "related": [
+        "dirname",
+        "realpath",
+        "readlink",
+        "split"
+      ],
+      "tags": [
+        "path",
+        "filename",
+        "shell"
+      ]
+    },
+    {
+      "slug": "dirname",
+      "name": "dirname",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Strip the final component from a pathname.",
+      "syntax": "dirname NAME...",
+      "description": "Prints the directory portion of each pathname.",
+      "options": [
+        {
+          "flag": "-z",
+          "description": "End each output line with NUL instead of newline.",
+          "example": "dirname -z /srv/app/file"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Get a parent directory",
+          "command": "dirname /var/log/nginx/access.log",
+          "output": "/var/log/nginx",
+          "explanation": "Removes the final filename component."
+        },
+        {
+          "title": "Process multiple paths",
+          "command": "dirname /tmp/a /srv/app/b",
+          "output": "/tmp\n/srv/app",
+          "explanation": "Prints one parent directory for each input."
+        },
+        {
+          "title": "Use NUL-delimited output",
+          "command": "dirname -z /tmp/report.txt | od -An -t x1",
+          "output": " 2f 74 6d 70 00",
+          "explanation": "Uses NUL termination for robust pipelines."
+        }
+      ],
+      "useCases": [
+        "Creating parent directories",
+        "Splitting paths in scripts",
+        "Handling filenames with whitespace"
+      ],
+      "related": [
+        "basename",
+        "realpath",
+        "readlink",
+        "mkdir"
+      ],
+      "tags": [
+        "path",
+        "directory",
+        "shell"
+      ]
+    },
+    {
+      "slug": "realpath",
+      "name": "realpath",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Print resolved absolute path names.",
+      "syntax": "realpath [OPTION]... FILE...",
+      "description": "Resolves symbolic links, relative components, and repeated separators to canonical path names.",
+      "options": [
+        {
+          "flag": "-e",
+          "description": "Require all path components to exist.",
+          "example": "realpath -e ./config/app.conf"
+        },
+        {
+          "flag": "-m",
+          "description": "Resolve components without requiring them to exist.",
+          "example": "realpath -m ./build/new/file"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Resolve a relative path",
+          "command": "realpath ./src/../README.md",
+          "output": "/home/alice/project/README.md",
+          "explanation": "Normalizes the path against the current directory."
+        },
+        {
+          "title": "Resolve a symlink",
+          "command": "realpath current",
+          "output": "/srv/releases/release-2",
+          "explanation": "Follows the release symlink to its target."
+        },
+        {
+          "title": "Resolve a future path",
+          "command": "realpath -m ./build/output.bin",
+          "output": "/home/alice/project/build/output.bin",
+          "explanation": "Produces a canonical path even when the final file is absent."
+        }
+      ],
+      "useCases": [
+        "Passing canonical paths to tools",
+        "Comparing paths reliably",
+        "Writing deployment scripts"
+      ],
+      "related": [
+        "readlink",
+        "dirname",
+        "basename",
+        "ln"
+      ],
+      "tags": [
+        "path",
+        "canonical",
+        "symlink"
+      ]
+    },
+    {
+      "slug": "tree",
+      "name": "tree",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Display directories as a tree.",
+      "syntax": "tree [options] [directory]",
+      "description": "Recursively lists directories and files in an indented tree format when installed.",
+      "options": [
+        {
+          "flag": "-L LEVEL",
+          "description": "Limit recursion to LEVEL directory levels.",
+          "example": "tree -L 2 project"
+        },
+        {
+          "flag": "-d",
+          "description": "List directories only.",
+          "example": "tree -d project"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Show a project tree",
+          "command": "tree -L 2 project",
+          "output": "project\n├── README.md\n├── src\n│   ├── main.ts\n│   └── util.ts",
+          "explanation": "Limits output to the first two levels."
+        },
+        {
+          "title": "List directories only",
+          "command": "tree -d /etc/nginx",
+          "output": "/etc/nginx\n├── conf.d\n└── sites-enabled",
+          "explanation": "Omits regular files from the display."
+        },
+        {
+          "title": "Count a small tree",
+          "command": "tree -L 1 -a project",
+          "output": "project\n├── .gitignore\n├── README.md\n└── src",
+          "explanation": "Includes hidden entries at one level."
+        }
+      ],
+      "useCases": [
+        "Exploring unfamiliar projects",
+        "Documenting directory layouts",
+        "Auditing configuration trees"
+      ],
+      "related": [
+        "find",
+        "ls",
+        "du",
+        "dirname"
+      ],
+      "tags": [
+        "tree",
+        "directory",
+        "listing"
+      ]
+    },
+    {
+      "slug": "dd",
+      "name": "dd",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Copy and convert raw data streams.",
+      "syntax": "dd [OPERAND]...",
+      "description": "Copies data using configurable block sizes and conversions; use carefully because it writes raw devices without confirmation.",
+      "options": [
+        {
+          "flag": "if=FILE",
+          "description": "Read from FILE instead of standard input.",
+          "example": "dd if=boot.img of=backup.img"
+        },
+        {
+          "flag": "bs=BYTES",
+          "description": "Read and write BYTES at a time.",
+          "example": "dd if=disk.img of=disk.copy bs=4M status=progress"
+        },
+        {
+          "flag": "status=progress",
+          "description": "Report transfer progress.",
+          "example": "dd if=image.iso of=/dev/sdb bs=4M status=progress"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Create a raw image copy",
+          "command": "dd if=boot.img of=boot.copy bs=4M status=progress",
+          "output": "16+0 records in\n16+0 records out\n67108864 bytes copied",
+          "explanation": "Copies an image using a larger block size and progress reporting."
+        },
+        {
+          "title": "Write a fixed-size zero file",
+          "command": "dd if=/dev/zero of=blank.bin bs=1M count=4 status=none",
+          "output": "",
+          "explanation": "Creates a four-megabyte file of zero bytes."
+        },
+        {
+          "title": "Inspect a boot signature",
+          "command": "dd if=disk.img bs=512 count=1 status=none | hexdump -C | head -n 1",
+          "output": "00000000  eb 63 90 4d 53 44 4f 53  35 2e 30 00 02 08 20 00  |.c.MSDOS5.0... .|",
+          "explanation": "Reads only the first sector for inspection."
+        }
+      ],
+      "useCases": [
+        "Making forensic images",
+        "Creating test files",
+        "Copying fixed-size data blocks"
+      ],
+      "related": [
+        "split",
+        "file",
+        "hexdump",
+        "xxd"
+      ],
+      "tags": [
+        "raw",
+        "copy",
+        "disk"
+      ]
+    },
+    {
+      "slug": "split",
+      "name": "split",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Split a file into fixed-size pieces.",
+      "syntax": "split [OPTION]... [FILE [PREFIX]]",
+      "description": "Writes consecutive sections of FILE to separate output files.",
+      "options": [
+        {
+          "flag": "-b SIZE",
+          "description": "Place SIZE bytes per output file.",
+          "example": "split -b 100M archive.tar part-"
+        },
+        {
+          "flag": "-l NUMBER",
+          "description": "Place NUMBER lines per output file.",
+          "example": "split -l 1000 access.log log-"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Split a large archive",
+          "command": "split -b 100M archive.tar archive.part-",
+          "output": "",
+          "explanation": "Creates 100-megabyte pieces with a stable prefix."
+        },
+        {
+          "title": "Split a log by line count",
+          "command": "split -l 1000 access.log access-",
+          "output": "",
+          "explanation": "Creates files containing at most 1000 lines each."
+        },
+        {
+          "title": "Reassemble pieces",
+          "command": "cat archive.part-* > archive.restored.tar",
+          "output": "",
+          "explanation": "Concatenates pieces in lexical order to restore the original stream."
+        }
+      ],
+      "useCases": [
+        "Transferring large files in pieces",
+        "Processing logs in parallel",
+        "Working around file-size limits"
+      ],
+      "related": [
+        "csplit",
+        "cat",
+        "dd"
+      ],
+      "tags": [
+        "split",
+        "files",
+        "transfer"
+      ]
+    },
+    {
+      "slug": "csplit",
+      "name": "csplit",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Split a file at context-defined boundaries.",
+      "syntax": "csplit [OPTION]... FILE PATTERN...",
+      "description": "Splits a file into sections at lines matching supplied patterns or line numbers.",
+      "options": [
+        {
+          "flag": "-f PREFIX",
+          "description": "Use PREFIX for output file names.",
+          "example": "csplit -f section- manual.txt '/^## /' '{*}'"
+        },
+        {
+          "flag": "-n DIGITS",
+          "description": "Use DIGITS digits in output suffixes.",
+          "example": "csplit -n 3 -f part- data.txt 20 40"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Split Markdown sections",
+          "command": "csplit -f section- manual.md '/^## /' '{*}'",
+          "output": "112\n245\n98",
+          "explanation": "Creates one file for each second-level heading boundary."
+        },
+        {
+          "title": "Split at line numbers",
+          "command": "csplit -f chunk- data.txt 20 40",
+          "output": "420\n515\n193",
+          "explanation": "Splits before the specified line numbers."
+        },
+        {
+          "title": "Discard output details",
+          "command": "csplit -s -f part- report.txt '/^END$/' '{*}'",
+          "output": "",
+          "explanation": "Silences byte-count output while splitting at END markers."
+        }
+      ],
+      "useCases": [
+        "Splitting structured reports",
+        "Separating document sections",
+        "Processing marker-delimited data"
+      ],
+      "related": [
+        "split",
+        "sed",
+        "awk",
+        "grep"
+      ],
+      "tags": [
+        "split",
+        "patterns",
+        "text"
+      ]
+    },
+    {
+      "slug": "shred",
+      "name": "shred",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Overwrite files to make data recovery harder.",
+      "syntax": "shred [OPTION]... FILE...",
+      "description": "Overwrites file contents repeatedly and optionally removes the file; effectiveness depends on the storage medium and filesystem.",
+      "options": [
+        {
+          "flag": "-n NUMBER",
+          "description": "Overwrite NUMBER times instead of the default.",
+          "example": "shred -n 3 old-secrets.txt"
+        },
+        {
+          "flag": "-u",
+          "description": "Remove the file after overwriting.",
+          "example": "shred -u old-secrets.txt"
+        },
+        {
+          "flag": "-z",
+          "description": "Add a final overwrite with zeros.",
+          "example": "shred -u -z old-secrets.txt"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Overwrite a temporary file",
+          "command": "shred -n 3 temporary.txt",
+          "output": "",
+          "explanation": "Performs three overwrite passes while retaining the file."
+        },
+        {
+          "title": "Overwrite and remove",
+          "command": "shred -u credentials.txt",
+          "output": "",
+          "explanation": "Overwrites and then unlinks the file."
+        },
+        {
+          "title": "Finish with zeros",
+          "command": "shred -u -z export.csv",
+          "output": "",
+          "explanation": "Adds a zero pass before removal to make the result less conspicuous."
+        }
+      ],
+      "useCases": [
+        "Handling disposable sensitive files",
+        "Cleaning temporary exports",
+        "Documenting limitations of file shredding"
+      ],
+      "related": [
+        "rm",
+        "truncate",
+        "dd",
+        "stat"
+      ],
+      "tags": [
+        "secure-delete",
+        "files",
+        "privacy"
+      ]
+    },
+    {
+      "slug": "truncate",
+      "name": "truncate",
+      "category": "file-and-directory",
+      "section": "linux",
+      "summary": "Shrink or extend a file to a specified size.",
+      "syntax": "truncate OPTION... FILE...",
+      "description": "Adjusts file sizes without changing file ownership or permissions; extending creates sparse regions when supported.",
+      "options": [
+        {
+          "flag": "-s SIZE",
+          "description": "Set or adjust the file size using SIZE notation.",
+          "example": "truncate -s 0 app.log"
+        },
+        {
+          "flag": "--no-create",
+          "description": "Do not create files that do not already exist.",
+          "example": "truncate --no-create -s 0 app.log"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Clear a log in place",
+          "command": "truncate -s 0 app.log",
+          "output": "",
+          "explanation": "Empties the log while preserving its path and metadata."
+        },
+        {
+          "title": "Limit a test file",
+          "command": "truncate -s 1M sample.bin",
+          "output": "",
+          "explanation": "Sets the file length to one mebibyte."
+        },
+        {
+          "title": "Extend a sparse file",
+          "command": "truncate -s 10G sparse.img",
+          "output": "",
+          "explanation": "Creates a logically large file without writing every block immediately."
+        }
+      ],
+      "useCases": [
+        "Rotating logs manually",
+        "Creating sparse test files",
+        "Adjusting fixture sizes"
+      ],
+      "related": [
+        "dd",
+        "stat",
+        "rm",
+        "shred"
+      ],
+      "tags": [
+        "files",
+        "size",
+        "sparse"
       ]
     }
   ],
