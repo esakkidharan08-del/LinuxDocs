@@ -85,6 +85,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onToggleSidebar })
             >
               CTF & Security
             </NavLink>
+            <NavLink to="/cheat-sheets" className={({ isActive }) => `px-3 py-1.5 rounded-md transition-colors ${isActive ? 'text-[var(--terminal-green)] bg-[var(--terminal-green-bg)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]'}`}>Cheat Sheets</NavLink>
+            <NavLink to="/learn" className={({ isActive }) => `px-3 py-1.5 rounded-md transition-colors ${isActive ? 'text-[var(--terminal-green)] bg-[var(--terminal-green-bg)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]'}`}>Learn</NavLink>
           </nav>
         </div>
 

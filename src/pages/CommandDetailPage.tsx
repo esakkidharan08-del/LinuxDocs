@@ -336,6 +336,9 @@ const saveTimeoutRef = useRef<number | null>(null);
               ))}
             </div>
           </div>
+          <p className="pt-2 text-xs text-[var(--text-muted)]">
+            Found an issue? <a href={`mailto:maintainers@linuxdocs.local?subject=${encodeURIComponent(`Correction: ${command.name}`)}&body=${encodeURIComponent(`Command: ${command.name}\nWhat should be corrected:\n`)}`} className="text-[var(--terminal-green)] hover:underline">Report a mistake</a>.
+          </p>
         </div>
 
         {/* Table of contents sidebar */}

@@ -1,17 +1,27 @@
 const API_BASE = '/api';
+let accessToken: string | null = null;
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+const setAccessToken = (token: string | null) => { accessToken = token; };
+
+async function request<T>(endpoint: string, options: RequestInit = {}, retry = true): Promise<T> {
+  const headers = new Headers(options.headers);
+  headers.set('Content-Type', 'application/json');
+  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
   const res = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   });
 
   const data = await res.json().catch(() => ({}));
 
+  if (res.status === 401 && retry && !endpoint.startsWith('/auth/')) {
+    try {
+      const refreshed = await request<{ access_token: string }>('/auth/refresh', { method: 'POST' }, false);
+      setAccessToken(refreshed.access_token);
+      return request<T>(endpoint, options, false);
+    } catch { setAccessToken(null); }
+  }
   if (!res.ok) {
     const error = new Error(data.error || 'Request failed') as Error & { 
       status: number; 
@@ -26,23 +36,35 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const authApi = {
-  register: (data: { username: string; email: string; password: string; confirm_password: string }) =>
-    request<{ user: User; access_token: string }>('/auth/register', {
+  register: async (data: { username: string; email: string; password: string; confirm_password: string }) => {
+    const response = await request<{ user: User; access_token: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
-    }),
+    });
+    setAccessToken(response.access_token);
+    return response;
+  },
 
-  login: (data: { email: string; password: string; remember?: boolean }) =>
-    request<{ user: User; access_token: string }>('/auth/login', {
+  login: async (data: { email: string; password: string; remember?: boolean }) => {
+    const response = await request<{ user: User; access_token: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
-    }),
+    });
+    setAccessToken(response.access_token);
+    return response;
+  },
 
-  refresh: () =>
-    request<{ access_token: string }>('/auth/refresh', { method: 'POST' }),
+  refresh: async () => {
+    const response = await request<{ access_token: string }>('/auth/refresh', { method: 'POST' }, false);
+    setAccessToken(response.access_token);
+    return response;
+  },
 
-  logout: () =>
-    request<{ message: string }>('/auth/logout', { method: 'POST' }),
+  logout: async () => {
+    const response = await request<{ message: string }>('/auth/logout', { method: 'POST' });
+    setAccessToken(null);
+    return response;
+  },
 
   me: () =>
     request<{ user: User }>('/auth/me'),

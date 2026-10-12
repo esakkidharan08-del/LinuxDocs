@@ -35,8 +35,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { user } = await authApi.me();
       setUser(user);
+      return user;
     } catch {
       setUser(null);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -54,7 +56,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [fetchUser]);
 
   const refreshUserData = useCallback(async () => {
-    if (!user) return;
     try {
       const [{ bookmarks: bm }, { notes: nt }, { history: hist }] = await Promise.all([
         userApi.getBookmarks(),
@@ -75,8 +76,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string, remember = true) => {
     try {
-      await authApi.login({ email, password, remember });
-      await fetchUser();
+      const response = await authApi.login({ email, password, remember });
+      setUser(response.user);
       await refreshUserData();
       return {};
     } catch (err: any) {
@@ -86,8 +87,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (data: { username: string; email: string; password: string; confirm_password: string }) => {
     try {
-      await authApi.register(data);
-      await fetchUser();
+      const response = await authApi.register(data);
+      setUser(response.user);
       await refreshUserData();
       return {};
     } catch (err: any) {
