@@ -19,6 +19,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { ExplainCommandPage } from './pages/ExplainCommandPage';
 import { PracticeTerminalPage } from './pages/PracticeTerminalPage';
 import { LearningPage } from './pages/LearningPage';
+import { CheatSheetsPage } from './pages/CheatSheetsPage';
 
 export function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -47,6 +48,7 @@ export function App() {
                   <Route path="/explain" element={<ExplainCommandPage />} />
                   <Route path="/practice-terminal" element={<PracticeTerminalPage />} />
                   <Route path="/learn" element={<LearningPage />} />
+                  <Route path="/cheat-sheets" element={<CheatSheetsPage />} />
                   <Route path="/linux/:categoryId" element={<CategoryPage />} />
                   <Route path="/linux/:categoryId/:slug" element={<CommandDetailPage />} />
                   <Route path="/ctf" element={<CTFHomePage />} />
