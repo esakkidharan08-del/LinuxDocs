@@ -14,7 +14,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items }) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 100;
+      const scrollPosition = window.scrollY + 120;
       for (let i = items.length - 1; i >= 0; i--) {
         const el = document.getElementById(items[i].id);
         if (el && el.offsetTop <= scrollPosition) {
@@ -25,7 +25,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items }) => {
       if (items.length > 0) setActiveId(items[0].id);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, [items]);
@@ -33,25 +33,30 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items }) => {
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="hidden xl:block w-64 shrink-0 pl-8 sticky top-24 self-start text-xs font-mono">
-      <div className="border-l border-[var(--border)] pl-4 py-1 space-y-2.5">
-        <span className="text-[11px] font-bold tracking-wider uppercase text-[var(--text-muted)] block mb-3">
-          On this page
-        </span>
-        {items.map((item) => (
-          <a
-            key={item.id}
-            href={`#${item.id}`}
-            className={`block transition-colors ${
-              activeId === item.id
-                ? 'text-[var(--terminal-green)] font-semibold -ml-[17px] pl-4 border-l-2 border-[var(--terminal-green)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text)]'
-            }`}
-          >
-            {item.label}
-          </a>
-        ))}
-      </div>
-    </div>
+    <nav aria-label="On this page" className="sticky top-24 hidden w-60 shrink-0 self-start pl-8 xl:block">
+      <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+        On this page
+      </p>
+      <ul className="space-y-2.5 border-l border-[var(--border)] pl-4 font-mono text-xs">
+        {items.map((item) => {
+          const isActive = activeId === item.id;
+          return (
+            <li key={item.id}>
+              <a
+                href={`#${item.id}`}
+                aria-current={isActive ? 'location' : undefined}
+                className={`block transition-colors ${
+                  isActive
+                    ? '-ml-[17px] border-l-2 border-[var(--terminal-green)] pl-4 font-semibold text-[var(--terminal-green)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text)]'
+                }`}
+              >
+                {item.label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 };

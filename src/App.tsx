@@ -1,85 +1,178 @@
-import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Footer } from './components/Footer';
-import { CommandPalette } from './components/CommandPalette';
-import { LandingPage } from './pages/LandingPage';
-import { CategoryPage } from './pages/CategoryPage';
-import { CommandDetailPage } from './pages/CommandDetailPage';
-import { CTFHomePage } from './pages/CTFHomePage';
-import { CTFDomainPage } from './pages/CTFDomainPage';
-import { NotFoundPage } from './pages/NotFoundPage';
-import { SignInPage } from './pages/SignInPage';
-import { SignUpPage } from './pages/SignUpPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { SettingsPage } from './pages/SettingsPage';
-import { ExplainCommandPage } from './pages/ExplainCommandPage';
-import { PracticeTerminalPage } from './pages/PracticeTerminalPage';
-import { LearningPage } from './pages/LearningPage';
-import { CheatSheetsPage } from './pages/CheatSheetsPage';
-import { ComparePage, CommandOfDayPage, ExportImportPage } from './pages/ToolsPages';
-import { PasswordResetPage } from './pages/PasswordResetPage';
+import { ShortcutsDialog } from './components/ShortcutsDialog';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { recordVisit } from './lib/streak';
 
-export function App() {
+/* Route-level code splitting: every page below is loaded on demand, so the
+   first paint only carries the shell + the page actually being visited.
+   The palette also loads on demand (it pulls the search index + fuse.js),
+   mounted only while open. IntroPage stays light (no heavy deps) but loads
+   lazily so returning visitors — who skip the intro — never download it. */
+const IntroPage = lazy(() => import('./pages/IntroPage').then((m) => ({ default: m.IntroPage })));
+const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
+const CategoryPage = lazy(() => import('./pages/CategoryPage').then((m) => ({ default: m.CategoryPage })));
+const CommandDetailPage = lazy(() => import('./pages/CommandDetailPage').then((m) => ({ default: m.CommandDetailPage })));
+const CTFHomePage = lazy(() => import('./pages/CTFHomePage').then((m) => ({ default: m.CTFHomePage })));
+const CTFDomainPage = lazy(() => import('./pages/CTFDomainPage').then((m) => ({ default: m.CTFDomainPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
+const SignInPage = lazy(() => import('./pages/SignInPage').then((m) => ({ default: m.SignInPage })));
+const SignUpPage = lazy(() => import('./pages/SignUpPage').then((m) => ({ default: m.SignUpPage })));
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const ExplainCommandPage = lazy(() => import('./pages/ExplainCommandPage').then((m) => ({ default: m.ExplainCommandPage })));
+const PracticeTerminalPage = lazy(() => import('./pages/PracticeTerminalPage').then((m) => ({ default: m.PracticeTerminalPage })));
+const LearningPage = lazy(() => import('./pages/LearningPage').then((m) => ({ default: m.LearningPage })));
+const FlashcardsPage = lazy(() => import('./pages/FlashcardsPage').then((m) => ({ default: m.FlashcardsPage })));
+const SpeedDrillPage = lazy(() => import('./pages/SpeedDrillPage').then((m) => ({ default: m.SpeedDrillPage })));
+const CheatSheetsPage = lazy(() => import('./pages/CheatSheetsPage').then((m) => ({ default: m.CheatSheetsPage })));
+const ComparePage = lazy(() => import('./pages/ToolsPages').then((m) => ({ default: m.ComparePage })));
+const CommandOfDayPage = lazy(() => import('./pages/ToolsPages').then((m) => ({ default: m.CommandOfDayPage })));
+const ExportImportPage = lazy(() => import('./pages/ToolsPages').then((m) => ({ default: m.ExportImportPage })));
+const PasswordResetPage = lazy(() => import('./pages/PasswordResetPage').then((m) => ({ default: m.PasswordResetPage })));
+const LegalPage = lazy(() => import('./pages/LegalPage').then((m) => ({ default: m.LegalPage })));
+const CommandPalette = lazy(() => import('./components/CommandPalette').then((m) => ({ default: m.CommandPalette })));
+
+/** Terminal-flavored placeholder shown while a route chunk loads. */
+const RouteFallback = () => (
+  <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-label="Loading page">
+    <span className="font-mono text-sm text-[var(--text-muted)]">
+      <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--terminal-green)] align-middle" />
+      loading module<span className="animate-pulse">_</span>
+    </span>
+  </div>
+);
+
+const INTRO_SEEN_KEY = 'linuxdocs_intro_seen';
+
+function introSeen() {
+  try {
+    return sessionStorage.getItem(INTRO_SEEN_KEY) === '1';
+  } catch {
+    return true; // no sessionStorage → never force the intro
+  }
+}
+
+function AppShell() {
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
+  /* daily streak: one record per app load */
   useEffect(() => {
+    recordVisit();
+  }, []);
+
+  const closeShortcuts = useCallback(() => setShortcutsOpen(false), []);
+
+  // The intro owns the '/' route on first visit (and always owns '/intro',
+  // e.g. "Replay intro" from the footer). Reading sessionStorage on every
+  // render guarantees the redirect flash stays away: when the intro finishes,
+  // it writes the flag and navigates back to '/', and this flips to the app.
+  const showIntro =
+    location.pathname === '/intro' || (location.pathname === '/' && !introSeen());
+
+  useEffect(() => {
+    if (showIntro) return;
     const handleShortcut = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); setSearchOpen(true); }
-      if (event.key === '?' && !['INPUT', 'TEXTAREA'].includes((event.target as HTMLElement)?.tagName)) { event.preventDefault(); setShortcutsOpen(true); }
+      const inField = ['INPUT', 'TEXTAREA'].includes((event.target as HTMLElement)?.tagName);
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+      if (event.key === '?' && !inField) {
+        event.preventDefault();
+        setShortcutsOpen(true);
+      }
     };
     window.addEventListener('keydown', handleShortcut);
     return () => window.removeEventListener('keydown', handleShortcut);
-  }, []);
+  }, [showIntro]);
 
+  if (showIntro) {
+    return (
+      <div className="relative flex min-h-screen flex-col bg-[var(--bg)] text-[var(--text)]">
+        <div className="noise-overlay" aria-hidden="true" />
+        <Suspense fallback={<div className="min-h-screen bg-[var(--bg)]" />}>
+          <IntroPage />
+        </Suspense>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex min-h-screen flex-col bg-[var(--bg)] text-[var(--text)] transition-colors">
+      <div className="noise-overlay" aria-hidden="true" />
+
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-[var(--terminal-green)] focus:px-4 focus:py-2 focus:font-mono focus:text-sm focus:font-semibold focus:text-[var(--bg)]"
+      >
+        Skip to content
+      </a>
+
+      <Header
+        onOpenSearch={() => setSearchOpen(true)}
+        onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+      />
+
+      <div className="relative flex flex-1">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        <main id="main" className="min-w-0 flex-1">
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/sign-in" element={<SignInPage />} />
+            <Route path="/sign-up" element={<SignUpPage />} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/explain" element={<ExplainCommandPage />} />
+            <Route path="/practice-terminal" element={<PracticeTerminalPage />} />
+            <Route path="/learn" element={<LearningPage />} />
+            <Route path="/flashcards" element={<FlashcardsPage />} />
+            <Route path="/speed-drill" element={<SpeedDrillPage />} />
+            <Route path="/cheat-sheets" element={<CheatSheetsPage />} />
+            <Route path="/compare" element={<ComparePage />} />
+            <Route path="/command-of-the-day" element={<CommandOfDayPage />} />
+            <Route path="/export-import" element={<ExportImportPage />} />
+            <Route path="/password-reset" element={<PasswordResetPage />} />
+            <Route path="/privacy" element={<LegalPage />} />
+            <Route path="/terms" element={<LegalPage />} />
+            <Route path="/linux/:categoryId" element={<CategoryPage />} />
+            <Route path="/linux/:categoryId/:slug" element={<CommandDetailPage />} />
+            <Route path="/ctf" element={<CTFHomePage />} />
+            <Route path="/ctf/:domainId" element={<CTFDomainPage />} />
+            <Route path="/ctf/:domainId/:slug" element={<CommandDetailPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+          <Footer />
+        </main>
+      </div>
+
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <CommandPalette isOpen onClose={() => setSearchOpen(false)} />
+        </Suspense>
+      )}
+      <ShortcutsDialog open={shortcutsOpen} onClose={closeShortcuts} />
+    </div>
+  );
+}
+
+export function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
-          <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)] transition-colors">
-            <Header
-              onOpenSearch={() => setSearchOpen(true)}
-              onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-            />
-
-            <div className="flex-1 flex">
-              <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-              <main className="flex-1 lg:pl-72 min-w-0 transition-all">
-                <Routes>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/sign-in" element={<SignInPage />} />
-                  <Route path="/sign-up" element={<SignUpPage />} />
-                  <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-                  <Route path="/explain" element={<ExplainCommandPage />} />
-                  <Route path="/practice-terminal" element={<PracticeTerminalPage />} />
-                  <Route path="/learn" element={<LearningPage />} />
-                  <Route path="/cheat-sheets" element={<CheatSheetsPage />} />
-                  <Route path="/compare" element={<ComparePage />} />
-                  <Route path="/command-of-the-day" element={<CommandOfDayPage />} />
-                  <Route path="/export-import" element={<ExportImportPage />} />
-                  <Route path="/password-reset" element={<PasswordResetPage />} />
-                  <Route path="/linux/:categoryId" element={<CategoryPage />} />
-                  <Route path="/linux/:categoryId/:slug" element={<CommandDetailPage />} />
-                  <Route path="/ctf" element={<CTFHomePage />} />
-                  <Route path="/ctf/:domainId" element={<CTFDomainPage />} />
-                  <Route path="/ctf/:domainId/:slug" element={<CommandDetailPage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-                <Footer />
-              </main>
-            </div>
-
-            <CommandPalette isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-            {shortcutsOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShortcutsOpen(false)}><div className="w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl" onClick={(event) => event.stopPropagation()}><div className="flex items-center justify-between"><h2 className="font-mono text-lg font-bold text-[var(--text-heading)]">Keyboard Shortcuts</h2><button onClick={() => setShortcutsOpen(false)} className="text-[var(--text-muted)]">Esc</button></div><div className="mt-5 space-y-3 font-mono text-sm text-[var(--text)]"><p><kbd className="mr-3 rounded border border-[var(--border)] px-2 py-1">Ctrl K</kbd>Open command search</p><p><kbd className="mr-3 rounded border border-[var(--border)] px-2 py-1">?</kbd>Show this guide</p><p><kbd className="mr-3 rounded border border-[var(--border)] px-2 py-1">Ctrl S</kbd>Save a command note</p><p><kbd className="mr-3 rounded border border-[var(--border)] px-2 py-1">Esc</kbd>Close overlays</p></div></div></div>}
-          </div>
+          <AppShell />
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

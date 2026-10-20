@@ -1,3 +1,4 @@
+/* eslint-disable react/only-export-components -- context hooks are colocated with their providers on purpose */
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi, userApi } from '../services/api';
 import type { User } from '../services/api';
@@ -54,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchUser]);
 
   const refreshUserData = useCallback(async () => {
@@ -69,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {
       // ignore
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     refreshAuth();

@@ -15,9 +15,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
         <div className="terminal-window w-full max-w-md mx-4">
           <div className="terminal-header bg-[var(--bg-surface-elevated)] border-b border-[var(--border)] px-4 py-3 flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--ctf-red)]/70"></span>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--amber-warning)]/70"></span>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--terminal-green)]/70"></span>
           </div>
           <div className="terminal-body p-6 font-mono text-[var(--terminal-green)]">
             <div className="flex items-center gap-2">

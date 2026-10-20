@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="LinuxDocs — Linux and CTF command reference">
+  <defs>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#52c79e" stop-opacity="0.22" />
+      <stop offset="55%" stop-color="#52c79e" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="glow2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dd6a62" stop-opacity="0.16" />
+      <stop offset="60%" stop-color="#dd6a62" stop-opacity="0" />
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="#131110" />
+  <rect width="1200" height="630" fill="url(#glow)" />
+  <rect width="1200" height="630" fill="url(#glow2)" />
+  <rect width="1200" height="630" filter="url(#grain)" opacity="0.05" />
+
+  <!-- terminal chip -->
+  <g transform="translate(96 150)">
+    <rect x="0" y="0" width="72" height="72" rx="16" fill="#52c79e" opacity="0.12" stroke="#52c79e" stroke-opacity="0.35" />
+    <text x="36" y="47" font-family="'JetBrains Mono', monospace" font-size="30" font-weight="700" fill="#52c79e" text-anchor="middle">$_</text>
+  </g>
+
+  <text x="96" y="300" font-family="'Fraunces', Georgia, serif" font-size="104" font-weight="600" fill="#faf6ef" letter-spacing="-2">
+    Linux<tspan fill="#52c79e">Docs</tspan>
+  </text>
+
+  <text x="96" y="372" font-family="'Geist', system-ui, sans-serif" font-size="34" font-weight="400" fill="#a69d90">
+    Linux &amp; CTF command reference
+  </text>
+
+  <text x="96" y="430" font-family="'JetBrains Mono', monospace" font-size="22" fill="#a69d90" opacity="0.85">
+    syntax · flags · real output · practice terminal
+  </text>
+
+  <rect x="96" y="500" width="404" height="2" fill="#34302b" />
+  <text x="96" y="548" font-family="'JetBrains Mono', monospace" font-size="20" fill="#52c79e">
+    linuxdocs — search with Ctrl K
+  </text>
+</svg>

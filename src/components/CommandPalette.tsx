@@ -20,13 +20,11 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
     new Fuse(COMMANDS, {
       keys: ['name', 'summary', 'tags', 'syntax'],
       threshold: 0.35,
-      distance: 100
-    })
+      distance: 100,
+    }),
   ).current;
 
-  const results: Command[] = query.trim()
-    ? fuse.search(query).map((res) => res.item)
-    : COMMANDS.slice(0, 10);
+  const results: Command[] = query.trim() ? fuse.search(query).map((res) => res.item) : COMMANDS.slice(0, 10);
 
   useEffect(() => {
     if (isOpen) {
@@ -39,13 +37,6 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        if (isOpen) onClose();
-        else {
-          // handled in parent or Header
-        }
-      }
       if (!isOpen) return;
 
       if (e.key === 'Escape') {
@@ -72,47 +63,54 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/70 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-[var(--overlay)] px-4 pt-16 backdrop-blur-sm sm:pt-24"
+      onClick={onClose}
+      role="presentation"
+    >
       <div
-        className="w-full max-w-2xl rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+        className="animate-in w-full max-w-2xl overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-2xl"
         role="dialog"
         aria-modal="true"
-        aria-label="Search Commands"
+        aria-label="Search commands"
+        onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center px-4 border-b border-[var(--border)]">
-          <Search className="w-5 h-5 text-[var(--text-muted)]" />
+        <div className="flex items-center gap-2 border-b border-[var(--border)] px-4">
+          <Search className="h-5 w-5 text-[var(--text-muted)]" />
           <input
             ref={inputRef}
             type="text"
             role="combobox"
             aria-expanded="true"
             aria-controls="command-search-results"
-            placeholder="Search commands, syntax, tags (e.g. nmap, files, grep)..."
+            placeholder="Search commands, syntax, or tags…"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            className="w-full h-14 bg-transparent px-3 text-[var(--text)] placeholder-[var(--text-muted)] focus:outline-none font-mono text-sm"
+            className="h-14 w-full bg-transparent px-2 font-mono text-sm text-[var(--text)] placeholder-[var(--text-muted)] focus:outline-none"
           />
           <button
             onClick={onClose}
-            className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--text)]"
+            className="rounded-md p-1 text-[var(--text-muted)] hover:text-[var(--text)]"
             aria-label="Close search"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         <div
           id="command-search-results"
           role="listbox"
-          className="max-h-96 overflow-y-auto p-2 divide-y divide-[var(--border-subtle)]"
+          className="max-h-96 divide-y divide-[var(--border-subtle)] overflow-y-auto p-2"
         >
           {results.length === 0 ? (
-            <div className="py-12 text-center text-sm text-[var(--text-muted)] font-mono">
+            <div className="py-12 text-center font-mono text-sm text-[var(--text-muted)]">
               <p>bash: {query}: command not found in database</p>
-              <p className="mt-1 text-xs opacity-70">Try searching for generic terms like "network", "files", or "reversing"</p>
+              <p className="mt-1 text-xs opacity-70">
+                Try a broader term like &ldquo;network&rdquo;, &ldquo;files&rdquo; or &ldquo;reversing&rdquo;
+              </p>
             </div>
           ) : (
             results.map((cmd, idx) => {
@@ -128,50 +126,50 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
                     onClose();
                   }}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                  className={`flex cursor-pointer items-center justify-between rounded-lg p-3 ${
                     isSelected
                       ? isCTF
                         ? 'bg-[var(--ctf-red-bg)] text-[var(--text-heading)]'
                         : 'bg-[var(--terminal-green-bg)] text-[var(--text-heading)]'
-                      : 'hover:bg-[var(--bg-surface-elevated)] text-[var(--text)]'
+                      : 'text-[var(--text)] hover:bg-[var(--bg-surface-elevated)]'
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <div
-                      className={`p-1.5 mt-0.5 rounded ${
+                      className={`mt-0.5 rounded p-1.5 ${
                         isCTF
-                          ? 'text-[var(--ctf-red)] bg-[var(--ctf-red-bg)]'
-                          : 'text-[var(--terminal-green)] bg-[var(--terminal-green-bg)]'
+                          ? 'bg-[var(--ctf-red-bg)] text-[var(--ctf-red)]'
+                          : 'bg-[var(--terminal-green-bg)] text-[var(--terminal-green)]'
                       }`}
                     >
-                      {isCTF ? <Shield className="w-4 h-4" /> : <Terminal className="w-4 h-4" />}
+                      {isCTF ? <Shield className="h-4 w-4" /> : <Terminal className="h-4 w-4" />}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-sm">{cmd.name}</span>
-                        <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded border border-[var(--border)] text-[var(--text-muted)]">
+                        <span className="font-mono text-sm font-semibold">{cmd.name}</span>
+                        <span className="rounded border border-[var(--border)] px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
                           {cmd.category}
                         </span>
                       </div>
-                      <p className="text-xs text-[var(--text-muted)] line-clamp-1 mt-0.5">{cmd.summary}</p>
+                      <p className="mt-0.5 line-clamp-1 text-xs text-[var(--text-muted)]">{cmd.summary}</p>
                     </div>
                   </div>
-                  {isSelected && (
-                    <CornerDownLeft className="w-4 h-4 text-[var(--text-muted)] shrink-0 ml-2" />
-                  )}
+                  {isSelected && <CornerDownLeft className="ml-2 h-4 w-4 shrink-0 text-[var(--text-muted)]" />}
                 </div>
               );
             })
           )}
         </div>
 
-        <div className="flex items-center justify-between px-4 py-2 bg-[var(--bg-surface-elevated)] border-t border-[var(--border)] text-[11px] text-[var(--text-muted)] font-mono">
+        <div className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--bg-surface-elevated)] px-4 py-2 font-mono text-[11px] text-[var(--text-muted)]">
           <div className="flex items-center gap-3">
-            <span>Use ↑↓ to navigate</span>
-            <span>↵ to select</span>
-            <span>ESC to close</span>
+            <span>↑↓ navigate</span>
+            <span>↵ open</span>
+            <span>esc close</span>
           </div>
-          <span>{results.length} result{results.length === 1 ? '' : 's'}</span>
+          <span>
+            {results.length} {results.length === 1 ? 'result' : 'results'}
+          </span>
         </div>
       </div>
     </div>

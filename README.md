@@ -85,7 +85,7 @@ cd backend
 .\venv\Scripts\pytest
 ```
 
-All 32 tests should pass.
+All 79 tests should pass.
 
 ## Features
 
@@ -97,7 +97,8 @@ All 32 tests should pass.
 - **Dashboard**: View all bookmarks, notes, and history in one place
 - **Settings**: Change password, delete account with confirmation
 - **Terminal UI**: Dark/light themes, blinking cursor, terminal-styled auth forms
-- **Security**: HttpOnly cookies, CSRF-safe, rate-limited auth, server-side validation
+- **Security**: HttpOnly cookies, SameSite=Strict, CSRF origin checks, per-endpoint + global rate limits, account lockout, rotating opaque sessions with token-reuse (theft) detection, Host-header allowlist, strict payload validation, hardened security headers (HSTS/CSP in production)
+- **Data durability**: WAL + synchronous=FULL SQLite, `foreign_keys=ON`, verified daily backups with automatic restore on corruption, and a persistent security audit log — accounts are kept, not disposable
 
 ## Project Structure
 
@@ -116,9 +117,12 @@ LinuxDocs/
 │   │   ├── __init__.py     # App factory
 │   │   ├── models.py       # SQLAlchemy models
 │   │   ├── auth.py         # Auth endpoints
-│   │   └── user.py         # User endpoints
+│   │   ├── user.py         # User endpoints
+│   │   ├── security.py     # Rate limits, lockouts, headers, CSRF, Host checks
+│   │   ├── sessions.py     # Rotating opaque sessions + reset tokens
+│   │   └── persistence.py  # WAL, integrity checks, backups, restore
 │   ├── tests/
-│   │   └── test_auth.py    # 32 pytest cases
+│   │   └── test_auth.py    # 79 pytest cases
 │   ├── requirements.txt    # Pinned dependencies
 │   ├── .env.example        # Environment template
 │   └── pytest.ini

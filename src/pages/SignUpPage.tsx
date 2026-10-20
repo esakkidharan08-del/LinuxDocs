@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -13,7 +13,12 @@ const STRENGTH_CHECKS = [
 
 export const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, user, loading: authLoading } = useAuth();
+
+  // Already signed up? Skip straight to the home page instead of showing this form.
+  useEffect(() => {
+    if (!authLoading && user) navigate('/', { replace: true });
+  }, [authLoading, user, navigate]);
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -92,9 +97,9 @@ export const SignUpPage: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="terminal-window bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-2xl">
           <div className="terminal-header bg-[var(--bg-surface-elevated)] border-b border-[var(--border)] px-4 py-3 flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--ctf-red)]/70"></span>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--amber-warning)]/70"></span>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--terminal-green)]/70"></span>
             <span className="ml-2 font-mono text-xs text-[var(--text-muted)]">signup.sh</span>
           </div>
 
@@ -105,14 +110,14 @@ export const SignUpPage: React.FC = () => {
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
                 </div>
               </div>
-              <h1 className="font-mono text-2xl font-bold text-[var(--text-heading)]">Create Account</h1>
-              <p className="text-[var(--text-muted)] text-sm mt-1">Join LinuxDocs to bookmark commands and save notes</p>
+              <h1 className="font-display text-3xl font-semibold text-[var(--text-heading)]">Create account</h1>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">Bookmark commands and save notes across devices</p>
             </div>
 
             {success && (
               <div className="mb-6 p-3 bg-[var(--terminal-green-bg)] border border-[var(--terminal-green)]/30 rounded-lg flex items-center gap-2 text-[var(--terminal-green)] text-sm font-mono">
                 <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                <span>Account created! Redirecting...</span>
+                <span>Account created. Redirecting…</span>
               </div>
             )}
 

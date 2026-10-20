@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -6,8 +6,13 @@ import { useAuth } from '../context/AuthContext';
 export const SignInPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const from = (location.state as any)?.from?.pathname || '/';
+
+  // Already signed in? No need to see the sign-in form.
+  useEffect(() => {
+    if (!authLoading && user) navigate('/', { replace: true });
+  }, [authLoading, user, navigate]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,9 +55,9 @@ export const SignInPage = () => {
       <div className="w-full max-w-md">
         <div className="terminal-window bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-2xl">
           <div className="terminal-header bg-[var(--bg-surface-elevated)] border-b border-[var(--border)] px-4 py-3 flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--ctf-red)]/70"></span>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--amber-warning)]/70"></span>
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--terminal-green)]/70"></span>
             <span className="ml-2 font-mono text-xs text-[var(--text-muted)]">signin.sh</span>
           </div>
 
@@ -63,14 +68,14 @@ export const SignInPage = () => {
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                 </div>
               </div>
-              <h1 className="font-mono text-2xl font-bold text-[var(--text-heading)]">Sign In</h1>
-              <p className="text-[var(--text-muted)] text-sm mt-1">Access your LinuxDocs account</p>
+              <h1 className="font-display text-3xl font-semibold text-[var(--text-heading)]">Sign in</h1>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">Access your LinuxDocs account</p>
             </div>
 
             {success && (
               <div className="mb-6 p-3 bg-[var(--terminal-green-bg)] border border-[var(--terminal-green)]/30 rounded-lg flex items-center gap-2 text-[var(--terminal-green)] text-sm font-mono">
                 <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                <span>Welcome back! Redirecting...</span>
+                <span>Signed in. Redirecting…</span>
               </div>
             )}
 

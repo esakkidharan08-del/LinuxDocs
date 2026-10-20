@@ -74,8 +74,8 @@ const SettingsContent: React.FC = () => {
     <div className="min-h-screen bg-[var(--bg)]">
       <div className="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="font-mono text-3xl font-bold text-[var(--text-heading)]">Settings</h1>
-          <p className="text-[var(--text-muted)] mt-1">Manage your account and preferences</p>
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-[var(--text-heading)]">Settings</h1>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">Account details, password and deletion</p>
         </div>
 
         <div className="space-y-6">
@@ -255,7 +255,7 @@ const SettingsContent: React.FC = () => {
             </div>
             <div className="terminal-body p-6">
               <div className="mb-4">
-                <h3 className="font-mono text-lg font-semibold text-[var(--text)] mb-1">Delete Account</h3>
+                <h3 className="mb-1 font-display text-lg font-semibold text-[var(--text)]">Delete account</h3>
                 <p className="text-[var(--text-muted)] text-sm">Permanently delete your account and all associated data (bookmarks, notes, history). This action cannot be undone.</p>
               </div>
 

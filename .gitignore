@@ -10,3 +10,14 @@ __pycache__/
 qa/
 .claude/
 .DS_Store
+
+# local AI tooling (design skills, agent state)
+.agents/
+skills-lock.json
+
+# runtime artifacts: dev-server logs, saved session cookies, sqlite instance dir
+runtime-*.log
+backend/runtime-*.log
+backend/cookies*.txt
+backend/instance/
+

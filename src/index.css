@@ -1,90 +1,575 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Fonts
+   Display: Fraunces  — editorial serif for page/section headings
+   Sans:    Geist      — neutral grotesk for UI + body copy
+   Mono:    JetBrains  — code, terminal output and data tables
+--------------------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-display: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+
+  /* Remap the default red/amber ramps onto the theme's desaturated tokens so
+     existing utility classes inherit the editorial palette automatically. */
+  --color-red-400: var(--ctf-red);
+  --color-red-500: var(--ctf-red);
+  --color-amber-300: var(--amber-warning);
+  --color-amber-400: var(--amber-warning);
+  --color-amber-500: var(--amber-warning);
+
+  /* Warm-tinted elevations (shadows carry the background hue, not pure black) */
+  --shadow-2xs: 0 1px 2px var(--shadow-color);
+  --shadow-xs: 0 1px 3px var(--shadow-color);
+  --shadow-sm: 0 1px 2px -1px var(--shadow-color), 0 1px 3px var(--shadow-color);
+  --shadow-md: 0 4px 12px -4px var(--shadow-color);
+  --shadow-lg: 0 12px 28px -12px var(--shadow-color);
+  --shadow-xl: 0 20px 40px -18px var(--shadow-color);
+  --shadow-2xl: 0 28px 60px -24px var(--shadow-color);
+
+  /* Editorial weight system: display type reads calmer at SemiBold than Bold */
+  --font-weight-bold: 600;
+}
+
 @layer base {
   :root {
-    --bg: #0d1117;
-    --bg-surface: #161b22;
-    --bg-surface-elevated: #21262d;
-    --bg-surface-hover: #30363d;
-    --border: #30363d;
-    --border-subtle: #21262d;
-    --text: #e6edf3;
-    --text-muted: #8b949e;
-    --text-heading: #f0f6fc;
+    /* --- Surfaces: warm editorial charcoal --- */
+    --bg: #131110;
+    --bg-surface: #1b1817;
+    --bg-surface-elevated: #23201d;
+    --bg-surface-hover: #2c2825;
+    --border: #34302b;
+    --border-subtle: #262220;
 
-    --terminal-green: #00ff9c;
-    --terminal-green-dim: #00cc7d;
-    --terminal-green-bg: rgba(0, 255, 156, 0.08);
+    /* --- Type --- */
+    --text: #e9e3da;
+    --text-muted: #a69d90;
+    --text-heading: #faf6ef;
 
-    --amber-warning: #ffb86c;
-    --amber-warning-bg: rgba(255, 184, 108, 0.1);
+    /* --- Accent: single considered emerald --- */
+    --terminal-green: #52c79e;
+    --terminal-green-dim: #3fa685;
+    --terminal-green-bg: rgba(82, 199, 158, 0.1);
 
-    --ctf-red: #ff5555;
-    --ctf-red-dim: #e04444;
-    --ctf-red-bg: rgba(255, 85, 85, 0.1);
+    /* --- Caution: muted ochre --- */
+    --amber-warning: #d9a45c;
+    --amber-warning-bg: rgba(217, 164, 92, 0.12);
 
-    --code-bg: #090d13;
-    --code-border: #21262d;
+    /* --- CTF section accent: desaturated brick --- */
+    --ctf-red: #dd6a62;
+    --ctf-red-dim: #c4554d;
+    --ctf-red-bg: rgba(221, 106, 98, 0.1);
 
-    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* --- Code --- */
+    --code-bg: #0e0c0b;
+    --code-border: #262220;
+
+    /* --- Utility tokens --- */
+    --overlay: rgba(12, 10, 9, 0.66);
+    --ring: var(--terminal-green);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --grain-opacity: 0.035;
+
+    /* --- Z-index scale --- */
+    --z-sticky: 40;
+    --z-overlay: 50;
+    --z-modal: 60;
+
+    color-scheme: dark;
   }
 
   html.light {
-    --bg: #f8fafc;
-    --bg-surface: #ffffff;
-    --bg-surface-elevated: #f1f5f9;
-    --bg-surface-hover: #e2e8f0;
-    --border: #cbd5e1;
-    --border-subtle: #e2e8f0;
-    --text: #0f172a;
-    --text-muted: #475569;
-    --text-heading: #020617;
+    --bg: #f7f4ee;
+    --bg-surface: #fffdfa;
+    --bg-surface-elevated: #efeae1;
+    --bg-surface-hover: #e7e0d4;
+    --border: #dcd4c6;
+    --border-subtle: #ebe5da;
 
-    --terminal-green: #059669;
-    --terminal-green-dim: #047857;
-    --terminal-green-bg: rgba(5, 150, 105, 0.1);
+    --text: #23201c;
+    --text-muted: #6d655a;
+    --text-heading: #14110e;
 
-    --amber-warning: #d97706;
-    --amber-warning-bg: rgba(217, 119, 6, 0.12);
+    --terminal-green: #0e7357;
+    --terminal-green-dim: #0a5b45;
+    --terminal-green-bg: rgba(14, 115, 87, 0.09);
 
-    --ctf-red: #dc2626;
-    --ctf-red-dim: #b91c1c;
-    --ctf-red-bg: rgba(220, 38, 38, 0.1);
+    --amber-warning: #9a6a1e;
+    --amber-warning-bg: rgba(154, 106, 30, 0.1);
 
-    --code-bg: #f1f5f9;
-    --code-border: #cbd5e1;
+    --ctf-red: #b0453e;
+    --ctf-red-dim: #953a34;
+    --ctf-red-bg: rgba(176, 69, 62, 0.09);
+
+    --code-bg: #f1ede4;
+    --code-border: #dcd4c6;
+
+    --overlay: rgba(30, 26, 22, 0.42);
+    --shadow-color: rgba(60, 48, 34, 0.16);
+    --grain-opacity: 0.02;
+
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background-color: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  code,
+  pre,
+  .font-mono,
+  kbd {
+    font-family: var(--font-mono);
+  }
+
+  /* Warm-tinted selection that adapts to theme */
+  ::selection {
+    background: color-mix(in srgb, var(--terminal-green) 26%, transparent);
+    color: var(--text-heading);
+  }
+
+  /* Visible, consistent keyboard focus ring (accessibility) */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Tabular figures wherever numbers line up in columns */
+  .tabular,
+  table {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  margin: 0;
-  font-family: var(--font-sans);
-  background-color: var(--bg);
-  color: var(--text);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
+/* ---------------------------------------------------------------------------
+   Motion — restrained, GPU-friendly (transform/opacity only)
+--------------------------------------------------------------------------- */
+@keyframes ld-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-code, pre, .font-mono {
+@keyframes ld-rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ld-pop-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ld-cursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes ld-wordmark-in {
+  from { opacity: 0; transform: scale(1.08) translateY(18px); filter: blur(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+
+@keyframes ld-rule-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes cp-glitch {
+  0%, 91%, 100% { transform: translate(0, 0) skewX(0deg); }
+  92% { transform: translate(-2px, 1px) skewX(-2deg); }
+  94% { transform: translate(2px, -1px) skewX(2deg); }
+  96% { transform: translate(-1px, 0) skewX(0deg); }
+}
+
+@keyframes cp-flicker-a {
+  0%, 100% { opacity: 0.05; }
+  7% { opacity: 0.13; }
+  8% { opacity: 0.04; }
+  9% { opacity: 0.1; }
+  51% { opacity: 0.06; }
+  52% { opacity: 0.15; }
+  53% { opacity: 0.04; }
+}
+
+@keyframes cp-pulse-a {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+/* Kinetic text loader (VengeanceUI) */
+@keyframes ktl-dotMove {
+  0%, 100% { transform: rotate(180deg) translate(-80px, -10px) rotate(-180deg); }
+  50% { transform: rotate(0deg) translate(-81px, 10px) rotate(0deg); }
+}
+
+@keyframes ktl-letterStretch {
+  0%, 100% { transform: scale(1, 0.35); transform-origin: 100% 75%; }
+  8%, 28% { transform: scale(1, 1.4); transform-origin: 100% 67%; }
+  37% { transform: scale(1, 0.875); transform-origin: 100% 75%; }
+  46% { transform: scale(1, 1.03); transform-origin: 100% 75%; }
+  50%, 97% { transform: scale(1); transform-origin: 100% 75%; }
+}
+
+@keyframes ktl-l-bounce {
+  0%, 45%, 70%, 100% { transform: scaleY(1.11); }
+  49% { transform: scaleY(0.31); }
+  50% { transform: scaleY(0.16); }
+  53% { transform: scaleY(0.63); }
+  60% { transform: scaleY(1.275); }
+  68% { transform: scaleY(1.04); }
+}
+
+/* Kinetic text loader element classes — themed with main UI tokens.
+   Animations default off; the global (prefers-reduced-motion) rule handles
+   the reduce case, and a no-preference override turns them on. */
+.ktl-dot,
+.ktl-bounce,
+.ktl-stretch {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ktl-dot {
+    background: var(--terminal-green);
+    animation: ktl-dotMove 1800ms cubic-bezier(0.25, 0.25, 0.75, 0.75) infinite;
+  }
+
+  .ktl-bounce {
+    transform-origin: 100% 70%;
+    animation: ktl-l-bounce 1800ms cubic-bezier(0.25, 0.25, 0.75, 0.75) infinite;
+  }
+
+  .ktl-stretch {
+    transform-origin: 100% 70%;
+    animation: ktl-letterStretch 1800ms cubic-bezier(0.25, 0.23, 0.73, 0.75) infinite;
+  }
+}
+
+@layer components {
+/* Tailwind-animate compatible entry used by the command palette */
+.animate-in {
+  animation: ld-pop-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rise-in {
+  animation: ld-rise-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.blinking {
+  animation: ld-cursor 1.1s step-end infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Cyberpunk intro — neon HUD kit (wordmark, brackets, scanlines, glows)
+--------------------------------------------------------------------------- */
+.cp-wordmark {
+  animation:
+    ld-wordmark-in 900ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    cp-glitch 4.2s 1.1s infinite;
+}
+
+.cp-rule {
+  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.9), rgba(255, 46, 151, 0.9), transparent);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.55), 0 0 18px rgba(255, 46, 151, 0.35);
+  transform-origin: center;
+  animation: ld-rule-grow 700ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both;
+}
+
+/* HUD corner brackets */
+.cp-ret {
+  position: relative;
+}
+
+.cp-ret::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(#00f0ff, #00f0ff) top left / 26px 1px,
+    linear-gradient(#00f0ff, #00f0ff) top left / 1px 26px,
+    linear-gradient(#00f0ff, #00f0ff) top right / 26px 1px,
+    linear-gradient(#00f0ff, #00f0ff) top right / 1px 26px,
+    linear-gradient(#00f0ff, #00f0ff) bottom left / 26px 1px,
+    linear-gradient(#00f0ff, #00f0ff) bottom left / 1px 26px,
+    linear-gradient(#00f0ff, #00f0ff) bottom right / 26px 1px,
+    linear-gradient(#00f0ff, #00f0ff) bottom right / 1px 26px;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.8));
+}
+
+/* CRT flicker + subtle chromatic fringe */
+.cp-flicker {
+  background: radial-gradient(140% 140% at 50% 50%, transparent 78%, rgba(255, 46, 151, 0.045) 88%, transparent 93%, rgba(0, 240, 255, 0.03) 100%);
+  animation: cp-flicker-a 5s steps(1, end) infinite;
+}
+
+/* CRT scanlines */
+.cp-scanlines {
+  background: repeating-linear-gradient(0deg, rgba(238, 243, 255, 0.028) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+
+.cp-glow-text {
+  text-shadow:
+    0 0 8px rgba(0, 240, 255, 0.7),
+    0 0 26px rgba(255, 46, 151, 0.35);
+}
+
+.cp-glow-border {
+  box-shadow:
+    0 0 10px rgba(0, 240, 255, 0.16),
+    inset 0 0 8px rgba(0, 240, 255, 0.05);
+  transition: box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cp-glow-border:hover {
+  box-shadow:
+    0 0 18px rgba(0, 240, 255, 0.4),
+    inset 0 0 10px rgba(0, 240, 255, 0.1);
+}
+
+.cp-neon-cyan {
+  color: #d9f6ff;
+  text-shadow:
+    0 0 10px rgba(0, 240, 255, 0.85),
+    0 0 34px rgba(0, 240, 255, 0.45),
+    0 0 90px rgba(0, 240, 255, 0.28);
+}
+
+.cp-neon-magenta {
+  color: #ffd9ec;
+  text-shadow:
+    0 0 10px rgba(255, 46, 151, 0.85),
+    0 0 34px rgba(255, 46, 151, 0.45),
+    0 0 90px rgba(255, 46, 151, 0.28);
+}
+
+/* Blinking terminal block cursor */
+.cp-block {
+  animation: ld-cursor 1.05s step-end infinite;
+}
+
+.cp-pulse {
+  animation: cp-pulse-a 1.6s ease-in-out infinite;
+}
+
+/* Neon magenta → violet → cyan data bar */
+.cp-progress-bar {
+  background: linear-gradient(90deg, #ff2e97, #9d4edd, #00f0ff);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.55), 0 0 22px rgba(255, 46, 151, 0.35);
+}
+
+/* ---------------------------------------------------------------------------
+   Component primitives (previously class names with no CSS behind them)
+--------------------------------------------------------------------------- */
+.terminal-window {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background-color: var(--bg-surface);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset,
+    0 18px 40px -28px var(--shadow-color);
+}
+
+.terminal-header {
   font-family: var(--font-mono);
+  letter-spacing: 0.01em;
 }
 
-/* Custom scrollbars */
+.terminal-body {
+  font-family: var(--font-sans);
+}
+
+/* ---------------------------------------------------------------------------
+   Navigation links — active state driven by aria-current, not class soup
+--------------------------------------------------------------------------- */
+.nav-link {
+  position: relative;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: var(--text);
+}
+
+.nav-link[aria-current='page'] {
+  color: var(--text-heading);
+}
+
+.nav-link[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: -0.15rem;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--nav-accent, var(--terminal-green));
+}
+
+.nav-link--ctf {
+  --nav-accent: var(--ctf-red);
+}
+
+/* Sidebar entries — active state via aria-current + a slim accent bar */
+.side-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.side-link:hover {
+  color: var(--text);
+  background: var(--bg-surface-elevated);
+}
+
+.side-link[aria-current='page'] {
+  color: var(--side-accent, var(--terminal-green));
+  background: color-mix(in srgb, var(--side-accent, var(--terminal-green)) 10%, transparent);
+}
+
+.side-link[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 22%;
+  bottom: 22%;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--side-accent, var(--terminal-green));
+}
+
+.side-link--ctf {
+  --side-accent: var(--ctf-red);
+}
+
+/* ---------------------------------------------------------------------------
+   Texture — faint film grain so flat surfaces stop feeling sterile
+--------------------------------------------------------------------------- */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+html.light .noise-overlay {
+  mix-blend-mode: multiply;
+}
+
+/* Ambient tint for hero sections — breaks the flat vector look */
+.ambient {
+  background-image:
+    radial-gradient(60rem 30rem at 15% -10%, color-mix(in srgb, var(--terminal-green) 9%, transparent), transparent 70%),
+    radial-gradient(50rem 26rem at 95% 0%, color-mix(in srgb, var(--ctf-red) 6%, transparent), transparent 65%);
+}
+
+/* ---------------------------------------------------------------------------
+   Scrollbars
+--------------------------------------------------------------------------- */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 4px;
+  border-radius: 999px;
+  border: 2px solid var(--bg);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-subtle);
+  background: var(--text-muted);
+}
+
+}
+
+/* ---------------------------------------------------------------------------
+   Global interaction polish
+--------------------------------------------------------------------------- */
+@layer base {
+@media (prefers-reduced-motion: no-preference) {
+  a,
+  button,
+  summary,
+  [role='button'] {
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  button:not(:disabled):active,
+  [role='button']:active {
+    transform: translateY(0.5px);
+  }
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Print (cheat sheets)
+--------------------------------------------------------------------------- */
+@media print {
+  .noise-overlay,
+  header,
+  aside,
+  footer {
+    display: none !important;
+  }
+
+  main {
+    padding-left: 0 !important;
+  }
 }

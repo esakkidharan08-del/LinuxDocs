@@ -1,7 +1,36 @@
 const API_BASE = '/api';
 let accessToken: string | null = null;
+// Concurrent 401s used to each fire their own /auth/refresh, and every one of
+// those rotates the server-side session. Many parallel calls therefore meant
+// many rotations per second - churn in the sessions table, and enough volume
+// to trip the legitimate-traffic rate limit (which signs the user out).
+// Single-flight: all waiters share one in-flight refresh.
+let refreshInFlight: Promise<string> | null = null;
 
 const setAccessToken = (token: string | null) => { accessToken = token; };
+
+function refreshAccessToken(): Promise<string> {
+  if (!refreshInFlight) {
+    const attempt = (async () => {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Session expired');
+      }
+      const data = await res.json();
+      accessToken = data.access_token;
+      return data.access_token as string;
+    })();
+    refreshInFlight = attempt;
+    attempt.catch(() => { /* propagated to the caller */ })
+      .finally(() => { refreshInFlight = null; });
+  }
+  return refreshInFlight;
+}
 
 async function request<T>(endpoint: string, options: RequestInit = {}, retry = true): Promise<T> {
   const headers = new Headers(options.headers);
@@ -17,8 +46,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}, retry = t
 
   if (res.status === 401 && retry && !endpoint.startsWith('/auth/')) {
     try {
-      const refreshed = await request<{ access_token: string }>('/auth/refresh', { method: 'POST' }, false);
-      setAccessToken(refreshed.access_token);
+      await refreshAccessToken();
       return request<T>(endpoint, options, false);
     } catch { setAccessToken(null); }
   }
@@ -55,9 +83,8 @@ export const authApi = {
   },
 
   refresh: async () => {
-    const response = await request<{ access_token: string }>('/auth/refresh', { method: 'POST' }, false);
-    setAccessToken(response.access_token);
-    return response;
+    const access_token = await refreshAccessToken();
+    return { access_token };
   },
 
   logout: async () => {
@@ -124,6 +151,11 @@ export const userApi = {
       method: 'DELETE',
       body: JSON.stringify({ confirm }),
     }),
+};
+
+export const commandsApi = {
+  list: () => request<{ categories: import('../types').CategoryInfo[]; domains: import('../types').CTFDomainInfo[]; commands: import('../types').Command[] }>('/commands'),
+  get: (slug: string) => request<{ command: import('../types').Command }>(`/commands/${encodeURIComponent(slug)}`),
 };
 
 export interface User {

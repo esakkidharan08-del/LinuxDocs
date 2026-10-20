@@ -9,11 +9,19 @@ export const CategoryPage = () => {
 
   if (!category) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4 font-mono">
-        <h1 className="text-3xl font-bold text-[var(--text-heading)]">Category Not Found</h1>
-        <p className="text-[var(--text-muted)]">The requested category "{categoryId}" does not exist in our database.</p>
-        <Link to="/" className="inline-block px-6 py-2.5 rounded-lg bg-[var(--terminal-green)] text-slate-950 font-bold text-sm">
-          Return to Home
+      <div className="mx-auto max-w-4xl px-4 py-24 text-center">
+        <p className="font-mono text-sm text-[var(--text-muted)]">
+          bash: cd: {categoryId}: No such file or directory
+        </p>
+        <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--text-heading)]">Category not found</h1>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[var(--text-muted)]">
+          That category is not part of the reference. Browse the full index instead.
+        </p>
+        <Link
+          to="/"
+          className="mt-6 inline-block rounded-lg bg-[var(--terminal-green)] px-5 py-2.5 font-mono text-sm font-semibold text-[var(--bg)] hover:bg-[var(--terminal-green-dim)]"
+        >
+          Back to the index
         </Link>
       </div>
     );
@@ -22,46 +30,58 @@ export const CategoryPage = () => {
   const commandsInCat = COMMANDS.filter((c) => c.section === 'linux' && c.category === category.id);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 text-left space-y-8">
-      <Breadcrumbs items={[{ label: 'Linux Reference' }, { label: category.name }]} />
+    <div className="mx-auto max-w-6xl space-y-10 px-4 py-10 sm:px-6 lg:px-8">
+      <Breadcrumbs items={[{ label: 'Linux Reference', to: '/' }, { label: category.name }]} />
 
-      <div className="space-y-3 border-b border-[var(--border)] pb-6">
-        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[var(--terminal-green-bg)] text-[var(--terminal-green)] text-xs font-mono font-semibold">
-          <Terminal className="w-3.5 h-3.5" />
-          <span>Linux Category</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold font-mono text-[var(--text-heading)]">{category.name}</h1>
-        <p className="text-base text-[var(--text-muted)] leading-relaxed">{category.description}</p>
-        <div className="text-xs font-mono text-[var(--text-muted)]">
-          {commandsInCat.length} command{commandsInCat.length === 1 ? '' : 's'} available in this category.
-        </div>
-      </div>
+      <header className="space-y-4 border-b border-[var(--border)] pb-8">
+        <span className="inline-flex items-center gap-2 border border-[var(--terminal-green)]/30 bg-[var(--terminal-green-bg)] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--terminal-green)]">
+          <Terminal className="h-3.5 w-3.5" />
+          Linux category
+        </span>
+        <h1 className="font-display text-4xl font-semibold tracking-tight text-[var(--text-heading)] sm:text-5xl">
+          {category.name}
+        </h1>
+        <p className="max-w-[62ch] text-base leading-relaxed text-[var(--text-muted)]">{category.description}</p>
+        <p className="font-mono text-xs text-[var(--text-muted)]">
+          {commandsInCat.length} {commandsInCat.length === 1 ? 'command' : 'commands'} in this category
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {commandsInCat.map((cmd) => (
-          <Link
-            key={cmd.slug}
-            to={getPathForCommand(cmd)}
-            className="group p-5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--terminal-green)]/60 transition-all flex flex-col justify-between space-y-4 shadow-sm"
-          >
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-mono font-bold text-base text-[var(--text-heading)] group-hover:text-[var(--terminal-green)] transition-colors">
+      {commandsInCat.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-surface)] p-12 text-center">
+          <p className="font-display text-lg text-[var(--text-heading)]">Nothing documented here yet</p>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-[var(--text-muted)]">
+            This category is reserved but has no entries. Try another section from the sidebar.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {commandsInCat.map((cmd, index) => (
+            <Link
+              key={cmd.slug}
+              to={getPathForCommand(cmd)}
+              className="group flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 hover:-translate-y-0.5 hover:border-[var(--terminal-green)]/50"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="font-display text-lg font-semibold text-[var(--text-heading)] group-hover:text-[var(--terminal-green)]">
                   {cmd.name}
                 </span>
-                <code className="text-[11px] font-mono text-[var(--text-muted)] bg-[var(--code-bg)] px-2 py-0.5 rounded border border-[var(--border)]">
-                  {cmd.syntax.split(' ')[0]}
-                </code>
+                <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
               </div>
-              <p className="text-xs text-[var(--text-muted)] line-clamp-2 leading-relaxed">{cmd.summary}</p>
-            </div>
-            <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--terminal-green)]">
-              <span>View reference</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-        ))}
-      </div>
+              <code className="w-fit rounded border border-[var(--border)] bg-[var(--code-bg)] px-2 py-0.5 font-mono text-[11px] text-[var(--text-muted)]">
+                {cmd.syntax.split(' ')[0]}
+              </code>
+              <p className="line-clamp-2 text-xs leading-relaxed text-[var(--text-muted)]">{cmd.summary}</p>
+              <div className="mt-auto flex items-center justify-between border-t border-[var(--border-subtle)] pt-3 font-mono text-xs text-[var(--terminal-green)]">
+                <span>View reference</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,145 +1,223 @@
 import { useState, useEffect } from 'react';
-import { Terminal, Shield, ArrowRight } from 'lucide-react';
+import { Terminal, Shield, ArrowRight, Command, FileText, GitCompare, GraduationCap, Layers, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { COMMANDS, LINUX_CATEGORIES, CTF_DOMAINS } from '../data/commands';
+import SocialFlipButton from '../components/ui/SocialFlipButton';
+
+const SAMPLE_COMMANDS = [
+  { cmd: 'nmap -sC -sV 10.10.11.120', output: 'PORT 22/tcp open ssh\nPORT 80/tcp open http' },
+  { cmd: 'grep -rn "TODO" src/', output: 'src/App.tsx:14: // TODO: refactor\nsrc/main.tsx:5: // TODO: config' },
+  { cmd: 'sqlmap -u "http://target.htb/vuln.php?id=1" --dbs', output: '[INFO] fetching current database: ctf_db' },
+  { cmd: 'tar -czvf backup.tar.gz /var/www/', output: 'tar: Removing leading / from member names\nBackup completed successfully.' },
+  {
+    cmd: 'journalctl -u nginx.service -n 5',
+    output: 'Oct 12 10:00:01 server nginx[120]: Started A high performance web server.',
+  },
+];
+
+const TOOLS = [
+  { to: '/explain', icon: Command, label: 'Explain a command', blurb: 'Paste a one-liner and see each token accounted for.' },
+  { to: '/practice-terminal', icon: Terminal, label: 'Practice terminal', blurb: 'A safe simulated shell with mission levels, minus the risk.' },
+  { to: '/learn', icon: GraduationCap, label: 'Learning paths', blurb: 'Two stages, eight paths, quizzes with a strict cap of ten questions.' },
+  { to: '/flashcards', icon: Layers, label: 'Flashcards', blurb: 'Flip through command decks and lock the vocabulary into memory.' },
+  { to: '/speed-drill', icon: Zap, label: 'Speed drill', blurb: 'Sixty seconds of rapid questions, invented fresh from the dataset every round.' },
+  { to: '/compare', icon: GitCompare, label: 'Compare commands', blurb: 'Put two utilities side by side, flags and all.' },
+];
 
 export const LandingPage = () => {
   const [currentCmdIndex, setCurrentCmdIndex] = useState(0);
 
-  const sampleCommands = [
-    { cmd: 'nmap -sC -sV 10.10.11.120', output: 'PORT 22/tcp open ssh\nPORT 80/tcp open http' },
-    { cmd: 'grep -rn "TODO" src/', output: 'src/App.tsx:14: // TODO: refactor\nsrc/main.tsx:5: // TODO: config' },
-    { cmd: 'sqlmap -u "http://target.htb/vuln.php?id=1" --dbs', output: '[INFO] fetching current database: ctf_db' },
-    { cmd: 'tar -czvf backup.tar.gz /var/www/', output: 'tar: Removing leading / from member names\nBackup completed successfully.' },
-    { cmd: 'journalctl -u nginx.service -n 5', output: 'Oct 12 10:00:01 server nginx[120]: Started A high performance web server.' }
-  ];
-
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentCmdIndex((prev) => (prev + 1) % sampleCommands.length);
+      setCurrentCmdIndex((prev) => (prev + 1) % SAMPLE_COMMANDS.length);
     }, 4500);
     return () => clearInterval(timer);
   }, []);
 
   const totalLinuxCount = COMMANDS.filter((c) => c.section === 'linux').length;
   const totalCTFCount = COMMANDS.filter((c) => c.section === 'ctf').length;
+  const totalCategories = LINUX_CATEGORIES.length + CTF_DOMAINS.length;
+
+  const stats = [
+    { value: totalLinuxCount, label: 'Linux commands', accent: 'text-[var(--terminal-green)]' },
+    { value: totalCTFCount, label: 'CTF & security tools', accent: 'text-[var(--ctf-red)]' },
+    { value: totalCategories, label: 'Reference categories', accent: 'text-[var(--text-heading)]' },
+  ];
 
   return (
-    <div className="space-y-16 pb-16">
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-16 px-4 sm:px-6 lg:px-8 border-b border-[var(--border)] overflow-hidden bg-gradient-to-b from-[var(--bg-surface)] to-[var(--bg)]">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--terminal-green)]/40 bg-[var(--terminal-green-bg)] text-[var(--terminal-green)] text-xs font-mono font-medium">
-            <span className="w-2 h-2 rounded-full bg-[var(--terminal-green)] animate-ping" />
-            MDN-Style Linux & CTF Command Reference
-          </div>
+    <div className="pb-20">
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-[var(--border)]">
+        <div className="ambient absolute inset-0" aria-hidden="true" />
+        <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16 lg:px-8 lg:py-24">
+          <div className="space-y-7">
+            <span className="inline-flex items-center gap-2 border border-[var(--terminal-green)]/30 bg-[var(--terminal-green-bg)] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terminal-green)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--terminal-green)]" />
+              Linux &amp; CTF reference
+            </span>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold text-[var(--text-heading)] tracking-tight font-mono">
-            Master the Terminal.<br />
-            <span className="text-[var(--terminal-green)]">Conquer CTF Challenges.</span>
-          </h1>
+            <h1 className="font-display text-5xl font-semibold leading-[0.95] tracking-tight text-[var(--text-heading)] sm:text-6xl lg:text-7xl">
+              Every flag,
+              <br />
+              every example,
+              <br />
+              <span className="italic text-[var(--terminal-green)]">without the guesswork.</span>
+            </h1>
 
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-[var(--text-muted)]">
-            A comprehensive, accurate, developer-focused reference for {totalLinuxCount}+ Linux system utilities and {totalCTFCount}+ CTF hacking & security tools. Complete with real syntax, options, and realistic output.
-          </p>
+            <p className="max-w-[58ch] text-base leading-relaxed text-[var(--text-muted)] sm:text-lg">
+              A hand-checked reference for {totalLinuxCount} Linux utilities and {totalCTFCount} CTF and security
+              tools. Real syntax, the flags that matter, and output you can trust enough to copy.
+            </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-            <Link
-              to="/linux/file-and-directory/ls"
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--terminal-green)] text-slate-950 font-mono font-bold text-sm hover:bg-[var(--terminal-green-dim)] transition-colors shadow-lg shadow-[var(--terminal-green)]/20"
-            >
-              <Terminal className="w-4 h-4" />
-              <span>Explore Linux Commands</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/ctf/recon/nmap"
-              className="flex items-center gap-2 px-6 py-3 rounded-lg border border-[var(--ctf-red)]/50 bg-[var(--ctf-red-bg)] text-[var(--ctf-red)] font-mono font-bold text-sm hover:bg-[var(--ctf-red)]/20 transition-colors"
-            >
-              <Shield className="w-4 h-4" />
-              <span>CTF Security Section</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Animated Terminal Simulator Demo */}
-        <div className="max-w-3xl mx-auto mt-12 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] shadow-2xl overflow-hidden font-mono text-left">
-          <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg-surface-elevated)] border-b border-[var(--border)]">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-              <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
-              <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Link
+                to="/linux/file-and-directory/ls"
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--terminal-green)] px-5 py-3 font-mono text-sm font-semibold text-[var(--bg)] hover:bg-[var(--terminal-green-dim)]"
+              >
+                <Terminal className="h-4 w-4" />
+                Browse Linux commands
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/ctf"
+                className="inline-flex items-center gap-2 rounded-lg border border-[var(--ctf-red)]/45 px-5 py-3 font-mono text-sm font-semibold text-[var(--ctf-red)] hover:bg-[var(--ctf-red-bg)]"
+              >
+                <Shield className="h-4 w-4" />
+                CTF &amp; security tools
+              </Link>
             </div>
-            <span className="text-xs text-[var(--text-muted)]">bash — linuxdocs@terminal:~</span>
-            <span className="text-xs text-[var(--terminal-green)] font-semibold">live</span>
-          </div>
-          <div className="p-5 space-y-3 text-sm">
-            <div className="flex items-center gap-2 text-[var(--terminal-green)]">
-              <span>$</span>
-              <span className="text-[var(--text-heading)] font-semibold">{sampleCommands[currentCmdIndex].cmd}</span>
+
+            {/* Contact — flip tiles reveal social profiles */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                Contact
+              </span>
+              <SocialFlipButton />
             </div>
-            <pre className="text-[var(--text-muted)] text-xs leading-relaxed whitespace-pre-wrap pl-4 border-l-2 border-[var(--border)]">
-              {sampleCommands[currentCmdIndex].output}
-            </pre>
+
+            {/* Stat strip — a divided rule, not three floating cards */}
+            <dl className="flex flex-wrap items-stretch gap-y-4 border-t border-[var(--border)] pt-6">
+              {stats.map((stat, index) => (
+                <div
+                  key={stat.label}
+                  className={`pr-6 ${index > 0 ? 'border-l border-[var(--border)] pl-6' : ''}`}
+                >
+                  <dt className="sr-only">{stat.label}</dt>
+                  <dd>
+                    <span className={`block font-display text-3xl font-semibold tabular ${stat.accent}`}>
+                      {stat.value}
+                    </span>
+                    <span className="mt-0.5 block font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                      {stat.label}
+                    </span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          {/* Live terminal demo */}
+          <div className="relative">
+            <div className="terminal-window overflow-hidden">
+              <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface-elevated)] px-4 py-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--ctf-red)]/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--amber-warning)]/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--terminal-green)]/70" />
+                </div>
+                <span className="font-mono text-[11px] text-[var(--text-muted)]">linuxdocs@reference:~</span>
+                <span className="flex items-center gap-1.5 font-mono text-[11px] text-[var(--terminal-green)]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--terminal-green)] blinking" />
+                  live
+                </span>
+              </div>
+              <div className="min-h-[15rem] space-y-3 bg-[var(--code-bg)] p-5 font-mono text-sm">
+                <div className="flex items-center gap-2 text-[var(--terminal-green)]">
+                  <span>$</span>
+                  <span className="font-semibold text-[var(--text-heading)]">
+                    {SAMPLE_COMMANDS[currentCmdIndex].cmd}
+                  </span>
+                </div>
+                <pre className="whitespace-pre-wrap border-l-2 border-[var(--border)] pl-4 text-xs leading-relaxed text-[var(--text-muted)]">
+                  {SAMPLE_COMMANDS[currentCmdIndex].output}
+                </pre>
+              </div>
+            </div>
+            <p className="mt-3 text-right font-mono text-[11px] text-[var(--text-muted)]">
+              One of {COMMANDS.length} documented entries
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Stats Overview */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-center space-y-2">
-            <div className="text-3xl font-extrabold font-mono text-[var(--terminal-green)]">{totalLinuxCount}+</div>
-            <div className="text-sm font-medium text-[var(--text-muted)]">Verified Linux Commands</div>
-          </div>
-          <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-center space-y-2">
-            <div className="text-3xl font-extrabold font-mono text-[var(--ctf-red)]">{totalCTFCount}+</div>
-            <div className="text-sm font-medium text-[var(--text-muted)]">CTF & Security Tools</div>
-          </div>
-          <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-center space-y-2">
-            <div className="text-3xl font-extrabold font-mono text-amber-400">100%</div>
-            <div className="text-sm font-medium text-[var(--text-muted)]">Accurate Syntax & Examples</div>
-          </div>
+      {/* Tools band */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="grid gap-px overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 lg:grid-cols-4">
+          {TOOLS.map((tool) => (
+            <Link
+              key={tool.to}
+              to={tool.to}
+              className="group flex flex-col gap-3 bg-[var(--bg-surface)] p-6 hover:bg-[var(--bg-surface-elevated)]"
+            >
+              <tool.icon className="h-5 w-5 text-[var(--terminal-green)]" />
+              <span className="font-display text-lg font-semibold text-[var(--text-heading)]">{tool.label}</span>
+              <span className="text-xs leading-relaxed text-[var(--text-muted)]">{tool.blurb}</span>
+              <span className="mt-auto inline-flex items-center gap-1 pt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--text-muted)] group-hover:text-[var(--terminal-green)]">
+                Open
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* Linux Categories Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold font-mono text-[var(--text-heading)]">Linux Reference Categories</h2>
-            <p className="text-sm text-[var(--text-muted)] mt-1">Explore essential system administration and file management utilities.</p>
+      {/* Linux categories */}
+      <section className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] pb-5">
+          <div className="space-y-2">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terminal-green)]">
+              Section 01
+            </span>
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--text-heading)] sm:text-4xl">
+              Linux reference
+            </h2>
+            <p className="max-w-[52ch] text-sm leading-relaxed text-[var(--text-muted)]">
+              System administration and file handling, grouped the way you actually reach for them.
+            </p>
           </div>
-          <Link to="/linux/file-and-directory/ls" className="text-sm font-mono text-[var(--terminal-green)] hover:underline flex items-center gap-1">
-            <span>View all</span>
-            <ArrowRight className="w-4 h-4" />
+          <Link
+            to="/linux/file-and-directory/ls"
+            className="inline-flex items-center gap-1 font-mono text-xs text-[var(--terminal-green)] hover:underline"
+          >
+            Start with ls
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {LINUX_CATEGORIES.map((cat) => {
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {LINUX_CATEGORIES.map((cat, index) => {
             const count = COMMANDS.filter((c) => c.section === 'linux' && c.category === cat.id).length;
             return (
               <Link
                 key={cat.id}
                 to={`/linux/${cat.id}`}
-                className="group p-6 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--terminal-green)]/50 transition-all shadow-sm hover:shadow-md flex flex-col justify-between"
+                className="group relative flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 hover:-translate-y-0.5 hover:border-[var(--terminal-green)]/45"
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--terminal-green-bg)] text-[var(--terminal-green)] font-semibold">
-                      {count} commands
-                    </span>
-                    <Terminal className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--terminal-green)] transition-colors" />
-                  </div>
-                  <h3 className="text-lg font-bold font-mono text-[var(--text-heading)] group-hover:text-[var(--terminal-green)] transition-colors">
-                    {cat.name}
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)] line-clamp-2 leading-relaxed">{cat.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <Terminal className="h-4 w-4 text-[var(--text-muted)] transition-colors group-hover:text-[var(--terminal-green)]" />
                 </div>
-                <div className="mt-6 flex items-center gap-1 text-xs font-mono text-[var(--terminal-green)] font-medium">
-                  <span>Browse category</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                <h3 className="font-display text-xl font-semibold text-[var(--text-heading)] group-hover:text-[var(--terminal-green)]">
+                  {cat.name}
+                </h3>
+                <p className="line-clamp-2 text-xs leading-relaxed text-[var(--text-muted)]">{cat.description}</p>
+                <div className="mt-auto flex items-center justify-between border-t border-[var(--border-subtle)] pt-3">
+                  <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                    {count} {count === 1 ? 'command' : 'commands'}
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-[var(--terminal-green)] transition-transform group-hover:translate-x-1" />
                 </div>
               </Link>
             );
@@ -147,47 +225,77 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* CTF Security Domains Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold font-mono text-[var(--text-heading)]">CTF & Security Domains</h2>
-            <p className="text-sm text-[var(--text-muted)] mt-1">Penetration testing, reverse engineering, forensics, and cryptography tools.</p>
+      {/* CTF domains */}
+      <section className="mx-auto max-w-7xl space-y-8 px-4 py-16 sm:px-6 lg:px-8">
+        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] pb-5">
+          <div className="space-y-2">
+            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ctf-red)]">
+              Section 02
+            </span>
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-[var(--text-heading)] sm:text-4xl">
+              CTF &amp; security
+            </h2>
+            <p className="max-w-[52ch] text-sm leading-relaxed text-[var(--text-muted)]">
+              Recon, exploitation, forensics and reversing tools — documented for learning, not for unauthorised
+              access.
+            </p>
           </div>
-          <Link to="/ctf/recon/nmap" className="text-sm font-mono text-[var(--ctf-red)] hover:underline flex items-center gap-1">
-            <span>View CTF home</span>
-            <ArrowRight className="w-4 h-4" />
+          <Link
+            to="/ctf"
+            className="inline-flex items-center gap-1 font-mono text-xs text-[var(--ctf-red)] hover:underline"
+          >
+            Open CTF home
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {CTF_DOMAINS.map((domain) => {
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {CTF_DOMAINS.map((domain, index) => {
             const count = COMMANDS.filter((c) => c.section === 'ctf' && c.category === domain.id).length;
             return (
               <Link
                 key={domain.id}
                 to={`/ctf/${domain.id}`}
-                className="group p-6 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--ctf-red)]/50 transition-all shadow-sm hover:shadow-md flex flex-col justify-between"
+                className="group relative flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 hover:-translate-y-0.5 hover:border-[var(--ctf-red)]/45"
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--ctf-red-bg)] text-[var(--ctf-red)] font-semibold">
-                      {count} tools
-                    </span>
-                    <Shield className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--ctf-red)] transition-colors" />
-                  </div>
-                  <h3 className="text-lg font-bold font-mono text-[var(--text-heading)] group-hover:text-[var(--ctf-red)] transition-colors">
-                    {domain.name}
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)] line-clamp-2 leading-relaxed">{domain.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <Shield className="h-4 w-4 text-[var(--text-muted)] transition-colors group-hover:text-[var(--ctf-red)]" />
                 </div>
-                <div className="mt-6 flex items-center gap-1 text-xs font-mono text-[var(--ctf-red)] font-medium">
-                  <span>Explore domain</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                <h3 className="font-display text-xl font-semibold text-[var(--text-heading)] group-hover:text-[var(--ctf-red)]">
+                  {domain.name}
+                </h3>
+                <p className="line-clamp-2 text-xs leading-relaxed text-[var(--text-muted)]">{domain.description}</p>
+                <div className="mt-auto flex items-center justify-between border-t border-[var(--border-subtle)] pt-3">
+                  <span className="font-mono text-[11px] text-[var(--text-muted)]">
+                    {count} {count === 1 ? 'tool' : 'tools'}
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-[var(--ctf-red)] transition-transform group-hover:translate-x-1" />
                 </div>
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      {/* Ethics note */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-7 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <FileText className="mt-0.5 h-5 w-5 shrink-0 text-[var(--amber-warning)]" />
+            <p className="max-w-[64ch] text-sm leading-relaxed text-[var(--text-muted)]">
+              Security tooling here is documented for study and for systems you own or are authorised to test.
+              LinuxDocs never runs anything against a live host.
+            </p>
+          </div>
+          <Link
+            to="/terms"
+            className="shrink-0 rounded-lg border border-[var(--border)] px-4 py-2.5 font-mono text-xs text-[var(--text)] hover:border-[var(--text-muted)]/40"
+          >
+            Read the terms
+          </Link>
         </div>
       </section>
     </div>

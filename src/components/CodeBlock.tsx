@@ -7,7 +7,7 @@ interface CodeBlockProps {
   showCopy?: boolean;
 }
 
-export const CodeBlock = ({ code, language: _language = 'bash', showCopy = true }: CodeBlockProps) => {
+export const CodeBlock = ({ code, language = 'bash', showCopy = true }: CodeBlockProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -17,28 +17,33 @@ export const CodeBlock = ({ code, language: _language = 'bash', showCopy = true 
   };
 
   return (
-    <div className="relative group rounded-lg border border-[var(--code-border)] bg-[var(--code-bg)] overflow-hidden font-mono text-sm my-3">
-      {showCopy && (
-        <button
-          onClick={handleCopy}
-          type="button"
-          className="absolute top-2 right-2 p-1.5 rounded-md bg-[var(--bg-surface-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all opacity-80 group-hover:opacity-100 flex items-center gap-1.5 text-xs"
-          aria-label="Copy to clipboard"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-[var(--terminal-green)]" />
-              <span className="text-[var(--terminal-green)] font-sans">Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              <span className="font-sans">Copy</span>
-            </>
-          )}
-        </button>
-      )}
-      <pre className="p-4 overflow-x-auto text-[var(--text)] leading-relaxed">
+    <div className="terminal-window group relative my-3 overflow-hidden">
+      <div className="flex items-center justify-between border-b border-[var(--code-border)] px-3.5 py-1.5">
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+          {language}
+        </span>
+        {showCopy && (
+          <button
+            onClick={handleCopy}
+            type="button"
+            className="flex items-center gap-1.5 rounded-md px-2 py-1 font-mono text-[11px] text-[var(--text-muted)] opacity-70 hover:bg-[var(--bg-surface-elevated)] hover:text-[var(--text)] focus-visible:opacity-100 group-hover:opacity-100"
+            aria-label="Copy code to clipboard"
+          >
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-[var(--terminal-green)]" />
+                <span className="text-[var(--terminal-green)]">Copied</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" />
+                <span>Copy</span>
+              </>
+            )}
+          </button>
+        )}
+      </div>
+      <pre className="overflow-x-auto bg-[var(--code-bg)] p-4 font-mono text-sm leading-relaxed text-[var(--text)]">
         <code>{code}</code>
       </pre>
     </div>

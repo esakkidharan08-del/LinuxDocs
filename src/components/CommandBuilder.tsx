@@ -19,7 +19,7 @@ export const CommandBuilder = ({ spec }: { spec: BuilderSpec }) => {
     <section className="space-y-5 p-5 rounded-xl border border-[var(--terminal-green)]/30 bg-[var(--terminal-green-bg)]" aria-labelledby="command-builder-title">
       <div className="flex items-center gap-2">
         <SlidersHorizontal className="w-5 h-5 text-[var(--terminal-green)]" />
-        <h2 id="command-builder-title" className="font-mono text-xl font-bold text-[var(--text-heading)]">Command Builder</h2>
+        <h2 id="command-builder-title" className="font-display text-xl font-semibold text-[var(--text-heading)]">Command builder</h2>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {spec.fields.map((field) => (
@@ -32,7 +32,7 @@ export const CommandBuilder = ({ spec }: { spec: BuilderSpec }) => {
       <div className="grid gap-2 sm:grid-cols-2">
         {spec.flags.map((item) => (
           <label key={item.flag} className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 font-mono text-xs text-[var(--text)]">
-            <input type="checkbox" checked={flags.has(item.flag)} onChange={() => setFlags((current) => { const next = new Set(current); next.has(item.flag) ? next.delete(item.flag) : next.add(item.flag); return next; })} className="accent-[var(--terminal-green)]" />
+            <input type="checkbox" checked={flags.has(item.flag)} onChange={() => setFlags((current) => { const next = new Set(current); if (next.has(item.flag)) { next.delete(item.flag); } else { next.add(item.flag); } return next; })} className="accent-[var(--terminal-green)]" />
             {item.label} <code className="ml-auto text-[var(--terminal-green)]">{item.flag}</code>
           </label>
         ))}

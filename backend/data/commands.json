@@ -5891,6 +5891,1086 @@
         "data",
         "query"
       ]
+    },
+    {
+      "slug": "ssh",
+      "name": "ssh",
+      "category": "networking",
+      "section": "linux",
+      "summary": "OpenSSH remote login client.",
+      "syntax": "ssh [user@]hostname [command]",
+      "description": "ssh is a program for logging into a remote machine and executing commands.",
+      "options": [
+        {
+          "flag": "-p",
+          "description": "Port to connect to."
+        },
+        {
+          "flag": "-i",
+          "description": "Select identity file."
+        }
+      ],
+      "examples": [
+        {
+          "title": "Connect to remote host",
+          "command": "ssh user@192.168.1.100",
+          "output": "user@host:~$",
+          "explanation": "Start SSH session."
+        }
+      ],
+      "useCases": [
+        "Remote access"
+      ],
+      "related": [
+        "scp",
+        "sftp"
+      ],
+      "tags": [
+        "ssh",
+        "remote"
+      ]
+    },
+    {
+      "slug": "scp",
+      "name": "scp",
+      "category": "networking",
+      "section": "linux",
+      "summary": "Secure copy.",
+      "syntax": "scp [options] source target",
+      "description": "scp copies files between hosts on a network using ssh.",
+      "options": [
+        {
+          "flag": "-r",
+          "description": "Recursively copy entire directories."
+        },
+        {
+          "flag": "-P",
+          "description": "Specifies remote host ssh port."
+        }
+      ],
+      "examples": [
+        {
+          "title": "Copy file to remote",
+          "command": "scp file.txt user@host:/home/user/",
+          "output": "file.txt 100% 1KB",
+          "explanation": "Securely copy file."
+        }
+      ],
+      "useCases": [
+        "File transfer"
+      ],
+      "related": [
+        "ssh",
+        "rsync"
+      ],
+      "tags": [
+        "scp",
+        "ssh",
+        "transfer"
+      ]
+    },
+    {
+      "slug": "hydra",
+      "name": "hydra",
+      "category": "pwn",
+      "section": "ctf",
+      "summary": "Parallelized login cracker.",
+      "syntax": "hydra [OPTIONS] target protocol",
+      "description": "Hydra is a parallelized login cracker which supports numerous protocols.",
+      "options": [
+        {
+          "flag": "-l",
+          "description": "Login with LOGIN name."
+        },
+        {
+          "flag": "-P",
+          "description": "Load several passwords from FILE."
+        },
+        {
+          "flag": "-t",
+          "description": "Number of threads."
+        }
+      ],
+      "examples": [
+        {
+          "title": "SSH brute force",
+          "command": "hydra -l admin -P passwords.txt ssh://192.168.1.100",
+          "output": "[22][ssh] host: 192.168.1.100   login: admin   password: password123",
+          "explanation": "Brute force SSH login."
+        }
+      ],
+      "useCases": [
+        "Password cracking",
+        "Auth testing"
+      ],
+      "related": [
+        "ncrack"
+      ],
+      "tags": [
+        "brute-force",
+        "auth",
+        "cracking"
+      ]
+    },
+    {
+      "slug": "searchsploit",
+      "name": "searchsploit",
+      "category": "pwn",
+      "section": "ctf",
+      "summary": "Exploit-DB's search tool for offline use.",
+      "syntax": "searchsploit [options] term1 [term2] ...",
+      "description": "SearchSploit allows you to search through Exploit-DB from your local copy.",
+      "options": [
+        {
+          "flag": "-m",
+          "description": "Mirror an exploit to current directory."
+        }
+      ],
+      "examples": [
+        {
+          "title": "Search exploits",
+          "command": "searchsploit apache 2.4",
+          "output": "Apache 2.4.x - Path Traversal & RCE",
+          "explanation": "Find public exploits."
+        }
+      ],
+      "useCases": [
+        "Exploit research"
+      ],
+      "related": [
+        "nmap"
+      ],
+      "tags": [
+        "exploits",
+        "search"
+      ]
+    },
+    {
+      "slug": "pkill",
+      "name": "pkill",
+      "category": "process-management",
+      "section": "linux",
+      "summary": "Look up or signal processes based on name and other attributes.",
+      "syntax": "pkill [options] pattern",
+      "description": "pkill sends signals to processes matching criteria.",
+      "options": [
+        {
+          "flag": "-9",
+          "description": "SIGKILL"
+        },
+        {
+          "flag": "-f",
+          "description": "Match full command line"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Kill by name",
+          "command": "pkill firefox",
+          "output": "",
+          "explanation": "Kill all firefox processes."
+        }
+      ],
+      "useCases": [
+        "Process management"
+      ],
+      "related": [
+        "kill",
+        "killall"
+      ],
+      "tags": [
+        "process",
+        "signals"
+      ]
+    },
+    {
+      "slug": "netstat",
+      "name": "netstat",
+      "category": "networking",
+      "section": "linux",
+      "summary": "Print network connections, routing tables, interface statistics.",
+      "syntax": "netstat [options]",
+      "description": "Netstat displays network connections, routing tables, and network interface statistics.",
+      "options": [
+        {
+          "flag": "-tulnp",
+          "description": "Show TCP/UDP listening with PID/name"
+        }
+      ],
+      "examples": [
+        {
+          "title": "List listening ports",
+          "command": "netstat -tulnp",
+          "output": "tcp 0 0 0.0.0.0:22 0.0.0.0:* LISTEN 1234/sshd",
+          "explanation": "Show open ports."
+        }
+      ],
+      "useCases": [
+        "Network inspection"
+      ],
+      "related": [
+        "ss",
+        "lsof"
+      ],
+      "tags": [
+        "network",
+        "ports"
+      ]
+    },
+    {
+      "slug": "locate",
+      "name": "locate",
+      "category": "search-and-find",
+      "section": "linux",
+      "summary": "Find files by name.",
+      "syntax": "locate [OPTION]... PATTERN...",
+      "description": "locate reads one or more databases prepared by updatedb and writes file names matching patterns.",
+      "options": [
+        {
+          "flag": "-i",
+          "description": "Ignore case"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Find file quickly",
+          "command": "locate bashrc",
+          "output": "/etc/bash.bashrc",
+          "explanation": "Fast filename search."
+        }
+      ],
+      "useCases": [
+        "File searching"
+      ],
+      "related": [
+        "find"
+      ],
+      "tags": [
+        "locate",
+        "search"
+      ]
+    },
+    {
+      "slug": "ncat",
+      "name": "ncat",
+      "category": "recon",
+      "section": "ctf",
+      "summary": "Concatenate and redirect sockets (Nmap version).",
+      "syntax": "ncat [options] [host] [port]",
+      "description": "Ncat is a feature-packed networking utility read from stdin and write to networks using TCP or UDP.",
+      "options": [
+        {
+          "flag": "-l",
+          "description": "Listen mode"
+        },
+        {
+          "flag": "-v",
+          "description": "Verbose"
+        },
+        {
+          "flag": "-e",
+          "description": "Execute command"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Listen on port",
+          "command": "ncat -lvp 4444",
+          "output": "",
+          "explanation": "Listen for reverse shell."
+        }
+      ],
+      "useCases": [
+        "Netcat-like operations"
+      ],
+      "related": [
+        "nc"
+      ],
+      "tags": [
+        "network",
+        "shell"
+      ]
+    },
+    {
+      "slug": "nc",
+      "name": "nc",
+      "category": "recon",
+      "section": "ctf",
+      "summary": "Arbitrary TCP and UDP connections and listens.",
+      "syntax": "nc [options] host port",
+      "description": "netcat is a computer networking utility for reading from and writing to network connections using TCP or UDP.",
+      "options": [
+        {
+          "flag": "-l",
+          "description": "Listen"
+        },
+        {
+          "flag": "-e",
+          "description": "Execute program"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Connect to port",
+          "command": "nc example.com 80",
+          "output": "",
+          "explanation": "Connect to a port."
+        }
+      ],
+      "useCases": [
+        "Debugging",
+        "Shells"
+      ],
+      "related": [
+        "ncat"
+      ],
+      "tags": [
+        "network",
+        "shell"
+      ]
+    },
+    {
+      "slug": "wpscan",
+      "name": "wpscan",
+      "category": "web",
+      "section": "ctf",
+      "summary": "WordPress Security Scanner.",
+      "syntax": "wpscan --url URL [options]",
+      "description": "WPScan is a black box WordPress vulnerability scanner.",
+      "options": [
+        {
+          "flag": "--url",
+          "description": "Target WordPress URL"
+        },
+        {
+          "flag": "--enumerate",
+          "description": "Enumeration options"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Scan WordPress site",
+          "command": "wpscan --url http://example.com",
+          "output": "[+] WordPress version 5.8 identified",
+          "explanation": "Enumerate WordPress."
+        }
+      ],
+      "useCases": [
+        "WordPress testing"
+      ],
+      "related": [
+        "nikto"
+      ],
+      "tags": [
+        "wordpress",
+        "web"
+      ]
+    },
+    {
+      "slug": "rsync",
+      "name": "rsync",
+      "category": "networking",
+      "section": "linux",
+      "summary": "Remote file copy (Synchronize file trees and files between directories/devices).",
+      "syntax": "rsync [OPTION]... SRC [SRC]... DEST",
+      "description": "rsync is a fast, versatile, remote (and local) file-copying tool.",
+      "options": [
+        {
+          "flag": "-a",
+          "description": "Archive mode"
+        },
+        {
+          "flag": "-v",
+          "description": "Verbose"
+        },
+        {
+          "flag": "-z",
+          "description": "Compress"
+        },
+        {
+          "flag": "--progress",
+          "description": "Show progress"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Sync directories",
+          "command": "rsync -avz /src/ user@host:/dest/",
+          "output": "sending incremental file list",
+          "explanation": "Efficient sync."
+        }
+      ],
+      "useCases": [
+        "Backups",
+        "Transfers"
+      ],
+      "related": [
+        "scp",
+        "ssh"
+      ],
+      "tags": [
+        "sync",
+        "transfer"
+      ]
+    },
+    {
+      "slug": "lsof",
+      "name": "lsof",
+      "category": "networking",
+      "section": "linux",
+      "summary": "List open files.",
+      "syntax": "lsof [options] [names]",
+      "description": "lsof lists information about files opened by processes.",
+      "options": [
+        {
+          "flag": "-i",
+          "description": "Select IPv[46] files"
+        },
+        {
+          "flag": "-p",
+          "description": "Exclude or select process IDs"
+        },
+        {
+          "flag": "+D",
+          "description": "Search in directory tree"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Show open network connections",
+          "command": "lsof -i",
+          "output": "COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME",
+          "explanation": "List network sockets."
+        }
+      ],
+      "useCases": [
+        "Debugging",
+        "Network inspection"
+      ],
+      "related": [
+        "netstat",
+        "ss"
+      ],
+      "tags": [
+        "files",
+        "network"
+      ]
+    },
+    {
+      "slug": "nikto",
+      "name": "nikto",
+      "category": "web",
+      "section": "ctf",
+      "summary": "Web server vulnerability scanner.",
+      "syntax": "nikto -h <host>",
+      "description": "Nikto is an open-source web server scanner that performs comprehensive tests against web servers.",
+      "options": [
+        {
+          "flag": "-h",
+          "description": "Target host or IP"
+        },
+        {
+          "flag": "-p",
+          "description": "Custom port to scan"
+        },
+        {
+          "flag": "-ssl",
+          "description": "Force SSL/HTTPS mode"
+        },
+        {
+          "flag": "-o",
+          "description": "Write scan output to a file"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Scan a web server",
+          "command": "nikto -h http://10.0.0.5",
+          "output": "+ Server: Apache/2.4.41\n+ Allowed HTTP Methods: GET, HEAD, POST, OPTIONS",
+          "explanation": "Identifies software versions and risky configurations."
+        }
+      ],
+      "useCases": [
+        "web scanning",
+        "misconfiguration checks"
+      ],
+      "related": [
+        "nmap",
+        "wpscan"
+      ],
+      "tags": [
+        "web",
+        "scanner",
+        "vuln"
+      ]
+    },
+    {
+      "slug": "wfuzz",
+      "name": "wfuzz",
+      "category": "web",
+      "section": "ctf",
+      "summary": "Web application fuzzer.",
+      "syntax": "wfuzz -w wordlist.txt <url> --hc 404",
+      "description": "wfuzz brute-forces web applications by injecting wordlist entries into the URL, headers, or POST parameters, filtering results by status/length.",
+      "options": [
+        {
+          "flag": "-w",
+          "description": "Wordlist to use"
+        },
+        {
+          "flag": "-u",
+          "description": "Target URL with FUZZ placeholder"
+        },
+        {
+          "flag": "--hc",
+          "description": "Hide responses with the given status code"
+        },
+        {
+          "flag": "-z",
+          "description": "Preset payload type (file, list, range)"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Fuzz directories",
+          "command": "wfuzz -w dirs.txt -u http://10.0.0.5/FUZZ --hc 404",
+          "output": "000000020: 200  121 l  415 w  7255 ch  \"admin\"",
+          "explanation": "FUZZ is replaced by each entry; 404s are hidden."
+        }
+      ],
+      "useCases": [
+        "directory discovery",
+        "parameter fuzzing"
+      ],
+      "related": [
+        "ffuf",
+        "gobuster"
+      ],
+      "tags": [
+        "web",
+        "fuzz",
+        "bruteforce"
+      ]
+    },
+    {
+      "slug": "feroxbuster",
+      "name": "feroxbuster",
+      "category": "web",
+      "section": "ctf",
+      "summary": "Rust-based recursive content discovery tool.",
+      "syntax": "feroxbuster -u <url> -w <wordlist>",
+      "description": "feroxbuster combines wordlist-based directory scanning with automatic recursion, fast concurrency, and link extraction written in Rust.",
+      "options": [
+        {
+          "flag": "-u",
+          "description": "Target URL"
+        },
+        {
+          "flag": "-w",
+          "description": "Wordlist path"
+        },
+        {
+          "flag": "-x",
+          "description": "Filter status codes"
+        },
+        {
+          "flag": "-r",
+          "description": "Follow redirects and recurse"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Recursive scan",
+          "command": "feroxbuster -u http://10.0.0.5 -w dirs.txt -x 500",
+          "output": "200      8l      45w     1204c http://10.0.0.5/uploads",
+          "explanation": "Discovers directories and automatically scans their children."
+        }
+      ],
+      "useCases": [
+        "content discovery",
+        "web recon"
+      ],
+      "related": [
+        "gobuster",
+        "wfuzz",
+        "ffuf"
+      ],
+      "tags": [
+        "web",
+        "rust",
+        "enum"
+      ]
+    },
+    {
+      "slug": "rustscan",
+      "name": "rustscan",
+      "category": "recon",
+      "section": "ctf",
+      "summary": "Fast port scanner that pipes to nmap.",
+      "syntax": "rustscan -a <host> -- -sV -sC",
+      "description": "RustScan scans all ports extremely fast in Rust and passes found ports to nmap for deep service enumeration in a single command.",
+      "options": [
+        {
+          "flag": "-a",
+          "description": "Target address"
+        },
+        {
+          "flag": "--",
+          "description": "Arguments passed through to nmap"
+        },
+        {
+          "flag": "-u",
+          "description": "ulimit cap for concurrent scans"
+        },
+        {
+          "flag": "-t",
+          "description": "Timeout per scan"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Scan then enumerate",
+          "command": "rustscan -a 10.0.0.5 -- -sV -sC",
+          "output": "Open 10.0.0.5:22\nOpen 10.0.0.5:80",
+          "explanation": "Open ports are immediately fed into nmap for versions/scripts."
+        }
+      ],
+      "useCases": [
+        "fast port discovery"
+      ],
+      "related": [
+        "nmap",
+        "masscan"
+      ],
+      "tags": [
+        "recon",
+        "rust",
+        "ports"
+      ]
+    },
+    {
+      "slug": "masscan",
+      "name": "masscan",
+      "category": "recon",
+      "section": "ctf",
+      "summary": "Extreme-speed TCP port scanner.",
+      "syntax": "masscan -p1-65535 <cidr> --rate 10000",
+      "description": "masscan can scan the entire internet in minutes by transmitting up to ten million packets per second with custom TCP stacks.",
+      "options": [
+        {
+          "flag": "-p",
+          "description": "Port(s) to scan"
+        },
+        {
+          "flag": "--rate",
+          "description": "Packets per second"
+        },
+        {
+          "flag": "--exclude",
+          "description": "Exclude IPs from scanning"
+        },
+        {
+          "flag": "-oG",
+          "description": "Grep-able output file"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Full-port sweep",
+          "command": "masscan -p1-65535 10.0.0.5 --rate 10000",
+          "output": "Discovered open port 22/tcp on 10.0.0.5",
+          "explanation": "All 65535 ports in seconds — verify with nmap afterwards."
+        }
+      ],
+      "useCases": [
+        "internet-scale scanning"
+      ],
+      "related": [
+        "nmap",
+        "rustscan"
+      ],
+      "tags": [
+        "recon",
+        "mass",
+        "ports"
+      ]
+    },
+    {
+      "slug": "smbclient",
+      "name": "smbclient",
+      "category": "recon",
+      "section": "ctf",
+      "summary": "SMB/CIFS client for share access.",
+      "syntax": "smbclient -L //<host> -N",
+      "description": "smbclient talks to Windows/Samba SMB servers: list shares, browse files, and upload/download using credentials - core for Windows CTF boxes.",
+      "options": [
+        {
+          "flag": "-L",
+          "description": "List available shares on the server"
+        },
+        {
+          "flag": "-N",
+          "description": "Authenticate with no password (anonymous)"
+        },
+        {
+          "flag": "-U",
+          "description": "User%password credentials"
+        },
+        {
+          "flag": "-m",
+          "description": "Force SMB protocol version"
+        }
+      ],
+      "examples": [
+        {
+          "title": "List shares anonymously",
+          "command": "smbclient -L //10.0.0.5 -N",
+          "output": "Sharename       Type      Comment\nprint$          Disk",
+          "explanation": "Null session reveals exposed shares - then connect with smbclient //<host>/<share>."
+        }
+      ],
+      "useCases": [
+        "share enumeration",
+        "file transfer"
+      ],
+      "related": [
+        "enum4linux",
+        "nmap"
+      ],
+      "tags": [
+        "smb",
+        "windows",
+        "recon"
+      ]
+    },
+    {
+      "slug": "subfinder",
+      "name": "subfinder",
+      "category": "osint",
+      "section": "ctf",
+      "summary": "Passive subdomain discovery tool.",
+      "syntax": "subfinder -d <domain>",
+      "description": "subfinder finds subdomains using passive online sources (certificate transparency logs, search engines, public APIs) without touching the target directly.",
+      "options": [
+        {
+          "flag": "-d",
+          "description": "Target domain"
+        },
+        {
+          "flag": "-all",
+          "description": "Use all sources for maximum coverage"
+        },
+        {
+          "flag": "-o",
+          "description": "Output file"
+        },
+        {
+          "flag": "-silent",
+          "description": "Print only the subdomains"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Enumerate subdomains",
+          "command": "subfinder -d example.com -silent",
+          "output": "mail.example.com\ndev.example.com",
+          "explanation": "Quiet, passive recon — a safe first step."
+        }
+      ],
+      "useCases": [
+        "subdomain enumeration",
+        "osint"
+      ],
+      "related": [
+        "whois",
+        "nmap"
+      ],
+      "tags": [
+        "osint",
+        "dns",
+        "subdomains"
+      ]
+    },
+    {
+      "slug": "volatility",
+      "name": "volatility",
+      "category": "forensics",
+      "section": "ctf",
+      "summary": "Memory forensics analysis framework.",
+      "syntax": "volatility -f <memory-dump> <profile> <plugin>",
+      "description": "Volatility extracts processes, network connections, and hidden artifacts from raw memory dumps - essential for memory forensics challenges.",
+      "options": [
+        {
+          "flag": "-f",
+          "description": "Memory dump file"
+        },
+        {
+          "flag": "--profile",
+          "description": "OS profile (e.g. WinXPsp2x86)"
+        },
+        {
+          "flag": "pslist",
+          "description": "Plugin: list running processes"
+        },
+        {
+          "flag": "netscan",
+          "description": "Plugin: dump network artifacts"
+        }
+      ],
+      "examples": [
+        {
+          "title": "List processes from a dump",
+          "command": "volatility -f dump.vmem --profile Win7SP1x64 pslist",
+          "output": "Offset(V)  Name          PID\n0xfffffa8... explorer.exe  1184",
+          "explanation": "Reconstructs process state at capture time."
+        }
+      ],
+      "useCases": [
+        "memory dump analysis"
+      ],
+      "related": [
+        "foremost",
+        "binwalk"
+      ],
+      "tags": [
+        "forensics",
+        "memory"
+      ]
+    },
+    {
+      "slug": "foremost",
+      "name": "foremost",
+      "category": "forensics",
+      "section": "ctf",
+      "summary": "File carving utility.",
+      "syntax": "foremost -i <image> -o <outdir>",
+      "description": "Foremost carves files (jpg, png, pdf, doc, etc.) out of disk images or binary blobs based on headers and footers, ignoring filesystem damage.",
+      "options": [
+        {
+          "flag": "-i",
+          "description": "Input image file"
+        },
+        {
+          "flag": "-o",
+          "description": "Output directory for carved files"
+        },
+        {
+          "flag": "-t",
+          "description": "Restrict carving to specific types"
+        },
+        {
+          "flag": "-q",
+          "description": "Quick sector-scan mode"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Carve files out of an image",
+          "command": "foremost -i disk.img -o recovered/",
+          "output": "Processing: disk.img\n10 jpg, 3 png recovered",
+          "explanation": "Turns raw bytes back into usable files."
+        }
+      ],
+      "useCases": [
+        "file carving"
+      ],
+      "related": [
+        "binwalk",
+        "steghide"
+      ],
+      "tags": [
+        "forensics",
+        "carve"
+      ]
+    },
+    {
+      "slug": "hashid",
+      "name": "hashid",
+      "category": "crypto",
+      "section": "ctf",
+      "summary": "Identify hash and cipher types before cracking.",
+      "syntax": "hashid <hash>",
+      "description": "hashid analyses a hash string and lists the most probable hash algorithms (MD5, SHA-1, bcrypt, etc.), telling you what to feed into a cracker.",
+      "options": [
+        {
+          "flag": "  none",
+          "description": "Pass the candidate hash as positional argument"
+        },
+        {
+          "flag": "-m",
+          "description": "Also show hashcat mode numbers"
+        },
+        {
+          "flag": "-j",
+          "description": "Also show john the ripper formats"
+        },
+        {
+          "flag": "-e",
+          "description": "Show probable etype (Salted/Unsalted)"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Identify a hash",
+          "command": "hashid 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+          "output": "[+] SHA-256\n[+] SHA3-256",
+          "explanation": "64 hex chars strongly suggests SHA-256 family."
+        }
+      ],
+      "useCases": [
+        "hash identification"
+      ],
+      "related": [
+        "john",
+        "hashcat"
+      ],
+      "tags": [
+        "crypto",
+        "hashes"
+      ]
+    },
+    {
+      "slug": "openssl",
+      "name": "openssl",
+      "category": "crypto",
+      "section": "ctf",
+      "summary": "TLS/SSL toolkit and cryptography Swiss-army knife.",
+      "syntax": "openssl <command> <options>",
+      "description": "openssl performs certificate inspection, encodes/decodes data, generates keys, and decrypts challenge artifacts (base64, AES, RSA).",
+      "options": [
+        {
+          "flag": "s_client",
+          "description": "Connect to a TLS service for diagnostics"
+        },
+        {
+          "flag": "x509",
+          "description": "Inspect certificate details"
+        },
+        {
+          "flag": "enc",
+          "description": "Encrypt/decrypt data"
+        },
+        {
+          "flag": "base64",
+          "description": "Base64 encode/decode"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Fetch a certificate",
+          "command": "openssl s_client -connect example.com:443",
+          "output": "subject=CN=example.com\nissuer=CN=R3",
+          "explanation": "Raws TLS handshake info, useful when probing services."
+        }
+      ],
+      "useCases": [
+        "certificate analysis",
+        "artifact decoding"
+      ],
+      "related": [
+        "hashid",
+        "hashcat"
+      ],
+      "tags": [
+        "crypto",
+        "tls",
+        "certs"
+      ]
+    },
+    {
+      "slug": "radare2",
+      "name": "radare2",
+      "category": "reverse-engineering",
+      "section": "ctf",
+      "summary": "Scriptable reverse-engineering and binary analysis framework.",
+      "syntax": "r2 <binary>",
+      "description": "radare2 (r2) is a feature-packed binary analysis suite: disassemble, patch, explore strings, and automate analysis from its interactive repl.",
+      "options": [
+        {
+          "flag": "aaa",
+          "description": "Analyse the binary thoroughly at load"
+        },
+        {
+          "flag": "pdf",
+          "description": "Disassemble a functioin on the visual page"
+        },
+        {
+          "flag": "iz",
+          "description": "List strings in data sections"
+        },
+        {
+          "flag": "V",
+          "description": "Switch to visual mode"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Quick look at a binary",
+          "command": "r2 -A ./crackme",
+          "output": "[0x00400530]> pdf @ main",
+          "explanation": "-A runs auto-analysis; pdf shows main's logic."
+        }
+      ],
+      "useCases": [
+        "binary analysis",
+        "disassembly"
+      ],
+      "related": [
+        "gdb",
+        "objdump"
+      ],
+      "tags": [
+        "re",
+        "radare",
+        "asm"
+      ]
+    },
+    {
+      "slug": "jadx",
+      "name": "jadx",
+      "category": "mobile",
+      "section": "ctf",
+      "summary": "Android APK / bytecode decompiler.",
+      "syntax": "jadx [options] <apk-file>",
+      "description": "jadx decompiles Android APKs into readable Java source, revealing flags baked into apps or logic in obfuscated code.",
+      "options": [
+        {
+          "flag": "-g",
+          "description": "Show bytecode (smali) graph view"
+        },
+        {
+          "flag": "-d",
+          "description": "Output directory"
+        },
+        {
+          "flag": "--no-res",
+          "description": "Skip resource decompiling for speed"
+        },
+        {
+          "flag": "-e",
+          "description": "Export as a gradle project"
+        }
+      ],
+      "examples": [
+        {
+          "title": "Decompile an APK",
+          "command": "jadx -d out/ app.apk",
+          "output": "INFO - loading...\nINFO - out/sources/com/ctf/MainActivity.java",
+          "explanation": "Browse out/sources for hardcoded flags and API keys."
+        }
+      ],
+      "useCases": [
+        "android reversing"
+      ],
+      "related": [
+        "apktool",
+        "strings"
+      ],
+      "tags": [
+        "mobile",
+        "android",
+        "re"
+      ]
     }
   ],
   "needsHumanReview": [

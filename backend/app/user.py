@@ -1,9 +1,18 @@
 from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db
-from app.models import User, Bookmark, UserNote, RecentlyViewed
+from . import db
+from .models import User, Bookmark, UserNote, RecentlyViewed, Session
+from .security import (
+    rate_limit, require_trusted_origin, client_ip, _warn_security, env_int, sha256_hex,
+)
+from .auth import password_policy_errors
+from .sessions import get_refresh_token_from_request
 
 user_bp = Blueprint('user', __name__)
+
+MAX_SLUG_LEN = 200
+MAX_NOTE_LEN = 10000
+MAX_IMPORT_ITEMS = 2000
 
 
 @user_bp.route('/me', methods=['GET'])
@@ -30,10 +39,12 @@ def get_bookmarks():
 def toggle_bookmark():
     user_id = get_jwt_identity()
     data = request.get_json(silent=True) or {}
-    slug = data.get('command_slug', '').strip()
+    slug = (data.get('command_slug') or '').strip()
 
     if not slug:
         return jsonify({'error': 'command_slug required'}), 400
+    if len(slug) > MAX_SLUG_LEN:
+        return jsonify({'error': 'command_slug too long'}), 400
 
     existing = Bookmark.query.filter_by(user_id=user_id, command_slug=slug).first()
     if existing:
@@ -61,15 +72,19 @@ def get_notes():
 def upsert_note():
     user_id = get_jwt_identity()
     data = request.get_json(silent=True) or {}
-    slug = data.get('command_slug', '').strip()
+    slug = (data.get('command_slug') or '').strip()
     text = data.get('text', '')
 
     if not slug:
         return jsonify({'error': 'command_slug required'}), 400
+    if len(slug) > MAX_SLUG_LEN:
+        return jsonify({'error': 'command_slug too long'}), 400
+    if not isinstance(text, str):
+        return jsonify({'error': 'Note text must be a string'}), 400
     if not text or not text.strip():
         return jsonify({'error': 'Note text cannot be empty'}), 400
-    if len(text) > 10000:
-        return jsonify({'error': 'Note too long (max 10000 characters)'}), 400
+    if len(text) > MAX_NOTE_LEN:
+        return jsonify({'error': f'Note too long (max {MAX_NOTE_LEN} characters)'}), 400
 
     note = UserNote.query.filter_by(user_id=user_id, command_slug=slug).first()
     if note:
@@ -107,10 +122,12 @@ def get_history():
 def add_history():
     user_id = get_jwt_identity()
     data = request.get_json(silent=True) or {}
-    slug = data.get('command_slug', '').strip()
+    slug = (data.get('command_slug') or '').strip()
 
     if not slug:
         return jsonify({'error': 'command_slug required'}), 400
+    if len(slug) > MAX_SLUG_LEN:
+        return jsonify({'error': 'command_slug too long'}), 400
 
     RecentlyViewed.add_view(user_id, slug)
     db.session.commit()
@@ -126,8 +143,10 @@ def import_data():
     notes = data.get('notes', [])
     if not isinstance(bookmarks, list) or not isinstance(notes, list):
         return jsonify({'error': 'bookmarks and notes must be arrays'}), 400
+    if len(bookmarks) > MAX_IMPORT_ITEMS or len(notes) > MAX_IMPORT_ITEMS:
+        return jsonify({'error': f'Import is limited to {MAX_IMPORT_ITEMS} items per collection'}), 400
     for slug in bookmarks:
-        if isinstance(slug, str) and slug.strip():
+        if isinstance(slug, str) and slug.strip() and len(slug) <= MAX_SLUG_LEN:
             existing = Bookmark.query.filter_by(user_id=user_id, command_slug=slug.strip()).first()
             if not existing:
                 db.session.add(Bookmark(user_id=user_id, command_slug=slug.strip()))
@@ -136,7 +155,7 @@ def import_data():
             continue
         slug = item['command_slug'].strip()
         text = item['text'].strip()
-        if not slug or not text or len(text) > 10000:
+        if not slug or not text or len(slug) > MAX_SLUG_LEN or len(text) > MAX_NOTE_LEN:
             continue
         note = UserNote.query.filter_by(user_id=user_id, command_slug=slug).first()
         if note:
@@ -150,7 +169,12 @@ def import_data():
 # --- CHANGE PASSWORD ---
 @user_bp.route('/change-password', methods=['POST'])
 @jwt_required()
+@rate_limit('change-pwd:ip:{ip}', lambda: env_int('CHANGE_PASSWORD_RATE_LIMIT', 10), 600)
 def change_password():
+    rejection = require_trusted_origin()
+    if rejection:
+        return rejection
+
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     if not user:
@@ -167,16 +191,9 @@ def change_password():
     elif not user.check_password(current):
         errors['current_password'] = 'Current password incorrect'
 
-    if not new or len(new) < 10:
-        errors['new_password'] = 'New password must be at least 10 characters'
-    elif not re.search(r'[A-Z]', new):
-        errors['new_password'] = 'Must contain at least one uppercase letter'
-    elif not re.search(r'[a-z]', new):
-        errors['new_password'] = 'Must contain at least one lowercase letter'
-    elif not re.search(r'\d', new):
-        errors['new_password'] = 'Must contain at least one digit'
-    elif not re.search(r'[^A-Za-z0-9]', new):
-        errors['new_password'] = 'Must contain at least one special character'
+    pw_errors = password_policy_errors(new, user.username, user.email)
+    if pw_errors:
+        errors['new_password'] = pw_errors[0]
 
     if new != confirm:
         errors['confirm_password'] = 'Passwords do not match'
@@ -185,14 +202,30 @@ def change_password():
         return jsonify({'errors': errors}), 400
 
     user.set_password(new)
+    # Keep THIS device signed in, drop every other session.
+    raw = get_refresh_token_from_request()
+    sessions = Session.query.filter_by(user_id=user_id, revoked=False).all()
+    current_hash = sha256_hex(raw) if raw else None
+    revoked = 0
+    for s in sessions:
+        if current_hash and s.token_hash == current_hash:
+            continue
+        s.revoked = True
+        revoked += 1
     db.session.commit()
+    _warn_security('password_changed', user_id=user_id, ip=client_ip(), other_sessions_revoked=revoked)
     return jsonify({'message': 'Password changed'}), 200
 
 
 # --- DELETE ACCOUNT ---
 @user_bp.route('/delete-account', methods=['DELETE'])
 @jwt_required()
+@rate_limit('delete-acct:ip:{ip}', lambda: env_int('DELETE_ACCOUNT_RATE_LIMIT', 5), 3600)
 def delete_account():
+    rejection = require_trusted_origin()
+    if rejection:
+        return rejection
+
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     if not user:
@@ -204,13 +237,10 @@ def delete_account():
     if confirm != user.username:
         return jsonify({'errors': {'confirm': 'Type your username to confirm deletion'}}), 400
 
-    db.session.delete(user)
+    db.session.delete(user)  # sessions + reset tokens cascade via FK
     db.session.commit()
 
     resp = make_response(jsonify({'message': 'Account deleted'}), 200)
     # Clear cookies
     resp.delete_cookie('refresh_token_cookie')
     return resp
-
-
-import re

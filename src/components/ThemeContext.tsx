@@ -1,3 +1,4 @@
+/* eslint-disable react/only-export-components -- context hooks are colocated with their providers on purpose */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'dark' | 'light';
