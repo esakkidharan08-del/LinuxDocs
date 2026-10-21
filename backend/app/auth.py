@@ -1,5 +1,4 @@
 import re
-import os
 from flask import Blueprint, request, jsonify, current_app, make_response
 from flask_jwt_extended import (
     create_access_token,
@@ -22,6 +21,7 @@ from .sessions import (
     set_refresh_cookie, clear_refresh_cookie, get_refresh_token_from_request,
     create_reset_token, consume_reset_token, prune_expired_sessions,
 )
+from . import mailer as mail_delivery
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -41,8 +41,13 @@ COMMON_PASSWORDS = {
 }
 
 
-def password_policy_errors(password: str, username: str = '', email: str = ''):
-    """Shared password strength rules. Returns a list of violation messages."""
+def password_content_errors(password: str):
+    """Identity-free password rules — length, bytes, charset, breach list.
+
+    Usable *before* a reset token is claimed: claiming is single-use, so a
+    mistyped new password must not burn the token. Identity-bound rules live
+    in ``password_policy_errors``.
+    """
     errors = []
     if not password or len(password) < 10:
         errors.append('Password must be at least 10 characters')
@@ -61,6 +66,14 @@ def password_policy_errors(password: str, username: str = '', email: str = ''):
             errors.append('Password must contain at least one digit')
         if not re.search(r'[^A-Za-z0-9]', password):
             errors.append('Password must contain at least one special character')
+    if password.lower() in COMMON_PASSWORDS:
+        errors.append('That password is too common — choose something stronger')
+    return errors
+
+
+def password_policy_errors(password: str, username: str = '', email: str = ''):
+    """Shared password strength rules. Returns a list of violation messages."""
+    errors = password_content_errors(password)
     low = password.lower()
     if username and username.lower() in low:
         errors.append('Password must not contain your username')
@@ -70,8 +83,6 @@ def password_policy_errors(password: str, username: str = '', email: str = ''):
     email_local = (email or '').split('@')[0].lower()
     if email_local and len(email_local) >= 5 and email_local in low:
         errors.append('Password must not contain your email address')
-    if password.lower() in COMMON_PASSWORDS:
-        errors.append('That password is too common — choose something stronger')
     return errors
 
 
@@ -148,28 +159,43 @@ def register():
 @auth_bp.route('/request-password-reset', methods=['POST'])
 @rate_limit('reset-request:ip:{ip}', lambda: env_int('RESET_REQUEST_RATE_LIMIT', 5), 3600)
 def request_password_reset():
-    """In-app password reset — no email provider involved. The one-time link
-    comes back in the response itself and the UI shows it on the spot.
+    """Email a single-use reset link to the account holder.
 
-    Accepted trade-off for this deployment model: the response is NOT identical
-    for registered vs unknown emails (that is what makes the link appear), so
-    this endpoint is deliberately not enumeration-proof. Everything else about
-    the token stays hardened: opaque, hashed at rest, single-use, 30-minute
-    TTL, and consuming one revokes that user's other sessions."""
+    The public response is GENERIC and identical for registered and unknown
+    addresses — no reset material ever reaches the API response, the UI, or
+    the logs. Timing is equalized for unknown addresses with a dummy bcrypt
+    verify so the two paths cost comparable work. Delivery failures are
+    soft-failed by the mailer and never change the response.
+    """
+    rejection = require_trusted_origin()
+    if rejection:
+        return rejection
+
+    generic = {
+        'message': 'If an account exists for that email, a reset link will be '
+                   'sent. It expires in 30 minutes and works exactly once.',
+        'email_configured': mail_delivery.is_email_configured(),
+    }
     data = request.get_json(silent=True) or {}
     email = data.get('email', '').strip().lower()
-    user = User.query.filter_by(email=email).first()
-    reset_link = None
-    if user:
-        token = create_reset_token(user.id)
-        db.session.commit()
-        base = (os.getenv('FRONTEND_ORIGIN') or '').rstrip('/')
-        reset_link = f'{base}/password-reset?token={token}'
-    return jsonify({'message':
-                    'If an account exists for that email, a one-time reset link is'
-                    ' included in the response. It expires in 30 minutes and works'
-                    ' exactly once.',
-                    'reset_link': reset_link}), 202
+
+    # Only well-formed, plausibly real addresses are even looked up. Every
+    # other input takes the same generic path below.
+    if email and EMAIL_REGEX.match(email):
+        user = User.query.filter_by(email=email).first()
+        if user is not None:
+            token = create_reset_token(user.id)       # also invalidates old tokens
+            db.session.commit()
+            outcome, detail = mail_delivery.send_reset_email(email, user.username, token)
+            # Sanitized event only: outcome category — never the token or address.
+            _warn_security('reset_email', user_id=user.id, ip=client_ip(),
+                           outcome=outcome, detail=detail)
+        else:
+            # Equalize the work between the two paths (a real request hashes a
+            # token + sends; an unknown address burns one bcrypt round).
+            verify_against_dummy('linuxdocs-timing-equalization-dummy-password')
+
+    return jsonify(generic), 202
 
 
 @auth_bp.route('/reset-password', methods=['POST'])
@@ -179,23 +205,39 @@ def reset_password():
     if rejection:
         return rejection
     data = request.get_json(silent=True) or {}
-    user = consume_reset_token(data.get('token', ''))
-    if user is None:
-        return jsonify({'errors': {'token': 'Reset link is invalid or expired'}}), 400
-
     password = data.get('password', '')
     confirm = data.get('confirm_password', '')
+
+    # Claiming the token is single-use — validate everything that doesn't
+    # depend on the account BEFORE spending it, so a mistyped password or a
+    # mismatched confirmation never burns a perfectly good link.
     errors = {}
-    pw_errors = password_policy_errors(password, user.username, user.email)
-    if pw_errors:
-        errors['password'] = pw_errors[0]
+    content = password_content_errors(password)
+    if content:
+        errors['password'] = content[0]
     if password != confirm:
         errors['confirm_password'] = 'Passwords do not match'
     if errors:
         return jsonify({'errors': errors}), 400
 
+    user = consume_reset_token(data.get('token', ''))
+    if user is None:
+        # One neutral message for invalid, expired AND already-used tokens —
+        # no distinction that could reveal anything about accounts.
+        return jsonify({'errors': {'token': 'Reset link is invalid or expired'}}), 400
+
+    # Identity-bound policy (new password contains own username/email) can
+    # only fail after the claim; in that rare case the token is spent and a
+    # fresh request must be made.
+    content_errors = set(password_content_errors(password))
+    identity_errors = [e for e in
+                       password_policy_errors(password, user.username, user.email)
+                       if e not in content_errors]
+    if identity_errors:
+        return jsonify({'errors': {'password': identity_errors[0]}}), 400
+
     user.set_password(password)
-    _revoke_all_auth(user.id)
+    _revoke_all_auth(user.id, keep_current=False)   # reset = kill every session
     db.session.commit()
     _warn_security('password_reset', user_id=user.id, ip=client_ip())
     return jsonify({'message': 'Password reset successfully'}), 200
@@ -287,12 +329,17 @@ def refresh():
     return jsonify({'access_token': access_token}), 200
 
 
-def _revoke_all_auth(user_id: int) -> None:
-    """Revoke every session + outstanding reset token for a user, keeping the
-    current device signed in."""
+def _revoke_all_auth(user_id: int, *, keep_current: bool = True) -> None:
+    """Revoke sessions + outstanding reset tokens for a user.
+
+    ``keep_current=True`` (password *change* from Settings) leaves the current
+    device signed in. Password RESET is an account-recovery path that may
+    follow a takeover — there ``keep_current=False`` kills every session,
+    including the one presenting the request's own cookie.
+    """
     current = get_refresh_token_from_request()
     for s in Session.query.filter_by(user_id=user_id, revoked=False).all():
-        if current and s.token_hash == sha256_hex(current):
+        if keep_current and current and s.token_hash == sha256_hex(current):
             continue
         s.revoked = True
     now = utcnow()
