@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Terminal, Shield, ArrowRight, Command, FileText, GitCompare, GraduationCap, Layers, Zap } from 'lucide-react';
+import { Terminal, Shield, ArrowRight, Command, FileText, GitCompare, GraduationCap, Layers, Zap, CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { COMMANDS, LINUX_CATEGORIES, CTF_DOMAINS } from '../data/commands';
 import SocialFlipButton from '../components/ui/SocialFlipButton';
@@ -22,7 +22,37 @@ const TOOLS = [
   { to: '/flashcards', icon: Layers, label: 'Flashcards', blurb: 'Flip through command decks and lock the vocabulary into memory.' },
   { to: '/speed-drill', icon: Zap, label: 'Speed drill', blurb: 'Sixty seconds of rapid questions, invented fresh from the dataset every round.' },
   { to: '/compare', icon: GitCompare, label: 'Compare commands', blurb: 'Put two utilities side by side, flags and all.' },
+  { to: '/cheat-sheets', icon: FileText, label: 'Cheat sheets', blurb: 'Printable one-pagers per category, searchable and ready for the printer.' },
+  { to: '/command-of-the-day', icon: CalendarDays, label: 'Command of the day', blurb: 'A fresh command every day, deterministic per date so everyone sees the same one.' },
 ];
+
+// Hairline dividers between the tool tiles. Each tile paints its own
+// border-r / border-b instead of the container faking lines with its
+// background — so an unfilled cell can never render as a solid block (any
+// leftover cell simply shows the page background). Every edge is drawn only
+// when a neighbour exists across it at the active breakpoint (1 column on
+// mobile, 2 on sm, 4 on lg), which keeps trailing edges clean for any tile
+// count: the current eight fill an exact 4x2 on lg, 2x4 on sm and stack
+// single-column on mobile.
+const TOOL_COLUMNS = { base: 1, sm: 2, lg: 4 } as const;
+
+const tileDividers = (index: number, total: number) => {
+  const hasRight = (cols: number) => index % cols !== cols - 1;
+  const hasBelow = (cols: number) =>
+    Math.floor(index / cols) < Math.floor((total - 1) / cols);
+  const classes: string[] = [];
+  if (hasRight(TOOL_COLUMNS.sm)) classes.push('sm:border-r');
+  if (hasRight(TOOL_COLUMNS.lg)) classes.push('lg:border-r');
+  if (hasBelow(TOOL_COLUMNS.base)) {
+    if (hasBelow(TOOL_COLUMNS.sm)) {
+      classes.push(hasBelow(TOOL_COLUMNS.lg) ? 'border-b' : 'border-b lg:border-b-0');
+    } else {
+      // hasBelow(lg) implies hasBelow(sm), so sm:border-b-0 covers lg too.
+      classes.push('border-b sm:border-b-0');
+    }
+  }
+  return classes.join(' ');
+};
 
 export const LandingPage = () => {
   const [currentCmdIndex, setCurrentCmdIndex] = useState(0);
@@ -152,12 +182,12 @@ export const LandingPage = () => {
 
       {/* Tools band */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-px overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 lg:grid-cols-4">
-          {TOOLS.map((tool) => (
+        <div className="grid overflow-hidden rounded-2xl border border-[var(--border)] sm:grid-cols-2 lg:grid-cols-4">
+          {TOOLS.map((tool, index) => (
             <Link
               key={tool.to}
               to={tool.to}
-              className="group flex flex-col gap-3 bg-[var(--bg-surface)] p-6 hover:bg-[var(--bg-surface-elevated)]"
+              className={`group flex flex-col gap-3 border-[var(--border)] bg-[var(--bg-surface)] p-6 hover:bg-[var(--bg-surface-elevated)] ${tileDividers(index, TOOLS.length)}`}
             >
               <tool.icon className="h-5 w-5 text-[var(--terminal-green)]" />
               <span className="font-display text-lg font-semibold text-[var(--text-heading)]">{tool.label}</span>
