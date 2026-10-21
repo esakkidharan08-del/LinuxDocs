@@ -2,7 +2,7 @@
 
 **LinuxDocs** is a professional, MDN-style reference and learning platform for **Linux commands and CTF security tools** — precise syntax, real flags, copy-ready examples — combined with a full interactive learning system: guided paths, quizzes, a sandboxed practice terminal, flashcards, a speed-drill arena, achievements, and streaks.
 
-> Status: ✅ production build green · lint zero findings · **102 backend tests passing** · browser QA **22/22** · API smoke **14/14** · datasets fully synced · all progress committed to git (`9dc822d`).
+> Status: ✅ production build green · lint zero findings · **102 backend tests passing** · browser QA **22/22** · API smoke **14/14** · terminal probe **60/60** · datasets fully synced · all progress committed to git (`4dd6997`).
 
 ---
 
@@ -111,6 +111,7 @@ Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrad
 
 - Flask + SQLite under `backend/` with session cookies, CSRF origin checks, hardened auth, and session management (token rotation on refresh, session-cap eviction, single-use reset tokens).
 - **Offline-friendly data sync**: a dashboard chip shows the honest five-state truth ("All changes saved · Syncing… · Synced · Saved locally — syncs automatically · Sync failed"); "Synced" appears only after the server's 2xx. Changes made offline land in a persisted end-state op queue that retries with exponential backoff (online event, 30 s ticker, or chip click), guests can bookmark and build history on-device and the data merges deterministically into the account at sign-in (guest wins for touched records), and account switches never leak state (per-user queued ops + stale-response guards). Exports/imports carry a schema version with strict client+server validation.
+- **Practice terminal, hardened**: the sandbox is a pure interpreted module (no eval, no host execution) with explicit resource limits — command lines capped at 2000 chars (interpreter + `maxLength`), 400-line scrollback, prototype-safe file lookups (`cat __proto__` reads nothing), and trick-free `man` coverage (builtins **and** all 132 dataset tools). Unknown commands suggest the closest real command ("did you mean 'ls'?"), `grep`/`wc`/`find` parse real flags, and **missions complete only when the expected output was actually produced** — error-tone turns never count. Still 13 missions across 3 levels.
 - Modules: `auth.py` · `commands.py` · `user.py` · `models.py` · `security.py` · `sessions.py` · `persistence.py` (auto-backup of the DB on startup/manual/scheduled triggers + maintenance prune).
 - **Password reset by email** (`/password-reset`): the request endpoint answers a byte-identical generic response for registered/unknown addresses (no user enumeration, timing equalized with a dummy bcrypt round) and emails a branded message with a **single-use, 30-minute link** built from the trusted `FRONTEND_ORIGIN`. Tokens are stored only as SHA-256 hashes, expire in 30 minutes, are consumed **atomically** (concurrent claims: exactly one wins), and a successful reset **revokes every session** on the account. Tokens never appear in API responses, logs, DOM, or referrer data. Providers: Resend API or any SMTP server via env vars; local development uses a safe **dev outbox backend** that writes `.eml` mailbox files and logs nothing. Both reset endpoints are rate-limited (5 requests + 10 token attempts per hour/IP).
 - Five test suites — `test_auth.py` (32) + `test_hardening.py` (30) + `test_security.py` (17) + `test_mailer.py` (14) + `test_user_data.py` (9) — **102 pytest cases**.
@@ -132,6 +133,7 @@ Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrad
 | `qa/browser_check.py` real-Chrome suite | ✅ **22/22 PASS** — zero console errors, phone viewport included |
 | `qa/smoke_api.py` endpoint checklist | ✅ **14/14 PASS** |
 | `qa/sync_probe.py` sync-hardening suite | ✅ **14/14 PASS** — guest merge, offline queue, auto-drain, account isolation, import validation |
+| `qa/terminal_probe.py` terminal-hardening suite | ✅ **60/60 PASS** — all command families + flags, resource limits, prototype-chain negatives, semantic mission validation, 13/13 UI playthrough to "Mastered" |
 | `qa/reset_probe.py` real-browser reset-security suite | ✅ **8/8 PASS** — byte-identical generic responses, token only in the dev mailbox (never in responses/DOM/filenames), full token→reset→login loop |
 | Dataset sync FE ↔ BE | ✅ 132 = 132, 95 Linux + 37 CTF, 0 mismatches |
 | Landing tools-band audit (`qa/grid_shots.py`) | ✅ border matrix 6/6 in dark+light × 360/768/1280, focus & hover probed |
