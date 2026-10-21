@@ -8,6 +8,8 @@ import { ProtectedRoute } from '../components/ProtectedRoute';
 import { LEARNING_PATHS } from './LearningPage';
 import { TOTAL_MISSIONS } from './PracticeTerminalPage';
 import { readStreak } from '../lib/streak';
+import { syncLabel } from '../lib/syncState';
+import type { SyncState } from '../lib/syncState';
 
 type ProgressEntry = { completed?: boolean; bestScore?: number; bestTotal?: number; lessons?: string[] };
 
@@ -212,6 +214,33 @@ const LearningSummary = () => {  const stats = useMemo(() => {
   );
 };
 
+/** Server-confirmed sync status chip — labels come from lib/syncState.ts so
+ *  "Synced" appears only after a 2xx round-trip, never from a local guess. */
+const SyncChip = () => {
+  const { sync, retrySync } = useAuth();
+  const tone: Record<SyncState['phase'], string> = {
+    idle: 'text-[var(--text-muted)]',
+    saving: 'text-[var(--terminal-green)] animate-pulse',
+    synced: 'text-[var(--terminal-green)]',
+    'saved-local': 'text-amber-500',
+    failed: 'text-red-500',
+  };
+  const dot = sync.phase === 'failed' ? 'bg-red-500' : sync.phase === 'saved-local' ? 'bg-amber-500' : 'bg-[var(--terminal-green)]';
+  return (
+    <button
+      type="button"
+      data-sync-chip
+      data-phase={sync.phase}
+      onClick={retrySync}
+      title="Click to sync now"
+      className={`inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface-elevated)] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] transition-opacity hover:opacity-80 ${tone[sync.phase]}`}
+    >
+      <span aria-hidden className={`inline-block h-1.5 w-1.5 rounded-full ${dot} ${sync.phase === 'saving' ? 'animate-pulse' : ''}`} />
+      {syncLabel(sync)}
+    </button>
+  );
+};
+
 const DashboardContent = () => {
   const { bookmarks, notes, history, refreshUserData, deleteNote, toggleBookmark } = useAuth();
   const [activeTab, setActiveTab] = useState<'bookmarks' | 'notes' | 'history'>('bookmarks');
@@ -247,9 +276,12 @@ const DashboardContent = () => {
   return (
     <div className="bg-[var(--bg)]">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="font-display text-4xl font-semibold tracking-tight text-[var(--text-heading)]">Dashboard</h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">Bookmarks, notes and recent views — plus everything you learned so far</p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="font-display text-4xl font-semibold tracking-tight text-[var(--text-heading)]">Dashboard</h1>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">Bookmarks, notes and recent views — plus everything you learned so far</p>
+          </div>
+          <SyncChip />
         </div>
 
         <LearningSummary />

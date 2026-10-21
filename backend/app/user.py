@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
+import re
+
 from . import db
 from .models import User, Bookmark, UserNote, RecentlyViewed, Session
 from .security import (
@@ -13,6 +15,9 @@ user_bp = Blueprint('user', __name__)
 MAX_SLUG_LEN = 200
 MAX_NOTE_LEN = 10000
 MAX_IMPORT_ITEMS = 2000
+# Every real dataset slug matches this (verified against the 132-entry synced
+# dataset); bulk imports could otherwise plant junk keys forever.
+SLUG_PATTERN = re.compile(r'^[a-z0-9/-]+$')
 
 
 @user_bp.route('/me', methods=['GET'])
@@ -56,6 +61,38 @@ def toggle_bookmark():
         db.session.add(bookmark)
         db.session.commit()
         return jsonify({'bookmarked': True, 'bookmark': bookmark.to_dict()}), 201
+
+
+@user_bp.route('/bookmarks/set', methods=['POST'])
+@jwt_required()
+def set_bookmark():
+    """Idempotent desired-state set for sync replays: unlike /toggle, replaying
+    ``wanted=true`` can never delete an existing bookmark (offline queue ops may
+    arrive for records that already exist server-side)."""
+    user_id = get_jwt_identity()
+    data = request.get_json(silent=True) or {}
+    slug = (data.get('command_slug') or '').strip()
+    wanted = data.get('wanted')
+
+    if not slug:
+        return jsonify({'error': 'command_slug required'}), 400
+    if len(slug) > MAX_SLUG_LEN:
+        return jsonify({'error': 'command_slug too long'}), 400
+    if not isinstance(wanted, bool):
+        return jsonify({'error': 'wanted must be a boolean'}), 400
+
+    existing = Bookmark.query.filter_by(user_id=user_id, command_slug=slug).first()
+    if wanted and not existing:
+        bookmark = Bookmark(user_id=user_id, command_slug=slug)
+        db.session.add(bookmark)
+        db.session.commit()
+        return jsonify({'bookmarked': True, 'bookmark': bookmark.to_dict()}), 201
+    if not wanted and existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return jsonify({'bookmarked': False}), 200
+    # Already in the desired state — nothing to do, still an ack.
+    return jsonify({'bookmarked': bool(existing)}), 200
 
 
 # --- NOTES ---
@@ -146,7 +183,8 @@ def import_data():
     if len(bookmarks) > MAX_IMPORT_ITEMS or len(notes) > MAX_IMPORT_ITEMS:
         return jsonify({'error': f'Import is limited to {MAX_IMPORT_ITEMS} items per collection'}), 400
     for slug in bookmarks:
-        if isinstance(slug, str) and slug.strip() and len(slug) <= MAX_SLUG_LEN:
+        if isinstance(slug, str) and slug.strip() and len(slug) <= MAX_SLUG_LEN \
+                and SLUG_PATTERN.fullmatch(slug.strip()):
             existing = Bookmark.query.filter_by(user_id=user_id, command_slug=slug.strip()).first()
             if not existing:
                 db.session.add(Bookmark(user_id=user_id, command_slug=slug.strip()))
@@ -156,6 +194,8 @@ def import_data():
         slug = item['command_slug'].strip()
         text = item['text'].strip()
         if not slug or not text or len(slug) > MAX_SLUG_LEN or len(text) > MAX_NOTE_LEN:
+            continue
+        if not SLUG_PATTERN.fullmatch(slug):
             continue
         note = UserNote.query.filter_by(user_id=user_id, command_slug=slug).first()
         if note:

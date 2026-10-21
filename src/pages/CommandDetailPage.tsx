@@ -35,9 +35,10 @@ export const CommandDetailPage = () => {
     ...(command?.related.length ? [{ id: 'related', label: 'Related Commands' }] : []),
   ];
 
-  // Track recently viewed when user is logged in
+  // Track recently viewed (server-synced when signed in, device-local for guests
+  // and replayed into the account history at sign-in).
   useEffect(() => {
-    if (user && slug && command) {
+    if (slug && command) {
       addHistory(slug);
     }
   }, [user, slug, command, addHistory]);
@@ -64,7 +65,7 @@ export const CommandDetailPage = () => {
   };
 
   const handleToggleBookmark = async () => {
-    if (!user || !slug) return;
+    if (!slug) return;
     await toggleBookmark(slug);
   };
 
@@ -151,7 +152,7 @@ export const CommandDetailPage = () => {
               <h1 className="min-w-0 flex-1 font-display text-5xl font-semibold tracking-tight text-[var(--text-heading)] sm:text-6xl">
                 {command.name}
               </h1>
-              {user && slug && (
+              {slug && (
                 <button
                   onClick={handleToggleBookmark}
                   className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 ${

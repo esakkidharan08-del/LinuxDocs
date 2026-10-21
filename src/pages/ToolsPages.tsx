@@ -46,6 +46,58 @@ export const ExportImportPage = () => {
   const { user, bookmarks, notes, importData } = useAuth();
   const [message, setMessage] = useState('');
   const exportData = () => { const data = { version: 1, exportedAt: new Date().toISOString(), bookmarks: [...bookmarks], notes: [...notes.entries()].map(([command_slug, text]) => ({ command_slug, text })), practiceTerminal: localStorage.getItem('linuxdocs.practice-terminal'), learningProgress: localStorage.getItem('linuxdocs.learning-progress-v3'), flashcards: localStorage.getItem('linuxdocs.flashcards'), speedDrill: localStorage.getItem('linuxdocs.speeddrill'), streak: localStorage.getItem('linuxdocs.streak') }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'linuxdocs-progress.json'; link.click(); URL.revokeObjectURL(url); setMessage('Progress, bookmarks, and notes exported.'); };
-  const handleImport = (event: ChangeEvent<HTMLInputElement>) => { const file = event.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = async () => { try { const data = JSON.parse(String(reader.result)); if (typeof data.practiceTerminal === 'string') localStorage.setItem('linuxdocs.practice-terminal', data.practiceTerminal); if (typeof data.learningProgress === 'string') localStorage.setItem('linuxdocs.learning-progress-v3', data.learningProgress); if (typeof data.flashcards === 'string') localStorage.setItem('linuxdocs.flashcards', data.flashcards); if (typeof data.speedDrill === 'string') localStorage.setItem('linuxdocs.speeddrill', data.speedDrill); if (typeof data.streak === 'string') localStorage.setItem('linuxdocs.streak', data.streak); if (user) await importData({ bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks : [], notes: Array.isArray(data.notes) ? data.notes : [] }); setMessage(user ? 'Progress, bookmarks, and notes imported.' : 'Local progress imported. Sign in to import bookmarks and notes.'); } catch { setMessage('Import rejected: invalid LinuxDocs JSON.'); } }; reader.readAsText(file); };
+  const handleImport = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const data = JSON.parse(String(reader.result));
+        // Schema validation — an unsupported version or malformed collection
+        // rejects the whole import rather than silently half-applying it.
+        const problems: string[] = [];
+        if (data?.version !== 1) {
+          setMessage(`Import rejected: unknown schema version ${String(data?.version)} (this build reads version 1).`);
+          return;
+        }
+        const slugOk = (s: unknown) => typeof s === 'string' && s.length > 0 && s.length <= 200 && /^[a-z0-9/-]+$/.test(s);
+        const bookmarksIn = Array.isArray(data.bookmarks) ? data.bookmarks : null;
+        if (bookmarksIn && (!bookmarksIn.every(slugOk) || bookmarksIn.length > 2000)) problems.push('bookmarks');
+        const notesIn = Array.isArray(data.notes) ? data.notes : null;
+        if (notesIn && (!notesIn.every((n: unknown) => !!n && typeof n === 'object' && slugOk((n as Record<string, unknown>).command_slug) && typeof (n as Record<string, unknown>).text === 'string' && String((n as Record<string, unknown>).text).length <= 10000) || notesIn.length > 2000)) problems.push('notes');
+        if (problems.length) {
+          setMessage(`Import rejected: malformed ${problems.join(' and ')} in the export file.`);
+          return;
+        }
+        // Device progress stores are swapped only when they parse to their
+        // documented shapes; a corrupt blob is skipped and reported, never crashes.
+        const storePlan: [string, string, (v: unknown) => boolean][] = [
+          ['practiceTerminal', 'linuxdocs.practice-terminal', (v) => v === null || (typeof v === 'object' && v !== null)],
+          ['learningProgress', 'linuxdocs.learning-progress-v3', (v) => v === null || (typeof v === 'object' && v !== null)],
+          ['flashcards', 'linuxdocs.flashcards', (v) => v === null || (typeof v === 'object' && v !== null)],
+          ['speedDrill', 'linuxdocs.speeddrill', (v) => v === null || (typeof v === 'object' && v !== null)],
+          ['streak', 'linuxdocs.streak', (v) => v === null || (typeof v === 'object' && v !== null)],
+        ];
+        const skipped: string[] = [];
+        for (const [field, key, shapeOk] of storePlan) {
+          const raw = (data as Record<string, unknown>)[field];
+          if (typeof raw === 'string') {
+            let restores = false;
+            try { const parsed: unknown = JSON.parse(raw); if (shapeOk(parsed)) { restores = true; localStorage.setItem(key, raw); } } catch { restores = false; }
+            if (!restores) skipped.push(field as string);
+          }
+        }
+        if (user && (bookmarksIn?.length || notesIn?.length)) await importData({ bookmarks: bookmarksIn ?? [], notes: notesIn ?? [] });
+        const noteBits = [`schema v1`];
+        if (skipped.length) noteBits.push(`skipped corrupt store${skipped.length > 1 ? 's' : ''}: ${skipped.join(', ')}`);
+        setMessage(user
+          ? `Progress, bookmarks, and notes imported (${noteBits.join(' · ')}).`
+          : `Local progress imported (${noteBits.join(' · ')}). Sign in to import bookmarks and notes.`);
+      } catch {
+        setMessage('Import rejected: invalid LinuxDocs JSON.');
+      }
+    };
+    reader.readAsText(file);
+  };
   return <div className="mx-auto max-w-3xl space-y-8 px-4 py-12 sm:px-6"><header className="space-y-3"><h1 className="font-display text-3xl font-semibold text-[var(--text-heading)]">Export &amp; import</h1><p className="text-sm text-[var(--text-muted)]">Back up browser progress plus authenticated bookmarks and notes as portable JSON.</p></header><div className="grid gap-4 sm:grid-cols-2"><button onClick={exportData} className="flex items-center justify-center gap-2 rounded-xl border border-[var(--terminal-green)]/40 bg-[var(--terminal-green-bg)] p-6 font-mono text-sm text-[var(--terminal-green)]"><Download className="h-5 w-5" /> Export progress</button><label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 font-mono text-sm text-[var(--text)] hover:border-[var(--terminal-green)]"><Upload className="h-5 w-5" /> Import JSON<input type="file" accept="application/json,.json" onChange={handleImport} className="hidden" /></label></div>{!user && <p className="text-xs text-[var(--text-muted)]">Sign in to include bookmarks and notes in the import/export.</p>}{message && <p className="font-mono text-sm text-[var(--terminal-green)]">$ {message}</p>}</div>;
 };

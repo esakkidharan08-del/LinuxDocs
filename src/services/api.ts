@@ -116,6 +116,13 @@ export const userApi = {
       body: JSON.stringify({ command_slug: commandSlug }),
     }),
 
+  /** Idempotent desired-state set — used by the offline sync queue for replays. */
+  setBookmark: (commandSlug: string, wanted: boolean) =>
+    request<{ bookmarked: boolean }>('/user/bookmarks/set', {
+      method: 'POST',
+      body: JSON.stringify({ command_slug: commandSlug, wanted }),
+    }),
+
   getNotes: () =>
     request<{ notes: UserNote[] }>('/user/notes'),
 
