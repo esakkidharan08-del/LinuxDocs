@@ -22,6 +22,7 @@ from .sessions import (
     set_refresh_cookie, clear_refresh_cookie, get_refresh_token_from_request,
     create_reset_token, consume_reset_token, prune_expired_sessions,
 )
+from .mailer import send_reset_email, is_email_configured
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -149,18 +150,26 @@ def register():
 @rate_limit('reset-request:ip:{ip}', lambda: env_int('RESET_REQUEST_RATE_LIMIT', 5), 3600)
 def request_password_reset():
     """Opaque, hashed, single-use reset token. Always respond identically to
-    prevent user enumeration. The raw token is only logged in dev so that the
-    local reset flow stays clickable without an SMTP server."""
+    prevent user enumeration. The token is emailed when mail delivery is
+    configured (RESEND_API_KEY or SMTP_*); without it, dev mode logs the raw
+    token server-side so the local flow stays clickable."""
     data = request.get_json(silent=True) or {}
     email = data.get('email', '').strip().lower()
     user = User.query.filter_by(email=email).first()
     if user:
         token = create_reset_token(user.id)
         db.session.commit()
-        if current_app.debug or os.getenv('RESET_LOG_TOKENS') == '1':
-            # Deliberately dev-only: never log usable tokens in production.
+        delivered, detail = send_reset_email(email, user.username, token)
+        may_log = (delivered != 'sent' and os.getenv('FLASK_ENV') != 'production') \
+            or os.getenv('RESET_LOG_TOKENS') == '1'
+        if may_log:
+            # Deliberately dev-only: never log usable tokens in production —
+            # if delivery failed there, the user can simply request the link again.
             current_app.logger.warning('PASSWORD-RESET TOKEN (dev only) %s -> %s', email, token)
-    return jsonify({'message': 'If an account exists for that email, a reset link will be sent.'}), 202
+    # `email_configured` mirrors the env, never the account lookup — identical
+    # for every email so the endpoint can't be used to enumerate users.
+    return jsonify({'message': 'If an account exists for that email, a reset link will be sent.',
+                    'email_configured': is_email_configured()}), 202
 
 
 @auth_bp.route('/reset-password', methods=['POST'])

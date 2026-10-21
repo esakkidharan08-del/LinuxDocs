@@ -157,6 +157,17 @@ Required `.env` variables (in `backend/.env` — never commit it):
 
 Then update `FRONTEND_ORIGIN`/`ALLOWED_HOSTS` on Render with the final Vercel URL and redeploy once — accounts, refresh cookies, and rate limiting all work across the proxy exactly like they do locally.
 
+**4. (Optional) Send real password-reset emails** — Create a [Resend](https://resend.com) account (free tier, no SMTP ports needed on Render) and set two env vars on the `linuxdocs-api` service:
+
+| Variable | Set to |
+|---|---|
+| `RESEND_API_KEY` | `re_…` from the Resend dashboard |
+| `MAIL_FROM` | `LinuxDocs <no-reply@yourdomain.com>` (or `onboarding@resend.dev` for testing) |
+
+From then on, "Email reset link" on `/password-reset` emails the registered address a branded message with a **single-use, 30-minute link**. Any SMTP provider works too (`SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD` — Gmail needs an app password). With no provider configured, nothing breaks: requests still answer `202`, and in a local dev run the one-time token is printed in the backend console instead (never in production).
+
+*Security properties that survive either mode:* the response is byte-identical whether or not the email exists (no user enumeration), tokens are stored hashed + single-use, and consuming one revokes all of that user's sessions.
+
 *Why the rewrite matters:* with `/api` on the site's own origin, the HttpOnly refresh cookie is first-party `SameSite=Strict`. The whole scary class of cross-site auth issues (third-party cookie deprecation, `SameSite=None` + cross-domain CSRF) simply does not apply.
 
 ## API endpoints

@@ -3,7 +3,7 @@
 > Snapshot of **current** project state. Covers what exists, what's finished,
 > what's still work-in-progress, the feature inventory, and the site structure.
 
-**Last updated:** final QA + polish round — repo is deployment-ready (Render blueprint + Vercel rewrites), README shipped with screenshots/GIF, browser + API QA suites both green.
+**Last updated:** password-reset email delivery shipped (Resend/SMTP + branded link, dev-mode fallback), maintenance prune bug fixed, QA suites still green.
 
 ---
 
@@ -44,9 +44,11 @@ An MDN-style reference for **Linux commands** plus a **CTF / security-tooling se
 
 ### 2.2 Committed this final round
 - **Auth boot fix** — `src/context/AuthContext.tsx`: a `linuxdocs.auth-visible` session-hint in localStorage now gates the boot refresh call. Signed-out visitors no longer produce a red `401` console line on every page (the hint is set on sign-in/register/refresh success, cleared on logout or failed refresh).
+- **Password-reset email delivery** — `backend/app/mailer.py` (new): branded HTML+text email with the single-use 30-minute link to `/password-reset?token=…`; providers are **Resend API** (`RESEND_API_KEY`) or **any SMTP server** (`SMTP_HOST/PORT/USER/PASSWORD`, STARTTLS 587 / SSL 465). No provider → 202 + dev token logging (never in production); provider failure never 500s the auth flow; response stays byte-identical for existing/unknown emails (anti-enumeration), with a non-enumerative `email_configured` flag (env-only) surfaced to the UI. 9 new pytest cases in `tests/test_mailer.py`.
+- **Maintenance prune fix** — `backend/app/persistence.py`: SQLAlchemy 2.0 rejected `.limit(500).delete()` in `_prune` (the job failed every cycle, seen live as `maintenance_task_failed`); now fetches then deletes by id, and token-only prunes commit too.
 - **Dataset accuracy fixes** — `systemctl` closed-bracket syntax; `expand -i` example corrected to real GNU semantics (leading tabs convert; tabs after words are preserved).
-- **Deployment scaffolding** — `render.yaml` (Flask gunicorn service + free partners Postgres, `DATABASE_URL`/secrets autowired), `vercel.json` (`/api/:path*` → Render + SPA fallback), `backend/requirements.txt` + `gunicorn` + `psycopg2-binary`.
-- **README rewrite** — hero + demo GIF + screenshots ("what I built and why", architecture with the same-origin rewrite rationale, quick start, deploy steps, verified endpoint table).
+- **Deployment scaffolding** — `render.yaml` (Flask gunicorn service + free partners Postgres, `DATABASE_URL`/secrets autowired, optional mail env block), `vercel.json` (`/api/:path*` → Render + SPA fallback), `backend/requirements.txt` + `gunicorn` + `psycopg2-binary`.
+- **README rewrite** — hero + demo GIF + screenshots ("what I built and why", architecture with the same-origin rewrite rationale, quick start, deploy steps incl. the password-reset email section, verified endpoint table).
 
 ### 2.3 QA work (artifacts in gitignored `qa/`, scripts kept for re-runs)
 - `qa/smoke_api.py` — 14-step stdlib API smoke: register → login → me → bookmark toggle → note save → history add → cookie-only refresh → logout → revoked-after-logout → API 404 shape → bad password 401 → duplicate register 400 → **14/14 PASS**.
@@ -138,7 +140,7 @@ LinuxDocs/
 ├── backend/                      # Flask API
 │   ├── app/                      # __init__ (env validation/CORS/headers), auth, user, commands,
 │   │                             #   security (limits/lockout/CSRF/host), sessions, models, persistence
-│   ├── tests/                    # 79 pytest cases (auth 32 + hardening 30 + security 17)
+│   ├── tests/                    # 88 pytest cases (auth 32 + hardening 30 + security 17 + mailer 9)
 │   ├── requirements.txt          # pinned; gunicorn + psycopg2-binary for Render
 │   └── .env.example / pytest.ini / check_links.py
 ├── docs/screenshots/             # README assets (intro/landing/command-page/palette/dashboard/
@@ -178,9 +180,11 @@ All under `/api` (CORS restricted to `FRONTEND_ORIGIN`); every response carries 
 |---|---|
 | `npm run build` (`tsc -b && vite build`) | ✅ passes (route-split chunks, no 500 kB warning) |
 | `npm run lint` (oxlint) | ✅ zero warnings |
-| Backend tests | ✅ **79 passed** |
+| Backend tests (`backend\venv\Scripts\python -m pytest`) | ✅ **88 passed** (32 auth + 30 hardening + 17 security + 9 mailer) |
 | `qa/smoke_api.py` (API-level checklist) | ✅ **14/14 PASS** |
 | `qa/browser_check.py` (real browser, phone viewport included) | ✅ **22/22 PASS — zero console errors** |
+| Backend tests (`backend\venv\Scripts\python -m pytest`) | ✅ **88 passed** (32 auth + 30 hardening + 17 security + 9 mailer) |
+| Password-reset email live checks | ✅ existing email → dev token logged; ghost email → silent + identical 202; `email_configured` reflects env only |
 | Command accuracy spot-check (expand, grep, cp, lsof, uname, whois, gdb flavored scan + whole-dataset syntax bracket audit) | ✅ 2 defects found & fixed (`systemctl` bracket, `expand -i` example) |
 | README screenshots/GIF | ✅ captured by the QA harness into `docs/screenshots/` |
 
@@ -191,7 +195,6 @@ All under `/api` (CORS restricted to `FRONTEND_ORIGIN`); every response carries 
 ---
 
 ## 8. Open items / nice-to-haves
-1. Push to GitHub → create Render blueprint + Vercel project → fill the two placeholder env vars → capture the live URL into README.
-2. Optional: real email delivery for password reset (tokens are already opaque/hashed/single-use; dev logs raw token only with `RESET_LOG_TOKENS=1`).
-3. Optional: sitemap.xml / robots.txt + OG image polish for the live domain.
-4. Optional: scheduled CI run of `qa/smoke_api.py` against a staging deployment.
+1. Push to GitHub → create Render blueprint + Vercel project → fill the two placeholder env vars → capture the live URL into README. Optional: add `RESEND_API_KEY` + `MAIL_FROM` for real password-reset emails (steps in README).
+2. Optional: sitemap.xml / robots.txt + OG image polish for the live domain.
+3. Optional: scheduled CI run of `qa/smoke_api.py` against a staging deployment.

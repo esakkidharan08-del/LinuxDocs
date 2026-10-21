@@ -345,15 +345,18 @@ class _Maintenance:
             for row in {*expired, *rotated}:
                 db.session.delete(row)
 
-            PasswordResetToken.query.filter(
-                (PasswordResetToken.expires_at < now)
-                | (PasswordResetToken.used_at.isnot(None))
-            ).limit(500).delete(synchronize_session=False)
+            # SQLAlchemy 2.0 refuses .delete() after .limit(); fetch first.
+            stale_tokens = (PasswordResetToken.query
+                            .filter((PasswordResetToken.expires_at < now)
+                                    | (PasswordResetToken.used_at.isnot(None)))
+                            .limit(500).all())
+            for row in stale_tokens:
+                db.session.delete(row)
 
-            if expired or rotated:
+            if expired or rotated or stale_tokens:
                 db.session.commit()
-                log.info('SEC-EVENT pruned sessions_expired=%d sessions_rotated=%d',
-                         len(expired), len(rotated))
+                log.info('SEC-EVENT pruned sessions_expired=%d sessions_rotated=%d tokens_stale=%d',
+                         len(expired), len(rotated), len(stale_tokens))
 
 
 # ---------------------------------------------------------------------------
