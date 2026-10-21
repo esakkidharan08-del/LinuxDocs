@@ -36,11 +36,6 @@ services:
         value: https://your-site.vercel.app
       - key: ALLOWED_HOSTS
         value: linuxdocs-api.onrender.com
-      # (Optional) password-reset email delivery — set in the dashboard once:
-      #   RESEND_API_KEY (recommended on Render, no SMTP ports involved) or
-      #   SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASSWORD for any SMTP server,
-      # plus MAIL_FROM such as "LinuxDocs <no-reply@yourdomain.com>".
-      # Without it, reset requests answer 202 but never mail anything.
 
 databases:
   - name: linuxdocs-db

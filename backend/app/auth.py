@@ -22,7 +22,6 @@ from .sessions import (
     set_refresh_cookie, clear_refresh_cookie, get_refresh_token_from_request,
     create_reset_token, consume_reset_token, prune_expired_sessions,
 )
-from .mailer import send_reset_email, is_email_configured
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -149,27 +148,28 @@ def register():
 @auth_bp.route('/request-password-reset', methods=['POST'])
 @rate_limit('reset-request:ip:{ip}', lambda: env_int('RESET_REQUEST_RATE_LIMIT', 5), 3600)
 def request_password_reset():
-    """Opaque, hashed, single-use reset token. Always respond identically to
-    prevent user enumeration. The token is emailed when mail delivery is
-    configured (RESEND_API_KEY or SMTP_*); without it, dev mode logs the raw
-    token server-side so the local flow stays clickable."""
+    """In-app password reset — no email provider involved. The one-time link
+    comes back in the response itself and the UI shows it on the spot.
+
+    Accepted trade-off for this deployment model: the response is NOT identical
+    for registered vs unknown emails (that is what makes the link appear), so
+    this endpoint is deliberately not enumeration-proof. Everything else about
+    the token stays hardened: opaque, hashed at rest, single-use, 30-minute
+    TTL, and consuming one revokes that user's other sessions."""
     data = request.get_json(silent=True) or {}
     email = data.get('email', '').strip().lower()
     user = User.query.filter_by(email=email).first()
+    reset_link = None
     if user:
         token = create_reset_token(user.id)
         db.session.commit()
-        delivered, detail = send_reset_email(email, user.username, token)
-        may_log = (delivered != 'sent' and os.getenv('FLASK_ENV') != 'production') \
-            or os.getenv('RESET_LOG_TOKENS') == '1'
-        if may_log:
-            # Deliberately dev-only: never log usable tokens in production —
-            # if delivery failed there, the user can simply request the link again.
-            current_app.logger.warning('PASSWORD-RESET TOKEN (dev only) %s -> %s', email, token)
-    # `email_configured` mirrors the env, never the account lookup — identical
-    # for every email so the endpoint can't be used to enumerate users.
-    return jsonify({'message': 'If an account exists for that email, a reset link will be sent.',
-                    'email_configured': is_email_configured()}), 202
+        base = (os.getenv('FRONTEND_ORIGIN') or '').rstrip('/')
+        reset_link = f'{base}/password-reset?token={token}'
+    return jsonify({'message':
+                    'If an account exists for that email, a one-time reset link is'
+                    ' included in the response. It expires in 30 minutes and works'
+                    ' exactly once.',
+                    'reset_link': reset_link}), 202
 
 
 @auth_bp.route('/reset-password', methods=['POST'])

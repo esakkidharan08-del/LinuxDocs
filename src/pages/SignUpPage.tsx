@@ -81,7 +81,7 @@ export const SignUpPage: React.FC = () => {
       setErrors(result.errors);
     } else {
       setSuccess(true);
-      setTimeout(() => navigate('/', { replace: true }), 500);
+      setTimeout(() => navigate('/dashboard', { replace: true }), 500);
     }
   };
 

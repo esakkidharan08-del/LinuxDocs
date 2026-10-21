@@ -12,7 +12,7 @@ A hand-checked MDN-style reference for **95 Linux utilities + 37 CTF & security 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org)
 [![Flask](https://img.shields.io/badge/Flask-3-000?logo=flask)](https://flask.palletsprojects.com)
 [![PostgreSQL ready](https://img.shields.io/badge/SQLite%20%E2%86%92%20PostgreSQL-ready-4169E1?logo=postgresql)](#deploy-your-own)
-[![Tests](https://img.shields.io/badge/tests-88%20passing-2EA043)](#how-it-is-verified)
+[![Tests](https://img.shields.io/badge/tests-84%20passing-2EA043)](#how-it-is-verified)
 
 ▶ **Live app:** *[[your deployed URL here]]* — **Demo GIF below** 👇
 
@@ -74,8 +74,8 @@ Mistyped a URL? The 404 page is itself a terminal — type `cat flag.hidden` and
 The repo ships its own test harnesses (in `qa/`, untracked):
 
 ```powershell
-# 88 pytest backend tests
-cd backend; .\venv\Scripts\pytest           # 88 passed
+# 84 pytest backend tests
+cd backend; .\venv\Scripts\pytest           # 84 passed
 
 # 14-step API smoke test (stdlib only): register → login →
 # refresh → logout → revoked-after-logout → 401/404 shape checks
@@ -157,16 +157,9 @@ Required `.env` variables (in `backend/.env` — never commit it):
 
 Then update `FRONTEND_ORIGIN`/`ALLOWED_HOSTS` on Render with the final Vercel URL and redeploy once — accounts, refresh cookies, and rate limiting all work across the proxy exactly like they do locally.
 
-**4. (Optional) Send real password-reset emails** — Create a [Resend](https://resend.com) account (free tier, no SMTP ports needed on Render) and set two env vars on the `linuxdocs-api` service:
+**4. Password reset without email** — No mail provider is needed. On `/password-reset` a user enters the registered email and the **one-time reset link is returned by the API and shown on the page immediately** — no inbox, no SMTP, nothing to configure. The link is single-use and expires in 30 minutes; consuming it also signs that user out of every other session.
 
-| Variable | Set to |
-|---|---|
-| `RESEND_API_KEY` | `re_…` from the Resend dashboard |
-| `MAIL_FROM` | `LinuxDocs <no-reply@yourdomain.com>` (or `onboarding@resend.dev` for testing) |
-
-From then on, "Email reset link" on `/password-reset` emails the registered address a branded message with a **single-use, 30-minute link**. Any SMTP provider works too (`SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD` — Gmail needs an app password). With no provider configured, nothing breaks: requests still answer `202`, and in a local dev run the one-time token is printed in the backend console instead (never in production).
-
-*Security properties that survive either mode:* the response is byte-identical whether or not the email exists (no user enumeration), tokens are stored hashed + single-use, and consuming one revokes all of that user's sessions.
+*Deployment-model trade-off, stated plainly:* because the link is returned in the response, the endpoint **does** reveal whether an email is registered (it is not enumeration-proof like an email-based reset would be). Appropriate for this project's personal/demo deployment model; rate limiting caps abuse. The token itself keeps every hardening property: opaque, stored hashed, single-use, 30-minute TTL.
 
 *Why the rewrite matters:* with `/api` on the site's own origin, the HttpOnly refresh cookie is first-party `SameSite=Strict`. The whole scary class of cross-site auth issues (third-party cookie deprecation, `SameSite=None` + cross-domain CSRF) simply does not apply.
 
@@ -181,7 +174,7 @@ All under `/api` (CORS restricted to `FRONTEND_ORIGIN`):
 | POST | `/auth/refresh` | Refresh cookie | New access token (single-flight on client) |
 | POST | `/auth/logout` | — | Revoke session + clear cookie |
 | GET | `/auth/me` | Access token | Current user |
-| POST | `/auth/request-password-reset` | — | Email-token reset request |
+| POST | `/auth/request-password-reset` | — | In-app single-use reset link |
 | POST | `/auth/reset-password` | — | Complete reset with token |
 | GET/POST | `/user/bookmarks` (+`/toggle`) | Access token | Bookmark sync |
 | GET/POST/DELETE | `/user/notes[/:slug]` | Access token | Per-command notes |
@@ -202,7 +195,7 @@ LinuxDocs/
 │   └── services/api.ts       #   Typede API client + single-flight refresh
 ├── backend/                  # Flask 3 API
 │   ├── app/                  #   factory, models, auth, user, security, sessions, persistence
-│   ├── tests/                #   88 pytest cases (incl. the mailer suite)
+│   ├── tests/                #   84 pytest cases (incl. the in-app reset suite)
 │   └── requirements.txt      #   pinned (incl. gunicorn + psycopg2 for Render)
 ├── docs/screenshots/          # README assets (captured by the QA run)
 ├── qa/                        # browser_check.py / smoke_api.py (gitignored)
