@@ -3,7 +3,7 @@
 > Snapshot of **current** project state. Covers what exists, what's finished,
 > what's still work-in-progress, the feature inventory, and the site structure.
 
-**Last updated:** production-readiness audit round 1 — the Task-1 mandate replaced the in-app reset-link disclosure with email-delivered single-use tokens (byte-identical generic responses, atomic consumption, session kill, token never in responses/logs/DOM; dev outbox backend for local runs). Signup keeps landing on the dashboard. 93 pytest cases pass, browser QA 22/22, API smoke 14/14.
+**Last updated:** production-readiness audit round 2 — after the Task-1 email-reset mandate, Task 2 hardened data persistence/sync: an honest four-state sync chip, an offline operation queue with exponential-backoff drain, guest-mode bookmark/note/history stores that merge into the account at sign-in, per-account isolation, and strict import schema validation (client + server). 102 backend tests pass, browser QA 22/22, API smoke 14/14, and a new 14-check live sync probe.
 
 ---
 
@@ -43,6 +43,13 @@ An MDN-style reference for **Linux commands** plus a **CTF / security-tooling se
 *Earlier commits: dataset expansion, command builders, exhausting TODO checklist landing.*
 
 ### 2.2 Committed this final round
+- **Data persistence / sync hardening (Task 2 of the audit)** — bookmarks, notes and view history now behave honestly across connectivity, sessions and accounts:
+  - **Sync chip on the dashboard** (`SyncChip` + `src/lib/syncState.ts`): the five phases (`idle`/`saving`/`synced`/`saved-local`/`failed`) map to "All changes saved · Syncing… · Synced · Saved locally — syncs automatically · Sync failed". `markSynced()` is callable ONLY from handlers of a 2xx server response, so the chip can never claim "Synced" before the server confirmed (probed live, offline + online).
+  - **Offline operation queue** (`linuxdocs.sync-queue-v1`, persisted, per-user tagged): mutations become idempotent *end-state* ops (bookmark `wanted` boolean, note upsert/delete, history add — same-key ops collapse) delivered by a new idempotent `POST /user/bookmarks/set`; when offline/5xx/429 the queue retries with exponential backoff (1s → 60s cap), on the `online` event, a 30 s ticker, or a chip click ("sync now"). Fatally rejected ops (4xx) revert the local change and surface "Sync failed".
+  - **Guest mode storage**: guests can now bookmark and build view history with no account (device-local `linuxdocs.guest-data-v1`); notes remain a signed-in feature. At sign-in (login, register, or silent boot refresh) the store is absorbed as queued ops — **deterministic merge rule: guest records win for the records the guest touched, server records the guest never saw are preserved** — then replayed and server-confirmed.
+  - **Account isolation**: queue ops are tagged with the originating `userId` and only drain under the matching session; every server pull and per-record op is sequentially guarded (pull `pullSeq`, per-key `lastOp` map) so superseded responses can never overwrite newer state (stale-request protection). Sign-out clears all user-owned state and hydrates the guest store back.
+  - **Import validation + schema versions** (`/export-import`): exports carry `version: 1`; imports with any other version are rejected outright with a clear message. Strict client-side shape caps (≤2000 items, slug charset, note length); corrupt device-progress blobs (practice terminal, flashcards, speed drill, streak) are skipped and named in the result message instead of crashing or half-applying.
+  - **Backend hardening**: `tests/test_user_data.py` (9 cases) proves per-record ownership (a second user cannot read/mutate/discover another's bookmarks, notes, or history), the idempotency of `bookmarks/set` (replaying `wanted=true` can never delete), import count/shape/charset enforcement (dataset slugs are letter/digit-only, verified against all 132 entries), and that no note text appears in log output.
 - **Auth boot fix** — `src/context/AuthContext.tsx`: a `linuxdocs.auth-visible` session-hint in localStorage now gates the boot refresh call. Signed-out visitors no longer produce a red `401` console line on every page (the hint is set on sign-in/register/refresh success, cleared on logout or failed refresh).
 - **Password reset — production email flow** (reverses the briefly-shipped in-app link disclosure after a production-readiness audit): `/auth/request-password-reset` answers a **byte-identical generic 202** for registered/unknown addresses (anti-enumeration restored, timing equalized with a dummy bcrypt round), and delivers a branded, single-use 30-minute link by **email** via a clean provider abstraction (`app/mailer.py`: Resend API / SMTP / dev outbox backend — the dev mailbox writes `.eml` files to `instance/dev_outbox`, never logs tokens). Consumption is now **atomic** (conditional single-UPDATE claim; concurrent claims: exactly one wins) and each request **invalidates previous outstanding tokens**; reset now **revokes every session** including the requesting device; new/mistyped passwords are validated **before** the token is spent so typos don't burn links; no token ever reaches responses, logs (`SEC-EVENT reset_email outcome=… detail=…` only), or DOM/referrers (`no-referrer` meta added). Tests: `tests/test_mailer.py` (14 cases) replaces the 5 in-app cases → **93 total**. Live-probed: identical responses, outbox delivery, neutral UI, full token→reset→login loop in `qa/reset_probe.py` (8/8).
 - **Signup lands inside the app** — after a successful signup the client now routes to `/dashboard` (it already issues a full session on `201`), instead of dropping the user back on the landing page.
@@ -141,7 +148,7 @@ LinuxDocs/
 ├── backend/                      # Flask API
 │   ├── app/                      # __init__ (env validation/CORS/headers), auth, user, commands,
 │   │                             #   security (limits/lockout/CSRF/host), sessions, models, persistence
-│   ├── tests/                    # 93 pytest cases (auth 32 + hardening 30 + security 17 + mailer 14)
+│   ├── tests/                    # 102 pytest cases (auth 32 + hardening 30 + security 17 + mailer 14 + user-data 9)
 │   ├── requirements.txt          # pinned; gunicorn + psycopg2-binary for Render
 │   └── .env.example / pytest.ini / check_links.py
 ├── docs/screenshots/             # README assets (intro/landing/command-page/palette/dashboard/
@@ -181,10 +188,11 @@ All under `/api` (CORS restricted to `FRONTEND_ORIGIN`); every response carries 
 |---|---|
 | `npm run build` (`tsc -b && vite build`) | ✅ passes (route-split chunks, no 500 kB warning) |
 | `npm run lint` (oxlint) | ✅ zero warnings |
-| Backend tests (`backend\venv\Scripts\python -m pytest`) | ✅ **93 passed** (32 auth + 30 hardening + 17 security + 14 mailer) |
+| Backend tests (`backend\venv\Scripts\python -m pytest`) | ✅ **102 passed** (32 auth + 30 hardening + 17 security + 14 mailer + 9 user-data) |
 | `qa/smoke_api.py` (API-level checklist) | ✅ **14/14 PASS** |
 | `qa/browser_check.py` (real browser, phone viewport included) | ✅ **22/22 PASS — zero console errors** |
 | Reset-flow live checks (`qa/reset_probe.py`, real Chrome + dev mailbox) | ✅ registered + ghost emails → byte-identical generic 202, no reset material in responses or DOM; mailbox `.eml` carries the single-use link (never in file names or logs); token completes reset; old password rejected, new works |
+| Sync-hardening live checks (`qa/sync_probe.py`, real Chrome, CDP network emulation) | ✅ **14/14 PASS** — guest bookmark stays device-local with no Synced claim; guest merge survives sign-in and lands server-confirmed; offline change shows "Saved locally" (never "Synced") and drains automatically after reconnect; second account starts clean; import rejects unknown schema versions and accepts v1 |
 | Command accuracy spot-check (expand, grep, cp, lsof, uname, whois, gdb flavored scan + whole-dataset syntax bracket audit) | ✅ 2 defects found & fixed (`systemctl` bracket, `expand -i` example) |
 | README screenshots/GIF | ✅ captured by the QA harness into `docs/screenshots/` |
 
