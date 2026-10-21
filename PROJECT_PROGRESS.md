@@ -3,7 +3,7 @@
 > Snapshot of **current** project state. Covers what exists, what's finished,
 > what's still work-in-progress, the feature inventory, and the site structure.
 
-**Last updated:** email-delivery round reversed by feature decision: password reset is now in-app (one-time link shown in the response itself), signup lands on the dashboard, and all email/Resend/SMTP config is gone. 84 pytest cases pass.
+**Last updated:** production-readiness audit round 1 — the Task-1 mandate replaced the in-app reset-link disclosure with email-delivered single-use tokens (byte-identical generic responses, atomic consumption, session kill, token never in responses/logs/DOM; dev outbox backend for local runs). Signup keeps landing on the dashboard. 93 pytest cases pass, browser QA 22/22, API smoke 14/14.
 
 ---
 
@@ -44,7 +44,7 @@ An MDN-style reference for **Linux commands** plus a **CTF / security-tooling se
 
 ### 2.2 Committed this final round
 - **Auth boot fix** — `src/context/AuthContext.tsx`: a `linuxdocs.auth-visible` session-hint in localStorage now gates the boot refresh call. Signed-out visitors no longer produce a red `401` console line on every page (the hint is set on sign-in/register/refresh success, cleared on logout or failed refresh).
-- **Password reset — in-app link, no email** — `/auth/request-password-reset` now returns the single-use 30-minute reset link in the response (`reset_link`, `null` for unknown emails) and the UI shows it on `/password-reset` instantly ("Set a new password now →" + the raw URL). Replaces the briefly-shipped Resend/SMTP email delivery (deleted: `mailer.py`, its 9 tests, the `.env.example`/render.yaml/README mail config). Trade-off kept deliberately: the endpoint is not enumeration-proof (the link's presence reveals account existence) — documented in code + README; rate limits unchanged. New `tests/test_reset_inapp.py` (5 cases: link format, unknown-email, distinct tokens, full reset+login flow, single-use replay).
+- **Password reset — production email flow** (reverses the briefly-shipped in-app link disclosure after a production-readiness audit): `/auth/request-password-reset` answers a **byte-identical generic 202** for registered/unknown addresses (anti-enumeration restored, timing equalized with a dummy bcrypt round), and delivers a branded, single-use 30-minute link by **email** via a clean provider abstraction (`app/mailer.py`: Resend API / SMTP / dev outbox backend — the dev mailbox writes `.eml` files to `instance/dev_outbox`, never logs tokens). Consumption is now **atomic** (conditional single-UPDATE claim; concurrent claims: exactly one wins) and each request **invalidates previous outstanding tokens**; reset now **revokes every session** including the requesting device; new/mistyped passwords are validated **before** the token is spent so typos don't burn links; no token ever reaches responses, logs (`SEC-EVENT reset_email outcome=… detail=…` only), or DOM/referrers (`no-referrer` meta added). Tests: `tests/test_mailer.py` (14 cases) replaces the 5 in-app cases → **93 total**. Live-probed: identical responses, outbox delivery, neutral UI, full token→reset→login loop in `qa/reset_probe.py` (8/8).
 - **Signup lands inside the app** — after a successful signup the client now routes to `/dashboard` (it already issues a full session on `201`), instead of dropping the user back on the landing page.
 - **Maintenance prune fix** — `backend/app/persistence.py`: SQLAlchemy 2.0 rejected `.limit(500).delete()` in `_prune` (the job failed every cycle, seen live as `maintenance_task_failed`); now fetches then deletes by id, and token-only prunes commit too.
 - **Dataset accuracy fixes** — `systemctl` closed-bracket syntax; `expand -i` example corrected to real GNU semantics (leading tabs convert; tabs after words are preserved).
@@ -141,7 +141,7 @@ LinuxDocs/
 ├── backend/                      # Flask API
 │   ├── app/                      # __init__ (env validation/CORS/headers), auth, user, commands,
 │   │                             #   security (limits/lockout/CSRF/host), sessions, models, persistence
-│   ├── tests/                    # 84 pytest cases (auth 32 + hardening 30 + security 17 + reset 5)
+│   ├── tests/                    # 93 pytest cases (auth 32 + hardening 30 + security 17 + mailer 14)
 │   ├── requirements.txt          # pinned; gunicorn + psycopg2-binary for Render
 │   └── .env.example / pytest.ini / check_links.py
 ├── docs/screenshots/             # README assets (intro/landing/command-page/palette/dashboard/
@@ -181,10 +181,10 @@ All under `/api` (CORS restricted to `FRONTEND_ORIGIN`); every response carries 
 |---|---|
 | `npm run build` (`tsc -b && vite build`) | ✅ passes (route-split chunks, no 500 kB warning) |
 | `npm run lint` (oxlint) | ✅ zero warnings |
-| Backend tests (`backend\venv\Scripts\python -m pytest`) | ✅ **84 passed** (32 auth + 30 hardening + 17 security + 5 in-app reset) |
+| Backend tests (`backend\venv\Scripts\python -m pytest`) | ✅ **93 passed** (32 auth + 30 hardening + 17 security + 14 mailer) |
 | `qa/smoke_api.py` (API-level checklist) | ✅ **14/14 PASS** |
 | `qa/browser_check.py` (real browser, phone viewport included) | ✅ **22/22 PASS — zero console errors** |
-| In-app reset live checks | ✅ registered email → 202 + `reset_link` shown; unknown email → 202 + `reset_link: null`; consumed token rejects replay |
+| Reset-flow live checks (`qa/reset_probe.py`, real Chrome + dev mailbox) | ✅ registered + ghost emails → byte-identical generic 202, no reset material in responses or DOM; mailbox `.eml` carries the single-use link (never in file names or logs); token completes reset; old password rejected, new works |
 | Command accuracy spot-check (expand, grep, cp, lsof, uname, whois, gdb flavored scan + whole-dataset syntax bracket audit) | ✅ 2 defects found & fixed (`systemctl` bracket, `expand -i` example) |
 | README screenshots/GIF | ✅ captured by the QA harness into `docs/screenshots/` |
 

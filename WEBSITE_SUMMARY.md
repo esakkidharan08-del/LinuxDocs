@@ -2,7 +2,7 @@
 
 **LinuxDocs** is a professional, MDN-style reference and learning platform for **Linux commands and CTF security tools** — precise syntax, real flags, copy-ready examples — combined with a full interactive learning system: guided paths, quizzes, a sandboxed practice terminal, flashcards, a speed-drill arena, achievements, and streaks.
 
-> Status: ✅ production build green · lint zero findings · **84 backend tests passing** · browser QA **22/22** · API smoke **14/14** · datasets fully synced · all progress committed to git (`09e13c1`).
+> Status: ✅ production build green · lint zero findings · **93 backend tests passing** · browser QA **22/22** · API smoke **14/14** · datasets fully synced · all progress committed to git (`ff10f7b`).
 
 ---
 
@@ -49,7 +49,7 @@
 | `/dashboard` 🔒 | DashboardPage | Learning summary, 12 achievements, bookmarks, notes, history |
 | `/settings` 🔒 | SettingsPage | Theme, profile, shortcuts |
 | `/export-import` | ExportImportPage | One-file backup/restore of all progress (section 9) |
-| `/sign-in` · `/sign-up` · `/password-reset` | Auth pages | Sign-up/sign-in drop you straight into the app (dashboard); `/password-reset` returns the **one-time reset link directly in the page** — no email provider needed |
+| `/sign-in` · `/sign-up` · `/password-reset` | Auth pages | Sign-up/sign-in drop you straight into the app (dashboard); `/password-reset` emails the account holder a **single-use link** and shows an identical neutral confirmation whether or not the address is registered |
 | `/privacy` · `/terms` | LegalPage | Legal docs |
 | `*` | NotFoundPage | `/dev/void` easter-egg terminal with one hidden flag 🏴 |
 
@@ -111,8 +111,8 @@ Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrad
 
 - Flask + SQLite under `backend/` with session cookies, CSRF origin checks, hardened auth, and session management (token rotation on refresh, session-cap eviction, single-use reset tokens).
 - Modules: `auth.py` · `commands.py` · `user.py` · `models.py` · `security.py` · `sessions.py` · `persistence.py` (auto-backup of the DB on startup/manual/scheduled triggers + maintenance prune).
-- **Password reset without email** (`/password-reset`): the request endpoint returns the single-use reset link in the API response and the UI shows it on the spot. Tokens are stored hashed, expire in 30 minutes, work exactly once, and consuming one revokes that user's sessions. *Documented trade-off:* the response differs between registered and unknown emails (that's what makes the link appear) — appropriate for this project's demo deployment model; both reset endpoints are rate-limited (5/hour/IP).
-- Four test suites — `test_auth.py` (32) + `test_hardening.py` (30) + `test_security.py` (17) + `test_reset_inapp.py` (5) — **84 pytest cases**.
+- **Password reset by email** (`/password-reset`): the request endpoint answers a byte-identical generic response for registered/unknown addresses (no user enumeration, timing equalized with a dummy bcrypt round) and emails a branded message with a **single-use, 30-minute link** built from the trusted `FRONTEND_ORIGIN`. Tokens are stored only as SHA-256 hashes, expire in 30 minutes, are consumed **atomically** (concurrent claims: exactly one wins), and a successful reset **revokes every session** on the account. Tokens never appear in API responses, logs, DOM, or referrer data. Providers: Resend API or any SMTP server via env vars; local development uses a safe **dev outbox backend** that writes `.eml` mailbox files and logs nothing. Both reset endpoints are rate-limited (5 requests + 10 token attempts per hour/IP).
+- Four test suites — `test_auth.py` (32) + `test_hardening.py` (30) + `test_security.py` (17) + `test_mailer.py` (14) — **93 pytest cases**.
 - `.env.example` documents required secrets (`SECRET_KEY`, `JWT_SECRET_KEY`, `DATABASE_URL`, `FRONTEND_ORIGIN`); cookies/logs/instance DBs are git-ignored (never committed).
 
 ## 11. Performance & UX System
@@ -127,9 +127,10 @@ Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrad
 |---|---|
 | `npm run build` (tsc strict + vite) | ✅ passes, no warnings (entry ≈ 544 kB min / 172 kB gzip) |
 | `npm run lint` (oxlint) | ✅ zero findings |
-| Backend tests (`backend\venv\Scripts\pytest`) | ✅ **84 passed** (32 auth + 30 hardening + 17 security + 5 in-app reset) |
+| Backend tests (`backend\venv\Scripts\pytest`) | ✅ **93 passed** (32 auth + 30 hardening + 17 security + 14 mailer) |
 | `qa/browser_check.py` real-Chrome suite | ✅ **22/22 PASS** — zero console errors, phone viewport included |
 | `qa/smoke_api.py` endpoint checklist | ✅ **14/14 PASS** |
+| `qa/reset_probe.py` real-browser reset-security suite | ✅ **8/8 PASS** — byte-identical generic responses, token only in the dev mailbox (never in responses/DOM/filenames), full token→reset→login loop |
 | Dataset sync FE ↔ BE | ✅ 132 = 132, 95 Linux + 37 CTF, 0 mismatches |
 | Landing tools-band audit (`qa/grid_shots.py`) | ✅ border matrix 6/6 in dark+light × 360/768/1280, focus & hover probed |
 | Not-found handling | ✅ every dynamic route |
@@ -144,7 +145,7 @@ npm run dev:backend    # Flask only
 npm run build          # type-check + production build → dist/
 npm run preview        # serve the production build
 npm run lint           # oxlint
-cd backend; .\venv\Scripts\pytest    # 84 backend tests
+cd backend; .\venv\Scripts\pytest    # 93 backend tests
 ```
 
 Full Windows-PowerShell walkthrough lives in `RUN.md`; the ongoing work log lives in `PROJECT_PROGRESS.md`.
@@ -164,5 +165,5 @@ src/
 backend/
 ├─ app/ auth.py · commands.py · security.py · sessions.py · persistence.py · user.py · models.py
 ├─ data/ commands.json         mirrored dataset for the API
-└─ tests/ test_auth.py · test_hardening.py · test_security.py · test_reset_inapp.py  (84 cases)
+└─ tests/ test_auth.py · test_hardening.py · test_security.py · test_mailer.py  (93 cases)
 ```
