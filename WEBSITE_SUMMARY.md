@@ -2,7 +2,7 @@
 
 **LinuxDocs** is a professional, MDN-style reference and learning platform for **Linux commands and CTF security tools** — precise syntax, real flags, copy-ready examples — combined with a full interactive learning system: guided paths, quizzes, a sandboxed practice terminal, flashcards, a speed-drill arena, achievements, and streaks.
 
-> Status: ✅ production build green · lint zero findings · datasets fully synced · all progress committed to git (`5641ff6`).
+> Status: ✅ production build green · lint zero findings · **84 backend tests passing** · browser QA **22/22** · API smoke **14/14** · datasets fully synced · all progress committed to git (`09e13c1`).
 
 ---
 
@@ -17,6 +17,7 @@
 | Backend | Flask (Python) — auth, bookmarks, notes, history, SQLite persistence, security hardening + tests |
 | Quality tools | `tsc -b` (build), `oxlint` (lint), link-check script, security test suite |
 | Dev experience | `npm run dev:all` runs Vite (:5173) + Flask (:5000) together, with `/api` proxy and strict-port CSRF-safe setup |
+| Deployment | `render.yaml` (Flask API on Render, gunicorn) + `vercel.json` (Vercel SPA with `/api` proxy rewrites) |
 
 ---
 
@@ -32,7 +33,7 @@
 
 | Route | Page | What it does |
 |---|---|---|
-| `/` | LandingPage | Terminal-editorial hero, feature tour for every tool on the site |
+| `/` | LandingPage | Terminal-editorial hero + **8-tile tools band** linking every tool on the site (responsive 1/2/4 columns) |
 | `/intro` | IntroPage | Cinematic first-visit intro (skipped for returning users; footer "Replay intro") |
 | `/linux/:categoryId` | CategoryPage | Command index per Linux category |
 | `/linux/:categoryId/:slug` · `/ctf/:domainId/:slug` | CommandDetailPage | Full command docs, builder, bookmarks, notes, copy buttons |
@@ -48,7 +49,7 @@
 | `/dashboard` 🔒 | DashboardPage | Learning summary, 12 achievements, bookmarks, notes, history |
 | `/settings` 🔒 | SettingsPage | Theme, profile, shortcuts |
 | `/export-import` | ExportImportPage | One-file backup/restore of all progress (section 9) |
-| `/sign-in` · `/sign-up` · `/password-reset` | Auth pages | Auth with redirect-on-login/logout |
+| `/sign-in` · `/sign-up` · `/password-reset` | Auth pages | Sign-up/sign-in drop you straight into the app (dashboard); `/password-reset` returns the **one-time reset link directly in the page** — no email provider needed |
 | `/privacy` · `/terms` | LegalPage | Legal docs |
 | `*` | NotFoundPage | `/dev/void` easter-egg terminal with one hidden flag 🏴 |
 
@@ -108,9 +109,11 @@ Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrad
 
 ## 10. Backend & Security
 
-- Flask + SQLite under `backend/` with session cookies, CSRF origin checks, and hardened auth.
-- Modules: `auth.py`, `user.py`, `models.py`, plus new `security.py`, `sessions.py`, `persistence.py` (auto-backup of the DB on startup/manual/scheduled triggers) and two test suites (`test_security.py`, `test_hardening.py`).
-- `.env.example` documents required secrets; cookies/logs/instance DBs are git-ignored (never committed).
+- Flask + SQLite under `backend/` with session cookies, CSRF origin checks, hardened auth, and session management (token rotation on refresh, session-cap eviction, single-use reset tokens).
+- Modules: `auth.py` · `commands.py` · `user.py` · `models.py` · `security.py` · `sessions.py` · `persistence.py` (auto-backup of the DB on startup/manual/scheduled triggers + maintenance prune).
+- **Password reset without email** (`/password-reset`): the request endpoint returns the single-use reset link in the API response and the UI shows it on the spot. Tokens are stored hashed, expire in 30 minutes, work exactly once, and consuming one revokes that user's sessions. *Documented trade-off:* the response differs between registered and unknown emails (that's what makes the link appear) — appropriate for this project's demo deployment model; both reset endpoints are rate-limited (5/hour/IP).
+- Four test suites — `test_auth.py` (32) + `test_hardening.py` (30) + `test_security.py` (17) + `test_reset_inapp.py` (5) — **84 pytest cases**.
+- `.env.example` documents required secrets (`SECRET_KEY`, `JWT_SECRET_KEY`, `DATABASE_URL`, `FRONTEND_ORIGIN`); cookies/logs/instance DBs are git-ignored (never committed).
 
 ## 11. Performance & UX System
 
@@ -122,9 +125,13 @@ Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrad
 
 | Check | Result |
 |---|---|
-| `npm run build` (tsc strict + vite) | ✅ passes, no warnings |
+| `npm run build` (tsc strict + vite) | ✅ passes, no warnings (entry ≈ 544 kB min / 172 kB gzip) |
 | `npm run lint` (oxlint) | ✅ zero findings |
+| Backend tests (`backend\venv\Scripts\pytest`) | ✅ **84 passed** (32 auth + 30 hardening + 17 security + 5 in-app reset) |
+| `qa/browser_check.py` real-Chrome suite | ✅ **22/22 PASS** — zero console errors, phone viewport included |
+| `qa/smoke_api.py` endpoint checklist | ✅ **14/14 PASS** |
 | Dataset sync FE ↔ BE | ✅ 132 = 132, 95 Linux + 37 CTF, 0 mismatches |
+| Landing tools-band audit (`qa/grid_shots.py`) | ✅ border matrix 6/6 in dark+light × 360/768/1280, focus & hover probed |
 | Not-found handling | ✅ every dynamic route |
 | Git | ✅ clean tree; runtime artifacts & secrets ignored |
 
@@ -137,6 +144,7 @@ npm run dev:backend    # Flask only
 npm run build          # type-check + production build → dist/
 npm run preview        # serve the production build
 npm run lint           # oxlint
+cd backend; .\venv\Scripts\pytest    # 84 backend tests
 ```
 
 Full Windows-PowerShell walkthrough lives in `RUN.md`; the ongoing work log lives in `PROJECT_PROGRESS.md`.
@@ -154,7 +162,7 @@ src/
 ├─ context/ AuthContext.tsx · CatalogContext.tsx
 ├─ data/ commands.ts           132 commands + categories + domains (single source of truth)
 backend/
-├─ app/ auth.py · security.py · sessions.py · persistence.py · user.py · models.py
+├─ app/ auth.py · commands.py · security.py · sessions.py · persistence.py · user.py · models.py
 ├─ data/ commands.json         mirrored dataset for the API
-└─ tests/ test_security.py · test_hardening.py
+└─ tests/ test_auth.py · test_hardening.py · test_security.py · test_reset_inapp.py  (84 cases)
 ```
