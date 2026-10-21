@@ -26,6 +26,40 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * "A session might exist" marker in localStorage. The refresh cookie is HttpOnly
+ * (unreadable from JS), so on boot we can't tell "guest" from "cookie died" —
+ * calling /auth/refresh for every guest made the F12 console show a red 401 on
+ * every public page. The marker is set on successful sign-in/refresh and cleared
+ * on sign-out or a failed refresh; guests with no marker skip the refresh call
+ * and get a completely clean console.
+ */
+const SESSION_HINT = 'linuxdocs.auth-visible';
+
+const hasSessionHint = () => {
+  try {
+    return localStorage.getItem(SESSION_HINT) === '1';
+  } catch {
+    return false;
+  }
+};
+
+const markSession = () => {
+  try {
+    localStorage.setItem(SESSION_HINT, '1');
+  } catch {
+    // private mode etc. — the app still works, just boot-refreshes every time
+  }
+};
+
+const unmarkSession = () => {
+  try {
+    localStorage.removeItem(SESSION_HINT);
+  } catch {
+    // ignore
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,12 +81,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const refreshAuth = useCallback(async () => {
+    let sessionOk = false;
     try {
       await authApi.refresh();
-      await fetchUser();
-      await refreshUserData();
+      sessionOk = true;
     } catch {
-      setUser(null);
+      // no valid refresh cookie — guest (or expired session)
+    }
+    try {
+      if (sessionOk) {
+        markSession();
+        await fetchUser();
+        await refreshUserData();
+      } else {
+        unmarkSession();
+        setUser(null);
+      }
+    } catch {
+      // refresh cookie was fine but profile/data failed (offline etc.) — leave UI neutral
+    } finally {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,12 +121,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    refreshAuth();
+    if (hasSessionHint()) {
+      refreshAuth();
+    } else {
+      setLoading(false); // never signed in on this device — skip the refresh call entirely
+    }
   }, [refreshAuth]);
 
   const login = async (email: string, password: string, remember = true) => {
     try {
       const response = await authApi.login({ email, password, remember });
+      markSession();
       setUser(response.user);
       await refreshUserData();
       return {};
@@ -91,6 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (data: { username: string; email: string; password: string; confirm_password: string }) => {
     try {
       const response = await authApi.register(data);
+      markSession();
       setUser(response.user);
       await refreshUserData();
       return {};
@@ -105,6 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {
       // ignore
     }
+    unmarkSession();
     setUser(null);
     setBookmarks(new Set());
     setNotes(new Map());

@@ -1,177 +1,203 @@
+<div align="center">
+
+![LinuxDocs](docs/screenshots/intro.png)
+
 # LinuxDocs
 
-An MDN-style reference for Linux commands plus a CTF security & hacking tools section, with user accounts, bookmarks, notes, and history.
+**Every flag, every example, without the guesswork.**
 
-## Stack
+A hand-checked MDN-style reference for **95 Linux utilities + 37 CTF & security tools**, wrapped in a full learning platform — guided paths, a mission-based practice terminal, quizzes, flashcards, and a speed drill — with real accounts that persist progress.
 
-- **Frontend**: Vite + React 19 + TypeScript + Tailwind CSS v4
-- **Backend**: Flask + Flask-SQLAlchemy + Flask-Bcrypt + Flask-JWT-Extended + Flask-CORS
-- **Database**: SQLite (local) / PostgreSQL (production)
-- **Auth**: JWT access tokens (in-memory) + HttpOnly refresh cookies (30-day)
+[![React 19](https://img.shields.io/badge/React-19-20232a?logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org)
+[![Flask](https://img.shields.io/badge/Flask-3-000?logo=flask)](https://flask.palletsprojects.com)
+[![PostgreSQL ready](https://img.shields.io/badge/SQLite%20%E2%86%92%20PostgreSQL-ready-4169E1?logo=postgresql)](#deploy-your-own)
+[![Tests](https://img.shields.io/badge/tests-79%20passing-2EA043)](#how-it-is-verified)
 
-## Quick Start (Windows PowerShell)
+▶ **Live app:** *[[your deployed URL here]]* — **Demo GIF below** 👇
 
-### Prerequisites
+</div>
 
-- Node.js 20+ and npm
-- Python 3.11+
-- Git
+---
 
-### 1. Clone and install frontend dependencies
+## The demo (8 real pages, captured during automated QA)
+
+![LinuxDocs demo](docs/screenshots/demo.gif)
+
+*Intro boot sequence → landing → a full command page → the Ctrl+K command palette → the practice sandbox → flashcards → the signed-in dashboard → the 404 page that hides a flag.*
+
+## Why I built it
+
+When I started learning Linux and CTF tooling, the information was everywhere and nowhere: `man` pages are complete but unreadable for beginners, blog posts contradict each other, and cheat sheets show flags without explaining what they change. I kept wishing for an MDN for the terminal — one index where every command had the same honest structure: syntax, the flags that actually matter, copy-paste examples **with the output you should expect**, and what to reach for next.
+
+So LinuxDocs is:
+
+- **The reference I wanted** — 132 hand-checked entries (95 Linux utilities, 37 CTF tools) in a consistent MDN-style layout, each with a *Command Builder* that assembles the real flag string as you toggle options, plus "Spotted a mistake? Report it." because accuracy is the product.
+- **The practice I needed** — 8 guided learning paths with 24 lessons and quizzes; a safe, simulated practice terminal where 13 missions across 3 ranks ("Boot Camp" → "Operator") must be solved to unlock more helper hints — like a real operator earning their way; flip-style flashcards over all 95 Linux utilities; a speed drill; achievements; daily streaks.
+- **The engineering exercise of doing auth right** — silent-refresh JWT sessions, and every deployment decision justified below.
+
+## What's inside
+
+| Area | Details |
+|---|---|
+| 📚 **Reference** | 95 Linux + 37 CTF tools — syntax, flag tables with per-flag examples, worked examples with sample output, related commands, tags; Ctrl+K command palette (keyboard-first, reachable from every page) |
+| 🎓 **Learn** | 8 paths × 24 lessons (Linux foundations → permissions → processes → systemd; CTF recon → web → crypto → forensics), quiz builder with difficulty + question-count controls |
+| 🖥️ **Practice terminal** | Simulated filesystem (`ls`, `cat`, `man`, `grep`, pipes…) + 13 missions over 3 ranks; helpers are retired as you rank up; ↑ history, Ctrl+L clear |
+| 🔁 **Flashcards** | Flip-style spaced repetition over every Linux utility with "Again / Got it" marking |
+| ⚡ **Speed drill** | Timed command-identification drill with per-session scoring |
+| 🏆 **Progress** | Achievements, streaks, per-path progress, all synced to your account when signed in |
+| 🔐 **Accounts** | Register / sign in / silent refresh / sign out; bookmarks, per-command notes (Ctrl+S autosave), history — synced across devices |
+
+<div align="center">
+  <img src="docs/screenshots/landing.png" alt="Landing page" width="600">
+  <img src="docs/screenshots/command-page.png" alt="Command documentation page" width="600">
+</div>
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Command palette](docs/screenshots/command-palette.png) | ![Dashboard](docs/screenshots/dashboard.png) |
+| *Ctrl+K palette — filters 132 entries by name, category, and tags* | *Dashboard — progress across paths, quizzes, missions + achievements* |
+
+<p align="center">
+  <img src="docs/screenshots/mobile-terminal.png" alt="Practice terminal on mobile" width="260">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/screenshots/mobile-flashcards.png" alt="Flashcards on mobile" width="260">
+</p>
+<p align="center"><sub>The practice sandbox and flashcards are fully phone-sized friendly (390×844).</sub></p>
+
+Mistyped a URL? The 404 page is itself a terminal — type `cat flag.hidden` and you'll find it hides a flag for curious learners: ![404 void terminal](docs/screenshots/not-found.png)
+
+## How it is verified
+
+The repo ships its own test harnesses (in `qa/`, untracked):
+
+```powershell
+# 79 pytest backend tests
+cd backend; .\venv\Scripts\pytest           # 79 passed
+
+# 14-step API smoke test (stdlib only): register → login →
+# refresh → logout → revoked-after-logout → 401/404 shape checks
+python qa/smoke_api.py                      # 14/14 PASS
+
+# Real-browser QA (Chrome DevTools Protocol, headless): drives the exact
+# 10-minute manual checklist — sign-up redirect, session surviving a hard
+# reload, sign out, protected-route gate, fake-URL 404, the void-terminal
+# flag, 8 random command pages, Ctrl+K palette, then a 390×844 phone
+# viewport running the practice terminal, a full quiz, and flashcards —
+# while logging every console message per page.
+python qa/browser_check.py                  # 22/22 PASS, zero red console errors
+```
+
+`qa/browser_check.py` types with real CDP input events (not synthetic ones), captures Network responses for the auth calls, and reports console errors per page — that last check is how a "signed-out visitor gets a 401 console line on every page" bug was found in the auth boot flow and fixed with a session-hint in `AuthContext`.
+
+## Architecture
+
+```
+Browser ──(one origin)──► Vercel  ──/api/* proxy──► Render (Flask API) ──► Render Postgres
+                          │                              ▲
+                          └── static React SPA (Vite)     └── host-allowlist + rate limits + CORS
+```
+
+- **Frontend** — Vite + React 19 + TypeScript + Tailwind CSS v4. Route-level code splitting (the intro's 3D scene loads only on `/intro` or first visit). All state flows through typed services (`src/services/api.ts`).
+- **Auth model** — JWT access token lives **in memory only** (15 min); the refresh credential is an **HttpOnly, SameSite=Strict cookie** (30 days) backed by opaque rotating session tokens with reuse (theft) detection. A single-flight refresh promise stops a tab full of failing requests from stampeding the auth endpoint.
+- **The same-origin trick** — `vercel.json` proxies `/api/*` to the Render API, so the browser only ever talks to one domain. That makes the refresh cookie first-party on the frontend origin — no `SameSite=None`, no third-party-cookie breakage, no CORS drama. In dev, `vite.config.ts` does the identical thing to `localhost:5000`.
+- **Backend** — Flask 3 + SQLAlchemy + Bcrypt + JWT-Extended. Env-driven config; request logging; per-endpoint **and** global rate limits; account lockout with attempt windows; CSRF origin checks; **Host-header allowlist**; payload clamps; hardened security headers (CSP/HSTS) in production.
+- **Data durability** — SQLite runs WAL + `synchronous=FULL` + automatic verified backups with self-healing restore on corruption. Point `DATABASE_URL` at Postgres (Render blueprint does exactly that) and the SQLite-only machinery disables itself cleanly — no forks, no code changes.
+
+## Quick start (local)
+
+Prerequisites: Node 20+, Python 3.11+.
 
 ```powershell
 git clone <your-repo-url>
 cd LinuxDocs
 npm install
-```
 
-### 2. Set up backend
-
-```powershell
 cd backend
 python -m venv venv
 .\venv\Scripts\pip install -r requirements.txt
+copy .env.example .env      # then fill in the two secrets (see below)
+cd ..
+
+npm run dev:all             # Vite on :5173 (proxies /api) + Flask on :5000
 ```
 
-### 3. Configure environment
+Frontend: http://localhost:5173 — API: http://localhost:5000/api
 
-```powershell
-# Copy example and edit with your secrets
-copy .env.example .env
-# Generate secrets:
-# python -c "import secrets; print(secrets.token_hex(32))"
-# Edit .env and fill in SECRET_KEY, JWT_SECRET_KEY
+Required `.env` variables (in `backend/.env` — never commit it):
+
+| Variable | Value |
+|---|---|
+| `SECRET_KEY` | `python -c "import secrets; print(secrets.token_hex(32))"` |
+| `JWT_SECRET_KEY` | same generator, different value |
+| `DATABASE_URL` | `sqlite:///instance/app.db` (local default) |
+| `FRONTEND_ORIGIN` | `http://localhost:5173` |
+
+## Deploy your own
+
+**1. Create the backend on Render** — Push the repo, then in Render: **New + → Blueprint** and pick the repository. `render.yaml` provisions the `linuxdocs-api` web service (gunicorn) **and** the free partners Postgres, wiring `DATABASE_URL`, strong regenerated `SECRET_KEY`/`JWT_SECRET_KEY` automatically.
+
+**2. Point it at your frontend** — After the first deploy, Render gives the service a URL like `https://linuxdocs-api.onrender.com`. Set its env vars:
+
+| Variable | Set to |
+|---|---|
+| `FRONTEND_ORIGIN` | your Vercel site URL (`https://…vercel.app`) |
+| `ALLOWED_HOSTS` | the Render service host (`linuxdocs-api.onrender.com`) |
+
+**3. Create the frontend on Vercel** — **New Project → Import repo**. Vercel auto-detects the `vercel.json`: builds with `npm run build`, serves `dist/`, and applies the two rewrites:
+
+```jsonc
+"rewrites": [
+  { "source": "/api/:path*", "destination": "https://linuxdocs-api.onrender.com/api/:path*" }, // API proxy
+  { "source": "/:path*",     "destination": "/index.html" }                                    // SPA fallback
+]
 ```
 
-Required `.env` variables:
-| Variable | Description |
-|----------|-------------|
-| `SECRET_KEY` | Flask secret (32+ random hex chars) |
-| `JWT_SECRET_KEY` | JWT signing secret (32+ random hex chars) |
-| `DATABASE_URL` | `sqlite:///instance/app.db` (local) or Postgres URL |
-| `FRONTEND_ORIGIN` | `http://localhost:5173` (must match exactly) |
-| `JWT_ACCESS_TOKEN_EXPIRES` | Access token TTL in seconds (default: 900) |
-| `JWT_REFRESH_TOKEN_EXPIRES` | Refresh token TTL in seconds (default: 2592000 = 30 days) |
+Then update `FRONTEND_ORIGIN`/`ALLOWED_HOSTS` on Render with the final Vercel URL and redeploy once — accounts, refresh cookies, and rate limiting all work across the proxy exactly like they do locally.
 
-**Never commit `.env` or `instance/app.db`** — they're in `.gitignore`.
+*Why the rewrite matters:* with `/api` on the site's own origin, the HttpOnly refresh cookie is first-party `SameSite=Strict`. The whole scary class of cross-site auth issues (third-party cookie deprecation, `SameSite=None` + cross-domain CSRF) simply does not apply.
 
-### 4. Run everything
+## API endpoints
 
-**Option A: One command (both servers)**
-```powershell
-npm run dev:all
-```
-
-**Option B: Separate terminals**
-
-Terminal 1 (Frontend):
-```powershell
-npm run dev
-```
-
-Terminal 2 (Backend):
-```powershell
-cd backend
-.\venv\Scripts\python -m flask run --port 5000
-```
-
-Frontend: http://localhost:5173  
-Backend API: http://localhost:5000/api
-
-### 5. Run backend tests
-
-```powershell
-cd backend
-.\venv\Scripts\pytest
-```
-
-All 79 tests should pass.
-
-## Features
-
-- **Command Reference**: 100+ Linux commands and CTF tools with syntax, examples, and related commands
-- **User Accounts**: Register, login, change password, delete account
-- **Bookmarks**: Star commands to save them to your dashboard
-- **Notes**: Per-command notes with auto-save (Ctrl+S)
-- **History**: Recently viewed commands (last 15)
-- **Dashboard**: View all bookmarks, notes, and history in one place
-- **Settings**: Change password, delete account with confirmation
-- **Terminal UI**: Dark/light themes, blinking cursor, terminal-styled auth forms
-- **Security**: HttpOnly cookies, SameSite=Strict, CSRF origin checks, per-endpoint + global rate limits, account lockout, rotating opaque sessions with token-reuse (theft) detection, Host-header allowlist, strict payload validation, hardened security headers (HSTS/CSP in production)
-- **Data durability**: WAL + synchronous=FULL SQLite, `foreign_keys=ON`, verified daily backups with automatic restore on corruption, and a persistent security audit log — accounts are kept, not disposable
-
-## Project Structure
-
-```
-LinuxDocs/
-├── src/                    # Frontend
-│   ├── components/         # Reusable UI components
-│   ├── context/            # React Context (Auth, Theme)
-│   ├── data/               # Command data (single source of truth)
-│   ├── pages/              # Route pages
-│   ├── services/           # API client
-│   ├── App.tsx             # Main router
-│   └── main.tsx            # Entry point
-├── backend/                # Flask API
-│   ├── app/
-│   │   ├── __init__.py     # App factory
-│   │   ├── models.py       # SQLAlchemy models
-│   │   ├── auth.py         # Auth endpoints
-│   │   ├── user.py         # User endpoints
-│   │   ├── security.py     # Rate limits, lockouts, headers, CSRF, Host checks
-│   │   ├── sessions.py     # Rotating opaque sessions + reset tokens
-│   │   └── persistence.py  # WAL, integrity checks, backups, restore
-│   ├── tests/
-│   │   └── test_auth.py    # 79 pytest cases
-│   ├── requirements.txt    # Pinned dependencies
-│   ├── .env.example        # Environment template
-│   └── pytest.ini
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-└── README.md
-```
-
-## API Endpoints
-
-All under `/api` with CORS restricted to `FRONTEND_ORIGIN`:
+All under `/api` (CORS restricted to `FRONTEND_ORIGIN`):
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/auth/register` | — | Register new user |
-| POST | `/auth/login` | — | Login, returns access token + sets refresh cookie |
-| POST | `/auth/refresh` | Refresh cookie | Get new access token |
-| POST | `/auth/logout` | — | Clear cookies |
-| GET | `/auth/me` | Access token | Get current user |
-| GET | `/user/me` | Access token | Get current user (alias) |
-| GET | `/user/bookmarks` | Access token | List bookmarks |
-| POST | `/user/bookmarks/toggle` | Access token | Toggle bookmark |
-| GET | `/user/notes` | Access token | List notes |
-| POST | `/user/notes` | Access token | Upsert note |
-| DELETE | `/user/notes/:slug` | Access token | Delete note |
-| GET | `/user/history` | Access token | List recent (15) |
-| POST | `/user/history/add` | Access token | Record view |
+| POST | `/auth/register` | — | Register (rate-limited) |
+| POST | `/auth/login` | — | Login → access token + HttpOnly refresh cookie |
+| POST | `/auth/refresh` | Refresh cookie | New access token (single-flight on client) |
+| POST | `/auth/logout` | — | Revoke session + clear cookie |
+| GET | `/auth/me` | Access token | Current user |
+| POST | `/auth/request-password-reset` | — | Email-token reset request |
+| POST | `/auth/reset-password` | — | Complete reset with token |
+| GET/POST | `/user/bookmarks` (+`/toggle`) | Access token | Bookmark sync |
+| GET/POST/DELETE | `/user/notes[/:slug]` | Access token | Per-command notes |
+| GET/POST | `/user/history` (+`/add`) | Access token | Recently viewed |
 | POST | `/user/change-password` | Access token | Change password |
-| DELETE | `/user/delete-account` | Access token | Delete account + cascade |
+| POST | `/user/data/import` | Access token | Import synced progress |
+| DELETE | `/user/delete-account` | Access token | Full cascade delete |
 
-## Verification Checklist
+## Project structure
 
-After running `npm run dev:all`:
-
-1. Open http://localhost:5173
-2. Click **Sign Up** → create account (username, email, strong password)
-3. Verify redirect to home, header shows username
-4. Browse to any command (e.g., `/linux/file-and-directory/ls`)
-5. Click **Bookmark** star → appears in Dashboard
-6. Add a **Note** → auto-saves, appears in Dashboard
-7. View 3+ different commands
-8. Open **Dashboard** → verify Bookmarks, Notes, History tabs
-9. Open **Settings** → change password, verify login works with new password
-10. **Restart Flask** (`Ctrl+C` in backend terminal, re-run)
-11. Reload frontend → should stay logged in (silent refresh)
-12. Open **incognito/private window** → sign in → verify data persists
-13. Check DevTools → Application → Cookies → `refresh_token_cookie` is **HttpOnly**, no tokens in localStorage
-14. `git status` → no `.env` or `instance/app.db` shown
+```
+LinuxDocs/
+├── src/                      # Frontend (React 19 + TS)
+│   ├── components/           #   Command pages, palette, intro scene, header…
+│   ├── context/              #   Auth (silent refresh + session hint), Theme
+│   ├── data/                 #   132 hand-checked command entries (source of truth)
+│   ├── pages/                #   Reference, Learn, PracticeTerminal, Flashcards, …
+│   └── services/api.ts       #   Typede API client + single-flight refresh
+├── backend/                  # Flask 3 API
+│   ├── app/                  #   factory, models, auth, user, security, sessions, persistence
+│   ├── tests/                #   79 pytest cases
+│   └── requirements.txt      #   pinned (incl. gunicorn + psycopg2 for Render)
+├── docs/screenshots/          # README assets (captured by the QA run)
+├── qa/                        # browser_check.py / smoke_api.py (gitignored)
+├── render.yaml                # Render blueprint: API + Postgres
+└── vercel.json                # /api/* proxy + SPA fallback
+```
 
 ## License
 

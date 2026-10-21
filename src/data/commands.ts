@@ -1799,7 +1799,7 @@ export const COMMANDS: Command[] = [
     "category": "services-and-logs",
     "section": "linux",
     "summary": "Control the systemd system and service manager.",
-    "syntax": "systemctl [OPTIONS] COMMAND [NAME...",
+    "syntax": "systemctl [OPTIONS] COMMAND [NAME...]",
     "description": "Query or control the systemd system and service manager state and services.",
     "options": [
       {
@@ -5192,10 +5192,10 @@ export const COMMANDS: Command[] = [
         "explanation": "Replaces the leading tab with spaces."
       },
       {
-        "title": "Preserve indentation semantics",
-        "command": "expand -i Makefile",
-        "output": "target: deps\n\tcommand",
-        "explanation": "Leaves tabs after non-blank characters unchanged."
+        "title": "Preserve tabs that follow text",
+        "command": "printf 'code\\t# note\\n' | expand -i",
+        "output": "code\t# note",
+        "explanation": "With -i only leading tabs become spaces; tabs after a word stay in place."
       }
     ],
     "useCases": [
