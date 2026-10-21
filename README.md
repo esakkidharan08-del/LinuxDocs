@@ -12,7 +12,7 @@ A hand-checked MDN-style reference for **95 Linux utilities + 37 CTF & security 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org)
 [![Flask](https://img.shields.io/badge/Flask-3-000?logo=flask)](https://flask.palletsprojects.com)
 [![PostgreSQL ready](https://img.shields.io/badge/SQLite%20%E2%86%92%20PostgreSQL-ready-4169E1?logo=postgresql)](#deploy-your-own)
-[![Tests](https://img.shields.io/badge/tests-79%20passing-2EA043)](#how-it-is-verified)
+[![Tests](https://img.shields.io/badge/tests-88%20passing-2EA043)](#how-it-is-verified)
 
 ▶ **Live app:** *[[your deployed URL here]]* — **Demo GIF below** 👇
 
@@ -74,8 +74,8 @@ Mistyped a URL? The 404 page is itself a terminal — type `cat flag.hidden` and
 The repo ships its own test harnesses (in `qa/`, untracked):
 
 ```powershell
-# 79 pytest backend tests
-cd backend; .\venv\Scripts\pytest           # 79 passed
+# 88 pytest backend tests
+cd backend; .\venv\Scripts\pytest           # 88 passed
 
 # 14-step API smoke test (stdlib only): register → login →
 # refresh → logout → revoked-after-logout → 401/404 shape checks
@@ -202,7 +202,7 @@ LinuxDocs/
 │   └── services/api.ts       #   Typede API client + single-flight refresh
 ├── backend/                  # Flask 3 API
 │   ├── app/                  #   factory, models, auth, user, security, sessions, persistence
-│   ├── tests/                #   79 pytest cases
+│   ├── tests/                #   88 pytest cases (incl. the mailer suite)
 │   └── requirements.txt      #   pinned (incl. gunicorn + psycopg2 for Render)
 ├── docs/screenshots/          # README assets (captured by the QA run)
 ├── qa/                        # browser_check.py / smoke_api.py (gitignored)
