@@ -160,9 +160,11 @@ export const userApi = {
     }),
 };
 
-export const commandsApi = {
-  list: () => request<{ categories: import('../types').CategoryInfo[]; domains: import('../types').CTFDomainInfo[]; commands: import('../types').Command[] }>('/commands'),
-  get: (slug: string) => request<{ command: import('../types').Command }>(`/commands/${encodeURIComponent(slug)}`),
+export const catalogApi = {
+  /** Light navigation/search index — requires auth; metadata only. */
+  index: () => request<{ categories: import('../types').CategoryInfo[]; domains: import('../types').CTFDomainInfo[]; counts: Record<string, number>; commands: import('../types').CommandLight[] }>('/catalog/index'),
+  /** Full documentation for one command — requires auth. */
+  command: (slug: string) => request<{ command: import('../types').Command }>(`/commands/${encodeURIComponent(slug)}`),
 };
 
 export interface User {

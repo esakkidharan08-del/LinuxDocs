@@ -1,0 +1,56 @@
+{
+  "slug": "expand",
+  "name": "expand",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Convert tabs to spaces.",
+  "syntax": "expand [OPTION]... [FILE]...",
+  "description": "Writes files with tab characters replaced by spaces using configurable tab stops.",
+  "options": [
+    {
+      "flag": "-t LIST",
+      "description": "Use the specified tab stops.",
+      "example": "expand -t 4,8,12 source.txt"
+    },
+    {
+      "flag": "-i",
+      "description": "Do not convert tabs after non-blank characters.",
+      "example": "expand -i Makefile"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Expand source tabs",
+      "command": "expand -t 4 source.txt",
+      "output": "int main(void) {\n    return 0;\n}",
+      "explanation": "Uses four-column tab stops."
+    },
+    {
+      "title": "Expand standard input",
+      "command": "printf '\\titem\\n' | expand",
+      "output": "        item",
+      "explanation": "Replaces the leading tab with spaces."
+    },
+    {
+      "title": "Preserve tabs that follow text",
+      "command": "printf 'code\\t# note\\n' | expand -i",
+      "output": "code\t# note",
+      "explanation": "With -i only leading tabs become spaces; tabs after a word stay in place."
+    }
+  ],
+  "useCases": [
+    "Normalizing text for review",
+    "Preparing source for tools without tab support",
+    "Inspecting indentation"
+  ],
+  "related": [
+    "column",
+    "fold",
+    "sed"
+  ],
+  "tags": [
+    "tabs",
+    "spaces",
+    "format"
+  ]
+}

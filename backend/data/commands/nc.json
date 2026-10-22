@@ -1,0 +1,38 @@
+{
+  "slug": "nc",
+  "name": "nc",
+  "category": "recon",
+  "section": "ctf",
+  "summary": "Arbitrary TCP and UDP connections and listens.",
+  "syntax": "nc [options] host port",
+  "description": "netcat is a computer networking utility for reading from and writing to network connections using TCP or UDP.",
+  "options": [
+    {
+      "flag": "-l",
+      "description": "Listen"
+    },
+    {
+      "flag": "-e",
+      "description": "Execute program"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Connect to port",
+      "command": "nc example.com 80",
+      "output": "",
+      "explanation": "Connect to a port."
+    }
+  ],
+  "useCases": [
+    "Debugging",
+    "Shells"
+  ],
+  "related": [
+    "ncat"
+  ],
+  "tags": [
+    "network",
+    "shell"
+  ]
+}

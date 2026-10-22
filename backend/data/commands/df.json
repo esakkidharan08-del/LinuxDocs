@@ -1,0 +1,40 @@
+{
+  "slug": "df",
+  "name": "df",
+  "category": "disk-and-storage",
+  "section": "linux",
+  "summary": "Report file system disk space usage.",
+  "syntax": "df [OPTION]... [FILE]...",
+  "description": "Display amount of available disk space taken up by file systems.",
+  "options": [
+    {
+      "flag": "-h",
+      "description": "Print sizes in human readable format (e.g., 1K 234M 2G).",
+      "example": "df -h"
+    },
+    {
+      "flag": "-T",
+      "description": "Print file system type for each partition.",
+      "example": "df -Th"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Check disk space",
+      "command": "df -h",
+      "output": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda1        50G   20G   28G  42% /\ntmpfs           3.9G     0  3.9G   0% /dev/shm",
+      "explanation": "Shows disk capacity, used space, and mount points in human-readable sizes."
+    }
+  ],
+  "useCases": [
+    "Checking available storage space on partitions"
+  ],
+  "related": [
+    "du"
+  ],
+  "tags": [
+    "disk",
+    "storage",
+    "filesystem"
+  ]
+}

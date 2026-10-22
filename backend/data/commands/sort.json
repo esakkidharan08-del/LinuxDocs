@@ -1,0 +1,62 @@
+{
+  "slug": "sort",
+  "name": "sort",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Sort lines of text files.",
+  "syntax": "sort [OPTION]... [FILE]...",
+  "description": "Writes a sorted concatenation of all input files to standard output.",
+  "options": [
+    {
+      "flag": "-n",
+      "description": "Compare strings as numerical values.",
+      "example": "sort -n scores.txt"
+    },
+    {
+      "flag": "-k KEYDEF",
+      "description": "Sort using a key field definition.",
+      "example": "sort -k2,2 users.txt"
+    },
+    {
+      "flag": "-r",
+      "description": "Reverse the comparison result.",
+      "example": "sort -nr scores.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Sort names alphabetically",
+      "command": "sort names.txt",
+      "output": "alice\nbob\ncarol",
+      "explanation": "Sorts lines using the locale comparison."
+    },
+    {
+      "title": "Sort numeric values",
+      "command": "sort -n scores.txt",
+      "output": "2\n10\n100",
+      "explanation": "Compares values numerically rather than lexically."
+    },
+    {
+      "title": "Sort by a column descending",
+      "command": "sort -k2,2nr report.txt",
+      "output": "alice 98\ncarol 87\nbob 74",
+      "explanation": "Uses the second field as a numeric reverse-order key."
+    }
+  ],
+  "useCases": [
+    "Ordering reports",
+    "Preparing input for join",
+    "Finding highest or lowest values"
+  ],
+  "related": [
+    "uniq",
+    "join",
+    "comm",
+    "wc"
+  ],
+  "tags": [
+    "sort",
+    "order",
+    "text"
+  ]
+}

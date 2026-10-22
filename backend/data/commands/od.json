@@ -1,0 +1,57 @@
+{
+  "slug": "od",
+  "name": "od",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Dump files in octal and other formats.",
+  "syntax": "od [OPTION]... [FILE]...",
+  "description": "Displays file contents as numeric bytes, words, characters, or other representations.",
+  "options": [
+    {
+      "flag": "-An",
+      "description": "Suppress the offset field.",
+      "example": "od -An -t x1 image.bin"
+    },
+    {
+      "flag": "-t TYPE",
+      "description": "Select the output type, such as x1 for hexadecimal bytes.",
+      "example": "od -t x1 header.bin"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Inspect hexadecimal bytes",
+      "command": "printf 'Hi\\n' | od -An -t x1",
+      "output": " 48 69 0a",
+      "explanation": "Displays the byte values for a short string."
+    },
+    {
+      "title": "Inspect a binary header",
+      "command": "od -Ax -t x1 firmware.bin | head -n 2",
+      "output": "000000 7f 45 4c 46 02 01 01 00\n000008 00 00 00 00 00 00 00 00",
+      "explanation": "Shows offsets and hexadecimal bytes."
+    },
+    {
+      "title": "Display octal values",
+      "command": "printf '\\001\\002' | od -b",
+      "output": "0000000 001 002\n0000002",
+      "explanation": "Uses traditional octal byte output."
+    }
+  ],
+  "useCases": [
+    "Inspecting binary headers",
+    "Comparing raw byte sequences",
+    "Debugging file formats"
+  ],
+  "related": [
+    "xxd",
+    "hexdump",
+    "file",
+    "strings"
+  ],
+  "tags": [
+    "binary",
+    "bytes",
+    "hex"
+  ]
+}

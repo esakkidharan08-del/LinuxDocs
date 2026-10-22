@@ -1,0 +1,57 @@
+{
+  "slug": "yq",
+  "name": "yq",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Process YAML and related structured data.",
+  "syntax": "yq [options] <filter> [file...]",
+  "description": "Reads and transforms YAML using a jq-like expression language while preserving structured data semantics.",
+  "options": [
+    {
+      "flag": "-r",
+      "description": "Output scalar strings without quotes.",
+      "example": "yq -r '.server.host' config.yml"
+    },
+    {
+      "flag": "-i",
+      "description": "Edit files in place.",
+      "example": "yq -i '.server.port = 8080' config.yml"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Read a YAML value",
+      "command": "printf 'server:\\n  host: localhost\\n' | yq -r '.server.host'",
+      "output": "localhost",
+      "explanation": "Extracts a nested scalar from YAML."
+    },
+    {
+      "title": "List YAML array entries",
+      "command": "yq '.services[].name' compose.yml",
+      "output": "api\nworker",
+      "explanation": "Iterates over service objects."
+    },
+    {
+      "title": "Update a configuration file",
+      "command": "yq -i '.server.port = 8080' config.yml",
+      "output": "",
+      "explanation": "Edits the YAML file in place."
+    }
+  ],
+  "useCases": [
+    "Inspecting deployment YAML",
+    "Updating configuration in scripts",
+    "Converting structured data"
+  ],
+  "related": [
+    "jq",
+    "grep",
+    "sed",
+    "sort"
+  ],
+  "tags": [
+    "yaml",
+    "data",
+    "query"
+  ]
+}

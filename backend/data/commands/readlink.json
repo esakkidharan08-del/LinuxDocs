@@ -1,0 +1,57 @@
+{
+  "slug": "readlink",
+  "name": "readlink",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Read the value of a symbolic link.",
+  "syntax": "readlink [OPTION]... FILE...",
+  "description": "Prints a symbolic link target or resolves a path according to the selected option.",
+  "options": [
+    {
+      "flag": "-f",
+      "description": "Canonicalize by following every symlink and resolving components.",
+      "example": "readlink -f current"
+    },
+    {
+      "flag": "-e",
+      "description": "Canonicalize and require every component to exist.",
+      "example": "readlink -e config"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Print a link target",
+      "command": "readlink current",
+      "output": "release-2",
+      "explanation": "Displays the target stored in the symbolic link."
+    },
+    {
+      "title": "Resolve an absolute path",
+      "command": "readlink -f ./current/bin/app",
+      "output": "/srv/releases/release-2/bin/app",
+      "explanation": "Follows links and normalizes path components."
+    },
+    {
+      "title": "Resolve an existing path",
+      "command": "readlink -e /etc/alternatives/editor",
+      "output": "/usr/bin/vim.basic",
+      "explanation": "Requires the resolved path to exist."
+    }
+  ],
+  "useCases": [
+    "Inspecting release links",
+    "Normalizing paths in scripts",
+    "Troubleshooting alternatives"
+  ],
+  "related": [
+    "ln",
+    "realpath",
+    "basename",
+    "dirname"
+  ],
+  "tags": [
+    "symlink",
+    "path",
+    "resolve"
+  ]
+}

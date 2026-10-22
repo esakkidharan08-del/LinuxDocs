@@ -1,0 +1,38 @@
+{
+  "slug": "pkill",
+  "name": "pkill",
+  "category": "process-management",
+  "section": "linux",
+  "summary": "Look up or signal processes based on name and other attributes.",
+  "syntax": "pkill [options] pattern",
+  "description": "pkill sends signals to processes matching criteria.",
+  "options": [
+    {
+      "flag": "-9",
+      "description": "SIGKILL"
+    },
+    {
+      "flag": "-f",
+      "description": "Match full command line"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Kill by name",
+      "command": "pkill firefox",
+      "output": "",
+      "explanation": "Kill all firefox processes."
+    }
+  ],
+  "useCases": [
+    "Process management"
+  ],
+  "related": [
+    "kill"
+  ],
+  "tags": [
+    "process",
+    "signals"
+  ],
+  "warnings": "pkill signals matching processes by name and can hit more than the process you had in mind; confirm matches with pgrep first."
+}

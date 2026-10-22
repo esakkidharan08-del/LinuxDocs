@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+
+/** Only same-app paths may round-trip through ?next= (no protocol tricks). */
+const safeNext = (raw: string | null): string => {
+  if (raw && raw.startsWith('/') && !raw.startsWith('//') && !raw.includes('\\')) return raw;
+  return '';
+};
 
 const STRENGTH_CHECKS = [
   { label: 'At least 10 characters', test: (p: string) => p.length >= 10 },
@@ -13,7 +19,9 @@ const STRENGTH_CHECKS = [
 
 export const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { register, user, loading: authLoading } = useAuth();
+  const from = safeNext(searchParams.get('next'));
 
   // Already signed up? Skip straight to the home page instead of showing this form.
   useEffect(() => {
@@ -81,7 +89,7 @@ export const SignUpPage: React.FC = () => {
       setErrors(result.errors);
     } else {
       setSuccess(true);
-      setTimeout(() => navigate('/dashboard', { replace: true }), 500);
+      setTimeout(() => navigate(from || '/dashboard', { replace: true }), 500);
     }
   };
 

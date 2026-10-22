@@ -1,0 +1,43 @@
+{
+  "slug": "top",
+  "name": "top",
+  "category": "process-management",
+  "section": "linux",
+  "summary": "Display Linux processes and system resource usage.",
+  "syntax": "top [options]",
+  "description": "Provide a dynamic real-time view of a running system.",
+  "options": [
+    {
+      "flag": "-u",
+      "description": "Monitor processes for specific user only.",
+      "example": "top -u user"
+    },
+    {
+      "flag": "-d",
+      "description": "Specify delay interval between updates in seconds.",
+      "example": "top -d 2"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Launch top monitor",
+      "command": "top",
+      "output": "(interactive resource monitor dashboard)",
+      "explanation": "Displays live CPU, memory, and task breakdown."
+    }
+  ],
+  "useCases": [
+    "Monitoring real-time CPU and memory load",
+    "Debugging performance spikes"
+  ],
+  "related": [
+    "htop",
+    "ps",
+    "df"
+  ],
+  "tags": [
+    "process",
+    "monitor",
+    "cpu"
+  ]
+}

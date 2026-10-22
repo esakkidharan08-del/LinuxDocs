@@ -1,0 +1,43 @@
+{
+  "slug": "uname",
+  "name": "uname",
+  "category": "system-info-and-monitoring",
+  "section": "linux",
+  "summary": "Print system information.",
+  "syntax": "uname [OPTION]...",
+  "description": "Print certain system information. With no option, same as -s.",
+  "options": [
+    {
+      "flag": "-a",
+      "description": "Print all information (kernel, hostname, release, machine).",
+      "example": "uname -a"
+    },
+    {
+      "flag": "-r",
+      "description": "Print kernel release.",
+      "example": "uname -r"
+    },
+    {
+      "flag": "-m",
+      "description": "Print machine hardware name (architecture).",
+      "example": "uname -m"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Show kernel version and architecture",
+      "command": "uname -rsm",
+      "output": "Linux 6.8.0-31-generic x86_64",
+      "explanation": "Prints kernel name, release version, and hardware architecture."
+    }
+  ],
+  "useCases": [
+    "Identifying Linux kernel version and CPU architecture"
+  ],
+  "related": [],
+  "tags": [
+    "system",
+    "kernel",
+    "info"
+  ]
+}

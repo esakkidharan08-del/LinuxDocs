@@ -1,0 +1,43 @@
+{
+  "slug": "binwalk",
+  "name": "binwalk",
+  "category": "forensics",
+  "section": "ctf",
+  "summary": "Firmware analysis tool for searching binary images for embedded files and executable code.",
+  "syntax": "binwalk [options] <file>",
+  "description": "Binwalk is designed for searching given files for embedded files and executables (e.g. ZIP archives inside JPEGs or firmware images).",
+  "options": [
+    {
+      "flag": "-e",
+      "description": "Extract known file types automatically.",
+      "example": "binwalk -e image.png"
+    },
+    {
+      "flag": "-M",
+      "description": "Recursively extract extracted files.",
+      "example": "binwalk -Me firmware.bin"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Scan and extract embedded files",
+      "command": "binwalk -e suspect.jpg",
+      "output": "DECIMAL       HEXADECIMAL     DESCRIPTION\n-----------------------------------------------------------------\n0             0x0             JPEG image data, JFIF standard 1.01\n4523          0x11AB          Zip archive data, v2.0 to extract, compressed size: 120 bytes",
+      "explanation": "Identifies hidden zip archive inside JPEG and extracts it."
+    }
+  ],
+  "useCases": [
+    "Forensics steganography and extracting hidden payloads from firmware or images"
+  ],
+  "related": [
+    "exiftool",
+    "steghide",
+    "strings"
+  ],
+  "tags": [
+    "ctf",
+    "forensics",
+    "steganography",
+    "firmware"
+  ]
+}

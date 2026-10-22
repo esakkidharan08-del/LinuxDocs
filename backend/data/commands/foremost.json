@@ -1,0 +1,46 @@
+{
+  "slug": "foremost",
+  "name": "foremost",
+  "category": "forensics",
+  "section": "ctf",
+  "summary": "File carving utility.",
+  "syntax": "foremost -i <image> -o <outdir>",
+  "description": "Foremost carves files (jpg, png, pdf, doc, etc.) out of disk images or binary blobs based on headers and footers, ignoring filesystem damage.",
+  "options": [
+    {
+      "flag": "-i",
+      "description": "Input image file"
+    },
+    {
+      "flag": "-o",
+      "description": "Output directory for carved files"
+    },
+    {
+      "flag": "-t",
+      "description": "Restrict carving to specific types"
+    },
+    {
+      "flag": "-q",
+      "description": "Quick sector-scan mode"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Carve files out of an image",
+      "command": "foremost -i disk.img -o recovered/",
+      "output": "Processing: disk.img\n10 jpg, 3 png recovered",
+      "explanation": "Turns raw bytes back into usable files."
+    }
+  ],
+  "useCases": [
+    "file carving"
+  ],
+  "related": [
+    "binwalk",
+    "steghide"
+  ],
+  "tags": [
+    "forensics",
+    "carve"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "slug": "shred",
+  "name": "shred",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Overwrite files to make data recovery harder.",
+  "syntax": "shred [OPTION]... FILE...",
+  "description": "Overwrites file contents repeatedly and optionally removes the file; effectiveness depends on the storage medium and filesystem.",
+  "options": [
+    {
+      "flag": "-n NUMBER",
+      "description": "Overwrite NUMBER times instead of the default.",
+      "example": "shred -n 3 old-secrets.txt"
+    },
+    {
+      "flag": "-u",
+      "description": "Remove the file after overwriting.",
+      "example": "shred -u old-secrets.txt"
+    },
+    {
+      "flag": "-z",
+      "description": "Add a final overwrite with zeros.",
+      "example": "shred -u -z old-secrets.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Overwrite a temporary file",
+      "command": "shred -n 3 temporary.txt",
+      "output": "",
+      "explanation": "Performs three overwrite passes while retaining the file."
+    },
+    {
+      "title": "Overwrite and remove",
+      "command": "shred -u credentials.txt",
+      "output": "",
+      "explanation": "Overwrites and then unlinks the file."
+    },
+    {
+      "title": "Finish with zeros",
+      "command": "shred -u -z export.csv",
+      "output": "",
+      "explanation": "Adds a zero pass before removal to make the result less conspicuous."
+    }
+  ],
+  "useCases": [
+    "Handling disposable sensitive files",
+    "Cleaning temporary exports",
+    "Documenting limitations of file shredding"
+  ],
+  "related": [
+    "rm",
+    "truncate",
+    "dd",
+    "stat"
+  ],
+  "tags": [
+    "secure-delete",
+    "files",
+    "privacy"
+  ],
+  "warnings": "shred destroys file contents permanently; journaling, copy-on-write, and SSD wear-leveling can still leave copies that shred cannot reach."
+}

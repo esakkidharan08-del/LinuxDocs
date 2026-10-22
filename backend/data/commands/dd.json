@@ -1,0 +1,63 @@
+{
+  "slug": "dd",
+  "name": "dd",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Copy and convert raw data streams.",
+  "syntax": "dd [OPERAND]...",
+  "description": "Copies data using configurable block sizes and conversions; use carefully because it writes raw devices without confirmation.",
+  "options": [
+    {
+      "flag": "if=FILE",
+      "description": "Read from FILE instead of standard input.",
+      "example": "dd if=boot.img of=backup.img"
+    },
+    {
+      "flag": "bs=BYTES",
+      "description": "Read and write BYTES at a time.",
+      "example": "dd if=disk.img of=disk.copy bs=4M status=progress"
+    },
+    {
+      "flag": "status=progress",
+      "description": "Report transfer progress.",
+      "example": "dd if=image.iso of=/dev/sdb bs=4M status=progress"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Create a raw image copy",
+      "command": "dd if=boot.img of=boot.copy bs=4M status=progress",
+      "output": "16+0 records in\n16+0 records out\n67108864 bytes copied",
+      "explanation": "Copies an image using a larger block size and progress reporting."
+    },
+    {
+      "title": "Write a fixed-size zero file",
+      "command": "dd if=/dev/zero of=blank.bin bs=1M count=4 status=none",
+      "output": "",
+      "explanation": "Creates a four-megabyte file of zero bytes."
+    },
+    {
+      "title": "Inspect a boot signature",
+      "command": "dd if=disk.img bs=512 count=1 status=none | hexdump -C | head -n 1",
+      "output": "00000000  eb 63 90 4d 53 44 4f 53  35 2e 30 00 02 08 20 00  |.c.MSDOS5.0... .|",
+      "explanation": "Reads only the first sector for inspection."
+    }
+  ],
+  "useCases": [
+    "Making forensic images",
+    "Creating test files",
+    "Copying fixed-size data blocks"
+  ],
+  "related": [
+    "split",
+    "file",
+    "hexdump",
+    "xxd"
+  ],
+  "tags": [
+    "raw",
+    "copy",
+    "disk"
+  ],
+  "warnings": "dd writes raw bytes with no prompt and no undo; pointing of= at the wrong target (for example a disk device) overwrites the data that is there."
+}

@@ -8,9 +8,10 @@ import type { FormEvent, KeyboardEvent } from 'react';
 import { Lightbulb, Lock, RotateCcw, Target, Terminal, Trophy } from 'lucide-react';
 import {
   ALL_LEVEL_IDS, HOME, MAX_INPUT_LENGTH, MAX_SCROLLBACK, MISSION_LEVELS, TOTAL_MISSIONS, WELCOME_GREETING,
-  executeCommand, evaluateMissions, toneClass,
+  executeCommand, evaluateMissions, setManualLookup, toneClass,
 } from '../lib/terminal';
 import type { Line, MissionLevel } from '../lib/terminal';
+import { useCatalog } from '../context/CatalogContext';
 
 export { ALL_LEVEL_IDS, TOTAL_MISSIONS } from '../lib/terminal';
 
@@ -24,6 +25,21 @@ export function PracticeTerminalPage() {
   const [history, setHistory] = useState<string[]>([]);
   const [solvedMissions, setSolvedMissions] = useState<string[]>([]);
   const [commandsRun, setCommandsRun] = useState(0);
+
+  // `man <tool>` reads the authed light index (name/summary/category/section
+  // — exactly the metadata a man header shows; Part 1 keeps docs off the
+  // bundled dataset). The lookup is installed for the interpreter module.
+  const { lights } = useCatalog();
+  useEffect(() => {
+    if (!lights.length) return;
+    setManualLookup((name) => {
+      const light = lights.find((entry) => entry.slug === name || entry.name.toLowerCase() === name);
+      if (!light) return null;
+      return { name: light.name, summary: light.summary, category: light.category, section: light.section };
+    });
+    return () => setManualLookup(null);
+  }, [lights]);
+
 
   const hydrated = useRef(false);
 

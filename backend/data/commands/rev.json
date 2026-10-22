@@ -1,0 +1,46 @@
+{
+  "slug": "rev",
+  "name": "rev",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Reverse characters on each line.",
+  "syntax": "rev [file...]",
+  "description": "Copies files to standard output with the characters in each line reversed.",
+  "options": [],
+  "examples": [
+    {
+      "title": "Reverse a word",
+      "command": "printf 'linux\\n' | rev",
+      "output": "xunil",
+      "explanation": "Reverses the characters without changing line order."
+    },
+    {
+      "title": "Reverse each record",
+      "command": "printf 'alpha\\nbeta\\n' | rev",
+      "output": "ahpla\nateb",
+      "explanation": "Processes every input line independently."
+    },
+    {
+      "title": "Inspect a reversed field",
+      "command": "printf 'abc:def\\n' | rev",
+      "output": "fed:cba",
+      "explanation": "Reverses the complete line, including punctuation."
+    }
+  ],
+  "useCases": [
+    "Simple text transformations",
+    "Testing palindrome logic",
+    "Inspecting reversed records"
+  ],
+  "related": [
+    "tr",
+    "tac",
+    "awk",
+    "sed"
+  ],
+  "tags": [
+    "reverse",
+    "characters",
+    "text"
+  ]
+}

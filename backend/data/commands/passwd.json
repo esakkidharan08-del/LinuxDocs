@@ -1,0 +1,42 @@
+{
+  "slug": "passwd",
+  "name": "passwd",
+  "category": "users-and-groups",
+  "section": "linux",
+  "summary": "Change user password.",
+  "syntax": "passwd [OPTION] [LOGIN]",
+  "description": "Change user password and account expiration settings.",
+  "options": [
+    {
+      "flag": "-d",
+      "description": "Delete password for user (makes account passwordless).",
+      "example": "sudo passwd -d username"
+    },
+    {
+      "flag": "-l",
+      "description": "Lock account password.",
+      "example": "sudo passwd -l username"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Change current user password",
+      "command": "passwd",
+      "output": "Changing password for user.\nCurrent password:\nNew password:",
+      "explanation": "Prompts for current and new password securely."
+    }
+  ],
+  "useCases": [
+    "Updating account passwords",
+    "Locking compromised accounts"
+  ],
+  "related": [
+    "useradd"
+  ],
+  "tags": [
+    "users",
+    "password",
+    "security"
+  ],
+  "warnings": "changing another user password requires root; password changes are written straight to the system authentication database."
+}

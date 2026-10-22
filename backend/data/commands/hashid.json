@@ -1,0 +1,46 @@
+{
+  "slug": "hashid",
+  "name": "hashid",
+  "category": "crypto",
+  "section": "ctf",
+  "summary": "Identify hash and cipher types before cracking.",
+  "syntax": "hashid <hash>",
+  "description": "hashid analyses a hash string and lists the most probable hash algorithms (MD5, SHA-1, bcrypt, etc.), telling you what to feed into a cracker.",
+  "options": [
+    {
+      "flag": "HASH",
+      "description": "Pass the candidate hash as a positional argument"
+    },
+    {
+      "flag": "-m",
+      "description": "Also show hashcat mode numbers"
+    },
+    {
+      "flag": "-j",
+      "description": "Also show john the ripper formats"
+    },
+    {
+      "flag": "-e",
+      "description": "Show probable etype (Salted/Unsalted)"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Identify a hash",
+      "command": "hashid 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "output": "[+] SHA-256\n[+] SHA3-256",
+      "explanation": "64 hex chars strongly suggests SHA-256 family."
+    }
+  ],
+  "useCases": [
+    "hash identification"
+  ],
+  "related": [
+    "john",
+    "hashcat"
+  ],
+  "tags": [
+    "crypto",
+    "hashes"
+  ]
+}

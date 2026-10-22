@@ -1,0 +1,57 @@
+{
+  "slug": "xxd",
+  "name": "xxd",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Make a hexadecimal dump or reverse it.",
+  "syntax": "xxd [options] [infile [outfile]]",
+  "description": "Creates a hexadecimal representation of a file and can convert a hexadecimal dump back to binary.",
+  "options": [
+    {
+      "flag": "-r",
+      "description": "Reverse a hexadecimal dump into binary.",
+      "example": "xxd -r dump.hex restored.bin"
+    },
+    {
+      "flag": "-l LEN",
+      "description": "Stop after LEN bytes.",
+      "example": "xxd -l 64 image.bin"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Dump a file header",
+      "command": "xxd -l 16 image.bin",
+      "output": "00000000: 8950 4e47 0d0a 1a0a 0000 000d 4948 4452  .PNG........IHDR",
+      "explanation": "Shows the first 16 bytes with offsets and printable text."
+    },
+    {
+      "title": "Create a reversible dump",
+      "command": "printf 'hello\\n' | xxd",
+      "output": "00000000: 6865 6c6c 6f0a                           hello.",
+      "explanation": "Converts standard input to hexadecimal."
+    },
+    {
+      "title": "Restore bytes",
+      "command": "printf '6869 0a\\n' | xxd -r -p",
+      "output": "hi",
+      "explanation": "Reverses a plain hexadecimal stream."
+    }
+  ],
+  "useCases": [
+    "Inspecting binary files",
+    "Making reviewable hex patches",
+    "Checking file signatures"
+  ],
+  "related": [
+    "od",
+    "hexdump",
+    "file",
+    "strings"
+  ],
+  "tags": [
+    "hex",
+    "binary",
+    "dump"
+  ]
+}

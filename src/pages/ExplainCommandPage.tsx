@@ -1,11 +1,17 @@
 import { useMemo, useState } from 'react';
 import { AlertTriangle, HelpCircle, Terminal, BookOpen, Search, Sparkles, ArrowRight, Shield } from 'lucide-react';
-import { COMMANDS, getCommand, getPathForCommand } from '../data/commands';
 import { Link } from 'react-router-dom';
+import { getPathForLight, useCatalog, useCommandDocs } from '../context/CatalogContext';
+import type { Command, CommandLight } from '../types';
 
 type Explanation = { token: string; kind: 'command' | 'flag' | 'pipe' | 'argument' | 'unknown'; text: string; commandSlug?: string; commandSection?: 'linux' | 'ctf' };
 
-function explainLine(input: string): Explanation[] {
+type LightLookup = (nameOrSlug: string) => CommandLight | undefined;
+
+/** Parse one shell line. Command identities come from the light index; flag
+ * details come from the full doc once it has loaded (docsBySlug may be
+ * incomplete while the fetch wave is in flight). */
+function explainLine(input: string, lookup: LightLookup, docsBySlug: Map<string, Command>): Explanation[] {
   const pieces = input.split(/(\|\||&&|\||;)/).map((piece) => piece.trim()).filter(Boolean);
   const output: Explanation[] = [];
   for (const piece of pieces) {
@@ -14,19 +20,22 @@ function explainLine(input: string): Explanation[] {
       continue;
     }
     const tokens = piece.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
-    const command = getCommand(tokens[0] || '');
-    if (!command) {
+    const light = lookup(tokens[0] || '');
+    if (!light) {
       tokens.forEach((token) => output.push({ token, kind: 'unknown', text: 'Unknown token - this command is not in the LinuxDocs dataset. Try searching for similar commands!' }));
       continue;
     }
-    output.push({ token: command.name, kind: 'command', text: `${command.summary} (Category: ${command.category})`, commandSlug: command.slug, commandSection: command.section });
+    output.push({ token: light.name, kind: 'command', text: `${light.summary} (Category: ${light.category})`, commandSlug: light.slug, commandSection: light.section });
+    const command = docsBySlug.get(light.slug);
     for (const token of tokens.slice(1)) {
       if (token.startsWith('-')) {
-        const option = command.options.find((item) => item.flag.split(',').some((flag) => flag.trim() === token) || item.flag.includes(token.replace(/^-+/, '')));
+        const option = command?.options.find((item) => item.flag.split(',').some((flag) => flag.trim() === token) || item.flag.includes(token.replace(/^-+/, '')));
         if (option) {
           output.push({ token, kind: 'flag', text: option.description + (option.example ? ` Example: ${option.example}` : '') });
+        } else if (command) {
+          output.push({ token, kind: 'unknown', text: `Unknown flag '${token}' for ${light.name} - not documented in our dataset` });
         } else {
-          output.push({ token, kind: 'unknown', text: `Unknown flag '${token}' for ${command.name} - not documented in our dataset` });
+          output.push({ token, kind: 'flag', text: `Looking up ${token} in the ${light.name} manual…` });
         }
       } else {
         output.push({ token, kind: 'argument', text: 'Argument/filename/target passed to this command. Meaning depends on context and the command\'s syntax.' });
@@ -49,8 +58,39 @@ const EXAMPLES = [
 
 export const ExplainCommandPage = () => {
   const [input, setInput] = useState('grep -rn "error" /var/log | head -n 20');
-  const explanations = useMemo(() => explainLine(input), [input]);
-  const knownCommands = COMMANDS.length;
+  // Lights resolve command identity instantly; flagged tokens need the full
+  // doc for option lookups, fetched on demand and cached in memory (Part 1).
+  const { lights } = useCatalog();
+
+  const lightBySlug = useMemo(() => {
+    const map = new Map<string, CommandLight>();
+    for (const light of lights) {
+      map.set(light.slug, light);
+      map.set(light.name.toLowerCase(), light);
+    }
+    return map;
+  }, [lights]);
+
+  const neededSlugs = useMemo(() => {
+    const out = new Set<string>();
+    if (input.trim()) {
+      for (const piece of input.split(/(\|\||&&|\||;)/)) {
+        const tokens = piece.trim().match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+        const first = tokens[0];
+        const light = first ? lightBySlug.get(first.replace(/\/.*$/, '').toLowerCase()) : undefined;
+        if (light) out.add(light.slug);
+      }
+    }
+    return Array.from(out);
+  }, [input, lightBySlug]);
+
+  const { docs, loading: docsLoading, error: docsError } = useCommandDocs(neededSlugs);
+
+  const lookup = useMemo(() => (token: string) => lightBySlug.get(token.toLowerCase()), [lightBySlug]);
+  const docsBySlug = useMemo(() => new Map(docs.map((doc) => [doc.slug, doc])), [docs]);
+  const explanations = useMemo(() => explainLine(input, lookup, docsBySlug), [input, lookup, docsBySlug]);
+
+  const knownCommands = lights.length;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -76,12 +116,12 @@ export const ExplainCommandPage = () => {
           </label>
           <span className="font-mono text-xs text-[var(--text-muted)]">{input.length} chars</span>
         </div>
-        <textarea 
-          id="command-input" 
-          value={input} 
-          onChange={(event) => setInput(event.target.value)} 
-          rows={6} 
-          className="w-full rounded-lg border-2 border-[var(--border)] bg-[var(--code-bg)] p-5 font-mono text-sm sm:text-base text-[var(--terminal-green)] focus:border-[var(--terminal-green)] focus:outline-none focus:ring-2 focus:ring-[var(--terminal-green)]/20 transition-all resize-none" 
+        <textarea
+          id="command-input"
+          value={input}
+          onChange={(event) => setInput(event.target.value)}
+          rows={6}
+          className="w-full rounded-lg border-2 border-[var(--border)] bg-[var(--code-bg)] p-5 font-mono text-sm sm:text-base text-[var(--terminal-green)] focus:border-[var(--terminal-green)] focus:outline-none focus:ring-2 focus:ring-[var(--terminal-green)]/20 transition-all resize-none"
           spellCheck={false}
           placeholder="e.g., find . -name '*.log' | xargs grep -l ERROR | wc -l"
         />
@@ -109,19 +149,29 @@ export const ExplainCommandPage = () => {
           </h2>
           <span className="font-mono text-xs text-[var(--text-muted)]">{explanations.length} token{explanations.length !== 1 ? 's' : ''} analyzed</span>
         </div>
-        {explanations.length === 0 ? (
+        {docsError ? (
+          <div className="rounded-xl border border-red-500/40 bg-gradient-to-r from-red-500/10 to-transparent p-8 text-center">
+            <p className="font-mono text-sm text-red-400">{docsError}</p>
+            <p className="mt-2 text-xs text-[var(--text-muted)]">Command details could not be loaded — check your session and retry.</p>
+          </div>
+        ) : explanations.length === 0 ? (
           <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-8 text-center">
             <p className="font-mono text-sm text-[var(--text-muted)]">$ waiting for input<span className="blinking">_</span></p>
             <p className="mt-2 text-xs text-[var(--text-muted)]">Start typing a command above to see the breakdown</p>
           </div>
         ) : (
           <div className="space-y-3">
+            {docsLoading && (
+              <p className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 font-mono text-xs text-[var(--text-muted)]">
+                fetching flag details<span className="blinking">_</span>
+              </p>
+            )}
             {explanations.map((item, index) => (
-              <div 
-                key={`${item.token}-${index}`} 
+              <div
+                key={`${item.token}-${index}`}
                 className={`group relative overflow-hidden rounded-xl border p-5 transition-all hover:shadow-lg ${
-                  item.kind === 'unknown' 
-                    ? 'border-red-500/40 bg-gradient-to-r from-red-500/10 to-transparent' 
+                  item.kind === 'unknown'
+                    ? 'border-red-500/40 bg-gradient-to-r from-red-500/10 to-transparent'
                     : item.kind === 'pipe'
                     ? 'border-amber-400/40 bg-gradient-to-r from-amber-400/10 to-transparent'
                     : item.kind === 'command'
@@ -132,8 +182,8 @@ export const ExplainCommandPage = () => {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
                   <div className="flex items-center gap-3 sm:min-w-[200px]">
                     <code className={`font-mono text-base sm:text-lg font-bold ${
-                      item.kind === 'unknown' ? 'text-red-400' 
-                      : item.kind === 'pipe' ? 'text-amber-400' 
+                      item.kind === 'unknown' ? 'text-red-400'
+                      : item.kind === 'pipe' ? 'text-amber-400'
                       : item.kind === 'command' ? 'text-[var(--terminal-green)]'
                       : item.kind === 'flag' ? 'text-cyan-400'
                       : 'text-[var(--text)]'
@@ -153,14 +203,14 @@ export const ExplainCommandPage = () => {
                   <div className="flex-1 space-y-2">
                     <p className="text-sm sm:text-base text-[var(--text)] leading-relaxed">{item.text}</p>
                     {item.kind === 'command' && item.commandSlug && (() => {
-                      const command = getCommand(item.commandSlug);
-                      if (!command) return null;
+                      const light = lightBySlug.get(item.commandSlug);
+                      if (!light) return null;
                       return (
                         <Link
-                          to={getPathForCommand(command)}
-                          className={`inline-flex items-center gap-1.5 text-sm hover:underline font-mono ${command.section === 'ctf' ? 'text-[var(--ctf-red)]' : 'text-[var(--terminal-green)]'}`}
+                          to={getPathForLight(light)}
+                          className={`inline-flex items-center gap-1.5 text-sm hover:underline font-mono ${light.section === 'ctf' ? 'text-[var(--ctf-red)]' : 'text-[var(--terminal-green)]'}`}
                         >
-                          {command.section === 'ctf' && <Shield className="h-3.5 w-3.5" />}
+                          {light.section === 'ctf' && <Shield className="h-3.5 w-3.5" />}
                           View full documentation <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                       );

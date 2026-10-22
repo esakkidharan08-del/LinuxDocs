@@ -1,0 +1,64 @@
+{
+  "slug": "grep",
+  "name": "grep",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Print lines matching patterns.",
+  "syntax": "grep [OPTION]... PATTERN [FILE]...",
+  "description": "Search for PATTERN in each FILE. PATTERN is, by default, a basic regular expression (BRE).",
+  "options": [
+    {
+      "flag": "-i",
+      "description": "Ignore case distinctions.",
+      "example": "grep -i \"error\" app.log"
+    },
+    {
+      "flag": "-r, -R",
+      "description": "Read all files under each directory recursively.",
+      "example": "grep -rn \"TODO\" src/"
+    },
+    {
+      "flag": "-v",
+      "description": "Invert match; select non-matching lines.",
+      "example": "grep -v \"#\" config.conf"
+    },
+    {
+      "flag": "-c",
+      "description": "Print only a count of matching lines per file.",
+      "example": "grep -c \"GET\" access.log"
+    },
+    {
+      "flag": "-n",
+      "description": "Prefix each line of output with the 1-based line number.",
+      "example": "grep -n \"interface\" src/"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Search recursively with line numbers",
+      "command": "grep -rn \"function\" src/",
+      "output": "src/App.tsx:7:function App() {\nsrc/data/commands.ts:15:function getCommand() {",
+      "explanation": "Finds all occurrences of \"function\" in src/ with filename and line number."
+    },
+    {
+      "title": "Case-insensitive search",
+      "command": "grep -i \"warning\" system.log",
+      "output": "[WARN] Disk space low\n[Warning] Memory usage high",
+      "explanation": "Matches \"warning\", \"Warning\", or \"WARNING\"."
+    }
+  ],
+  "useCases": [
+    "Searching codebase for keywords",
+    "Filtering log files for error codes"
+  ],
+  "related": [
+    "find",
+    "sed",
+    "awk"
+  ],
+  "tags": [
+    "text",
+    "search",
+    "regex"
+  ]
+}

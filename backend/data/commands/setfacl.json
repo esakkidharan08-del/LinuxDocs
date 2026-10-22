@@ -1,0 +1,62 @@
+{
+  "slug": "setfacl",
+  "name": "setfacl",
+  "category": "permissions-and-ownership",
+  "section": "linux",
+  "summary": "Modify access control lists for files and directories.",
+  "syntax": "setfacl [OPTION]... { -m | -M } ACL... FILE...",
+  "description": "Sets or removes extended ACL entries without replacing the traditional owner, group, and mode model.",
+  "options": [
+    {
+      "flag": "-m",
+      "description": "Modify or add ACL entries.",
+      "example": "setfacl -m u:alice:rw report.csv"
+    },
+    {
+      "flag": "-x",
+      "description": "Remove ACL entries.",
+      "example": "setfacl -x u:alice report.csv"
+    },
+    {
+      "flag": "-R",
+      "description": "Apply changes recursively.",
+      "example": "setfacl -R -m g:developers:rX project/"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Grant one user read/write access",
+      "command": "setfacl -m u:alice:rw report.csv",
+      "output": "",
+      "explanation": "Adds an ACL entry for Alice without changing the owning group."
+    },
+    {
+      "title": "Grant a group directory access",
+      "command": "setfacl -R -m g:developers:rX project/",
+      "output": "",
+      "explanation": "Gives developers read and directory traversal access throughout the tree."
+    },
+    {
+      "title": "Remove a user ACL",
+      "command": "setfacl -x u:alice report.csv",
+      "output": "",
+      "explanation": "Removes Alice’s named ACL entry."
+    }
+  ],
+  "useCases": [
+    "Fine-grained shared access",
+    "Granting exceptions to standard modes",
+    "Managing project directory permissions"
+  ],
+  "related": [
+    "getfacl",
+    "chmod",
+    "chown",
+    "chgrp"
+  ],
+  "tags": [
+    "acl",
+    "permissions",
+    "access-control"
+  ]
+}

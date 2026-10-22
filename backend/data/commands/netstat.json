@@ -1,0 +1,34 @@
+{
+  "slug": "netstat",
+  "name": "netstat",
+  "category": "networking",
+  "section": "linux",
+  "summary": "Print network connections, routing tables, interface statistics.",
+  "syntax": "netstat [options]",
+  "description": "Netstat displays network connections, routing tables, and network interface statistics.",
+  "options": [
+    {
+      "flag": "-tulnp",
+      "description": "Show TCP/UDP listening with PID/name"
+    }
+  ],
+  "examples": [
+    {
+      "title": "List listening ports",
+      "command": "netstat -tulnp",
+      "output": "tcp 0 0 0.0.0.0:22 0.0.0.0:* LISTEN 1234/sshd",
+      "explanation": "Show open ports."
+    }
+  ],
+  "useCases": [
+    "Network inspection"
+  ],
+  "related": [
+    "ss",
+    "lsof"
+  ],
+  "tags": [
+    "network",
+    "ports"
+  ]
+}

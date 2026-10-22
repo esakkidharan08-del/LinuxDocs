@@ -1,0 +1,44 @@
+{
+  "slug": "awk",
+  "name": "awk",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Pattern scanning and processing language.",
+  "syntax": "awk 'pattern {action}' [FILE]...",
+  "description": "A powerful text analysis tool that treats each line as records and space-separated fields ($1, $2, etc.).",
+  "options": [
+    {
+      "flag": "-F",
+      "description": "Use fs for input field separator.",
+      "example": "awk -F: '{print $1}' /etc/passwd"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Print specific columns",
+      "command": "ls -l | awk '{print $9, $5}'",
+      "output": "index.html 420\nsrc 4096",
+      "explanation": "Extracts filename ($9) and file size ($5) from ls -l output."
+    },
+    {
+      "title": "Extract usernames from passwd",
+      "command": "awk -F: '{print $1}' /etc/passwd",
+      "output": "root\ndaemon\nuser",
+      "explanation": "Splits by colon delimiter and prints the first field (username)."
+    }
+  ],
+  "useCases": [
+    "Extracting specific columns from tabular text output",
+    "Log analysis and reporting"
+  ],
+  "related": [
+    "sed",
+    "cut",
+    "grep"
+  ],
+  "tags": [
+    "text",
+    "processing",
+    "columns"
+  ]
+}

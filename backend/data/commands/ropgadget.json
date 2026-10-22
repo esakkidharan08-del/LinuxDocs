@@ -1,0 +1,43 @@
+{
+  "slug": "ropgadget",
+  "name": "ropgadget",
+  "category": "pwn",
+  "section": "ctf",
+  "summary": "Framework for finding gadget chains in binaries.",
+  "syntax": "ropgadget [options]",
+  "description": "Searches binaries for gadgets (short instruction sequences ending in ret) used in Return-Oriented Programming (ROP) exploitation.",
+  "options": [
+    {
+      "flag": "--binary",
+      "description": "Specify binary to analyze.",
+      "example": "ropgadget --binary vuln_bin"
+    },
+    {
+      "flag": "--ropchain",
+      "description": "Generate a ROP chain for common system calls.",
+      "example": "ropgadget --binary vuln_bin --ropchain"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Find gadgets in binary",
+      "command": "ropgadget --binary pwn_chall --only \"pop|ret\"",
+      "output": "0x00401163 : pop rdi ; ret\n0x00401161 : pop rsi ; pop r15 ; ret",
+      "explanation": "Locates useful ROP gadgets for exploit construction."
+    }
+  ],
+  "useCases": [
+    "Building ROP chains to bypass NX/DEP protection in binary exploitation"
+  ],
+  "related": [
+    "checksec",
+    "gdb",
+    "objdump"
+  ],
+  "tags": [
+    "ctf",
+    "pwn",
+    "rop",
+    "exploit"
+  ]
+}

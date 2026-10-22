@@ -1,0 +1,56 @@
+{
+  "slug": "tee",
+  "name": "tee",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Copy standard input to files and standard output.",
+  "syntax": "tee [OPTION]... [FILE]...",
+  "description": "Reads standard input and writes it both to standard output and to one or more files.",
+  "options": [
+    {
+      "flag": "-a",
+      "description": "Append to files instead of overwriting them.",
+      "example": "make 2>&1 | tee -a build.log"
+    },
+    {
+      "flag": "-i",
+      "description": "Ignore interrupts.",
+      "example": "long-command | tee -i output.log"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Save and view command output",
+      "command": "make 2>&1 | tee build.log",
+      "output": "cc -c main.c\ncc -o app main.o",
+      "explanation": "Displays build output while saving a copy."
+    },
+    {
+      "title": "Append to a log",
+      "command": "date | tee -a deploy.log",
+      "output": "Mon Oct 12 10:00:00 UTC 2026",
+      "explanation": "Adds the timestamp to an existing log."
+    },
+    {
+      "title": "Write to two files",
+      "command": "printf 'ready\\n' | tee status.txt audit.txt",
+      "output": "ready",
+      "explanation": "Writes the same stream to both files and the terminal."
+    }
+  ],
+  "useCases": [
+    "Capturing diagnostics",
+    "Auditing pipelines",
+    "Writing one stream to multiple destinations"
+  ],
+  "related": [
+    "xargs",
+    "tr",
+    "cat"
+  ],
+  "tags": [
+    "pipeline",
+    "logging",
+    "output"
+  ]
+}

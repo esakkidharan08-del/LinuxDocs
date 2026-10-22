@@ -1,0 +1,33 @@
+{
+  "slug": "locate",
+  "name": "locate",
+  "category": "search-and-find",
+  "section": "linux",
+  "summary": "Find files by name.",
+  "syntax": "locate [OPTION]... PATTERN...",
+  "description": "locate reads one or more databases prepared by updatedb and writes file names matching patterns.",
+  "options": [
+    {
+      "flag": "-i",
+      "description": "Ignore case"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Find file quickly",
+      "command": "locate bashrc",
+      "output": "/etc/bash.bashrc",
+      "explanation": "Fast filename search."
+    }
+  ],
+  "useCases": [
+    "File searching"
+  ],
+  "related": [
+    "find"
+  ],
+  "tags": [
+    "locate",
+    "search"
+  ]
+}

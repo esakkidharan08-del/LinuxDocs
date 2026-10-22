@@ -1,0 +1,48 @@
+{
+  "slug": "openssl",
+  "name": "openssl",
+  "category": "crypto",
+  "section": "ctf",
+  "summary": "TLS/SSL toolkit and cryptography Swiss-army knife.",
+  "syntax": "openssl <command> <options>",
+  "description": "openssl performs certificate inspection, encodes/decodes data, generates keys, and decrypts challenge artifacts (base64, AES, RSA).",
+  "options": [
+    {
+      "flag": "s_client",
+      "description": "Connect to a TLS service for diagnostics"
+    },
+    {
+      "flag": "x509",
+      "description": "Inspect certificate details"
+    },
+    {
+      "flag": "enc",
+      "description": "Encrypt/decrypt data"
+    },
+    {
+      "flag": "base64",
+      "description": "Base64 encode/decode"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Fetch a certificate",
+      "command": "openssl s_client -connect example.com:443",
+      "output": "subject=CN=example.com\nissuer=CN=R3",
+      "explanation": "Raws TLS handshake info, useful when probing services."
+    }
+  ],
+  "useCases": [
+    "certificate analysis",
+    "artifact decoding"
+  ],
+  "related": [
+    "hashid",
+    "hashcat"
+  ],
+  "tags": [
+    "crypto",
+    "tls",
+    "certs"
+  ]
+}

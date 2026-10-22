@@ -1,0 +1,1816 @@
+{
+  "categories": [
+    {
+      "id": "file-and-directory",
+      "name": "File & Directory",
+      "section": "linux",
+      "description": "Create, navigate, copy, move, and remove files and directories."
+    },
+    {
+      "id": "permissions-and-ownership",
+      "name": "Permissions & Ownership",
+      "section": "linux",
+      "description": "Manage file permissions, ownership, and access control."
+    },
+    {
+      "id": "text-processing",
+      "name": "Text Processing",
+      "section": "linux",
+      "description": "Search, filter, transform, and format text streams and files."
+    },
+    {
+      "id": "process-management",
+      "name": "Process Management",
+      "section": "linux",
+      "description": "Monitor, signal, background, and control active system processes."
+    },
+    {
+      "id": "networking",
+      "name": "Networking",
+      "section": "linux",
+      "description": "Test connectivity, trace routes, inspect interfaces, and transfer files."
+    },
+    {
+      "id": "package-management",
+      "name": "Package Management",
+      "section": "linux",
+      "description": "Install, update, remove, and query software packages and repositories."
+    },
+    {
+      "id": "disk-and-storage",
+      "name": "Disk & Storage",
+      "section": "linux",
+      "description": "Inspect disk usage, mount filesystems, and manage partitions."
+    },
+    {
+      "id": "archiving-and-compression",
+      "name": "Archiving & Compression",
+      "section": "linux",
+      "description": "Bundle, compress, extract, and unpack archives."
+    },
+    {
+      "id": "users-and-groups",
+      "name": "Users & Groups",
+      "section": "linux",
+      "description": "Manage user accounts, passwords, groups, and privileges."
+    },
+    {
+      "id": "shell-and-scripting",
+      "name": "Shell & Scripting",
+      "section": "linux",
+      "description": "Shell environment, history, aliases, arithmetic, and cron automation."
+    },
+    {
+      "id": "system-info-and-monitoring",
+      "name": "System Info & Monitoring",
+      "section": "linux",
+      "description": "Hardware info, kernel version, uptime, calendar, and system statistics."
+    },
+    {
+      "id": "search-and-find",
+      "name": "Search & Find",
+      "section": "linux",
+      "description": "Locate files and search file contents across the filesystem."
+    },
+    {
+      "id": "services-and-logs",
+      "name": "Services & Logs",
+      "section": "linux",
+      "description": "Control systemd services, inspect journal logs, and view kernel ring buffer."
+    }
+  ],
+  "domains": [
+    {
+      "id": "recon",
+      "name": "Reconnaissance",
+      "description": "Information gathering, port scanning, subdomain enumeration, and service fingerprinting.",
+      "tools": [
+        "nmap",
+        "gobuster",
+        "ffuf",
+        "wfuzz",
+        "nikto",
+        "whatweb",
+        "subfinder",
+        "theHarvester",
+        "whois",
+        "dnsrecon"
+      ],
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "web",
+      "name": "Web Hacking",
+      "description": "HTTP parameter tampering, vulnerability scanning, SQL injection, and web application assessment.",
+      "tools": [
+        "sqlmap",
+        "curl-for-web-testing",
+        "nikto",
+        "gobuster",
+        "ffuf",
+        "wfuzz"
+      ],
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "crypto",
+      "name": "Cryptography",
+      "description": "Symmetric/asymmetric encryption, hashing, decoding, and cryptographic protocol analysis.",
+      "tools": [
+        "openssl",
+        "hashid",
+        "john",
+        "hashcat",
+        "gpg",
+        "age"
+      ],
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "reverse-engineering",
+      "name": "Reverse Engineering",
+      "description": "Decompiling, disassembling, patching, and analyzing compiled binaries and bytecode.",
+      "tools": [
+        "strings",
+        "objdump",
+        "gdb",
+        "ltrace",
+        "strace",
+        "radare2",
+        "binwalk",
+        "checksec",
+        "ROPgadget"
+      ],
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "forensics",
+      "name": "Digital Forensics",
+      "description": "File carving, metadata extraction, memory dump analysis, and hidden data discovery.",
+      "tools": [
+        "binwalk",
+        "exiftool",
+        "steghide",
+        "foremost",
+        "volatility"
+      ],
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "pwn",
+      "name": "Binary Exploitation (Pwn)",
+      "description": "Buffer overflows, format string vulnerabilities, shellcode crafting, and ROP chain development.",
+      "tools": [
+        "checksec",
+        "ROPgadget",
+        "gdb",
+        "pwntools-snippets"
+      ],
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "osint",
+      "name": "OSINT",
+      "description": "Open-source intelligence gathering on people, organizations, domains, and infrastructure.",
+      "tools": [
+        "theHarvester",
+        "whois",
+        "dnsrecon",
+        "nmap"
+      ],
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "mobile",
+      "name": "Mobile Security",
+      "description": "Android/iOS application analysis, decompilation, and dynamic instrumentation.",
+      "tools": [
+        "adb",
+        "apktool",
+        "jadx"
+      ],
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "containers",
+      "name": "Container Security",
+      "description": "Docker inspection, container escape vulnerability scanning, and image analysis.",
+      "tools": [
+        "trivy"
+      ],
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "cloud",
+      "name": "Cloud Security",
+      "description": "AWS/Azure/GCP permission auditing, misconfiguration detection, and credential enumeration.",
+      "tools": [
+        "aws-cli-enumeration",
+        "trivy"
+      ],
+      "recommendedExternalTools": []
+    }
+  ],
+  "counts": {
+    "file-and-directory": 28,
+    "text-processing": 29,
+    "search-and-find": 2,
+    "process-management": 5,
+    "networking": 10,
+    "package-management": 2,
+    "disk-and-storage": 2,
+    "archiving-and-compression": 2,
+    "users-and-groups": 3,
+    "shell-and-scripting": 1,
+    "system-info-and-monitoring": 1,
+    "services-and-logs": 2,
+    "recon": 7,
+    "web": 6,
+    "crypto": 4,
+    "reverse-engineering": 4,
+    "forensics": 5,
+    "pwn": 4,
+    "osint": 3,
+    "mobile": 3,
+    "containers": 1,
+    "permissions-and-ownership": 8
+  },
+  "commands": [
+    {
+      "slug": "ls",
+      "name": "ls",
+      "summary": "List directory contents.",
+      "tags": [
+        "files",
+        "directory",
+        "listing"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "cd",
+      "name": "cd",
+      "summary": "Change the shell working directory.",
+      "tags": [
+        "navigation",
+        "directory",
+        "shell"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "pwd",
+      "name": "pwd",
+      "summary": "Print name of current/working directory.",
+      "tags": [
+        "directory",
+        "path"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "cp",
+      "name": "cp",
+      "summary": "Copy files and directories.",
+      "tags": [
+        "files",
+        "copy"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "mv",
+      "name": "mv",
+      "summary": "Move or rename files and directories.",
+      "tags": [
+        "files",
+        "move",
+        "rename"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "rm",
+      "name": "rm",
+      "summary": "Remove files or directories.",
+      "tags": [
+        "files",
+        "delete",
+        "remove"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "mkdir",
+      "name": "mkdir",
+      "summary": "Create directories.",
+      "tags": [
+        "directory",
+        "create"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "rmdir",
+      "name": "rmdir",
+      "summary": "Remove empty directories.",
+      "tags": [
+        "directory",
+        "remove"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "touch",
+      "name": "touch",
+      "summary": "Change file timestamps or create empty files.",
+      "tags": [
+        "files",
+        "timestamp",
+        "create"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "cat",
+      "name": "cat",
+      "summary": "Concatenate files and print on the standard output.",
+      "tags": [
+        "text",
+        "view",
+        "files"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "less",
+      "name": "less",
+      "summary": "Opposite of more; interactive file pager.",
+      "tags": [
+        "text",
+        "pager",
+        "logs"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "head",
+      "name": "head",
+      "summary": "Output the first part of files.",
+      "tags": [
+        "text",
+        "filter"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "tail",
+      "name": "tail",
+      "summary": "Output the last part of files.",
+      "tags": [
+        "text",
+        "logs",
+        "monitor"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "find",
+      "name": "find",
+      "summary": "Search for files in a directory hierarchy.",
+      "tags": [
+        "search",
+        "files"
+      ],
+      "category": "search-and-find",
+      "section": "linux"
+    },
+    {
+      "slug": "grep",
+      "name": "grep",
+      "summary": "Print lines matching patterns.",
+      "tags": [
+        "text",
+        "search",
+        "regex"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "sed",
+      "name": "sed",
+      "summary": "Stream editor for filtering and transforming text.",
+      "tags": [
+        "text",
+        "stream",
+        "edit"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "awk",
+      "name": "awk",
+      "summary": "Pattern scanning and processing language.",
+      "tags": [
+        "text",
+        "processing",
+        "columns"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "ps",
+      "name": "ps",
+      "summary": "Report a snapshot of current processes.",
+      "tags": [
+        "process",
+        "monitoring"
+      ],
+      "category": "process-management",
+      "section": "linux"
+    },
+    {
+      "slug": "top",
+      "name": "top",
+      "summary": "Display Linux processes and system resource usage.",
+      "tags": [
+        "process",
+        "monitor",
+        "cpu"
+      ],
+      "category": "process-management",
+      "section": "linux"
+    },
+    {
+      "slug": "htop",
+      "name": "htop",
+      "summary": "Interactive process viewer and system monitor.",
+      "tags": [
+        "process",
+        "monitor",
+        "interactive"
+      ],
+      "category": "process-management",
+      "section": "linux"
+    },
+    {
+      "slug": "kill",
+      "name": "kill",
+      "summary": "Send a signal to a process.",
+      "tags": [
+        "process",
+        "signal",
+        "stop"
+      ],
+      "category": "process-management",
+      "section": "linux"
+    },
+    {
+      "slug": "ip",
+      "name": "ip",
+      "summary": "Routing, network devices, interfaces and tunnels management.",
+      "tags": [
+        "networking",
+        "ip",
+        "interfaces"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "ss",
+      "name": "ss",
+      "summary": "Investigate sockets.",
+      "tags": [
+        "networking",
+        "sockets",
+        "ports"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "ping",
+      "name": "ping",
+      "summary": "Send ICMP ECHO_REQUEST to network hosts.",
+      "tags": [
+        "networking",
+        "icmp",
+        "test"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "curl",
+      "name": "curl",
+      "summary": "Transfer data from or to a server.",
+      "tags": [
+        "networking",
+        "http",
+        "api"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "wget",
+      "name": "wget",
+      "summary": "The non-interactive network downloader.",
+      "tags": [
+        "networking",
+        "download"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "apt",
+      "name": "apt",
+      "summary": "Advanced Package Tool (package manager for Debian/Ubuntu).",
+      "tags": [
+        "package",
+        "debian",
+        "ubuntu"
+      ],
+      "category": "package-management",
+      "section": "linux"
+    },
+    {
+      "slug": "dpkg",
+      "name": "dpkg",
+      "summary": "Medium for package management for Debian.",
+      "tags": [
+        "package",
+        "debian"
+      ],
+      "category": "package-management",
+      "section": "linux"
+    },
+    {
+      "slug": "df",
+      "name": "df",
+      "summary": "Report file system disk space usage.",
+      "tags": [
+        "disk",
+        "storage",
+        "filesystem"
+      ],
+      "category": "disk-and-storage",
+      "section": "linux"
+    },
+    {
+      "slug": "du",
+      "name": "du",
+      "summary": "Estimate file space usage.",
+      "tags": [
+        "disk",
+        "space",
+        "folder"
+      ],
+      "category": "disk-and-storage",
+      "section": "linux"
+    },
+    {
+      "slug": "tar",
+      "name": "tar",
+      "summary": "An archiving utility.",
+      "tags": [
+        "archive",
+        "compress",
+        "tarball"
+      ],
+      "category": "archiving-and-compression",
+      "section": "linux"
+    },
+    {
+      "slug": "gzip",
+      "name": "gzip",
+      "summary": "Compress or expand files.",
+      "tags": [
+        "compress",
+        "gzip"
+      ],
+      "category": "archiving-and-compression",
+      "section": "linux"
+    },
+    {
+      "slug": "useradd",
+      "name": "useradd",
+      "summary": "Create a new user or update default new user information.",
+      "tags": [
+        "users",
+        "admin",
+        "accounts"
+      ],
+      "category": "users-and-groups",
+      "section": "linux"
+    },
+    {
+      "slug": "passwd",
+      "name": "passwd",
+      "summary": "Change user password.",
+      "tags": [
+        "users",
+        "password",
+        "security"
+      ],
+      "category": "users-and-groups",
+      "section": "linux"
+    },
+    {
+      "slug": "history",
+      "name": "history",
+      "summary": "Display or manipulate the command history.",
+      "tags": [
+        "shell",
+        "history"
+      ],
+      "category": "shell-and-scripting",
+      "section": "linux"
+    },
+    {
+      "slug": "uname",
+      "name": "uname",
+      "summary": "Print system information.",
+      "tags": [
+        "system",
+        "kernel",
+        "info"
+      ],
+      "category": "system-info-and-monitoring",
+      "section": "linux"
+    },
+    {
+      "slug": "whoami",
+      "name": "whoami",
+      "summary": "Print effective userid.",
+      "tags": [
+        "users",
+        "identity"
+      ],
+      "category": "users-and-groups",
+      "section": "linux"
+    },
+    {
+      "slug": "systemctl",
+      "name": "systemctl",
+      "summary": "Control the systemd system and service manager.",
+      "tags": [
+        "services",
+        "systemd",
+        "daemon"
+      ],
+      "category": "services-and-logs",
+      "section": "linux"
+    },
+    {
+      "slug": "journalctl",
+      "name": "journalctl",
+      "summary": "Query the systemd journal.",
+      "tags": [
+        "logs",
+        "systemd",
+        "journal"
+      ],
+      "category": "services-and-logs",
+      "section": "linux"
+    },
+    {
+      "slug": "nmap",
+      "name": "nmap",
+      "summary": "Network exploration tool and security / port scanner.",
+      "tags": [
+        "ctf",
+        "recon",
+        "scanning",
+        "network"
+      ],
+      "category": "recon",
+      "section": "ctf"
+    },
+    {
+      "slug": "gobuster",
+      "name": "gobuster",
+      "summary": "Directory/file & DNS busting tool written in Go.",
+      "tags": [
+        "ctf",
+        "web",
+        "recon",
+        "bruteforce"
+      ],
+      "category": "recon",
+      "section": "ctf"
+    },
+    {
+      "slug": "ffuf",
+      "name": "ffuf",
+      "summary": "Fast web fuzzer written in Go.",
+      "tags": [
+        "ctf",
+        "web",
+        "fuzzing"
+      ],
+      "category": "web",
+      "section": "ctf"
+    },
+    {
+      "slug": "sqlmap",
+      "name": "sqlmap",
+      "summary": "Automatic SQL injection and database takeover tool.",
+      "tags": [
+        "ctf",
+        "web",
+        "sqli",
+        "database"
+      ],
+      "category": "web",
+      "section": "ctf"
+    },
+    {
+      "slug": "john",
+      "name": "john",
+      "summary": "John the Ripper password cracker.",
+      "tags": [
+        "ctf",
+        "crypto",
+        "passwords",
+        "cracker"
+      ],
+      "category": "crypto",
+      "section": "ctf"
+    },
+    {
+      "slug": "hashcat",
+      "name": "hashcat",
+      "summary": "World's fastest and most advanced password recovery utility.",
+      "tags": [
+        "ctf",
+        "crypto",
+        "gpu",
+        "passwords"
+      ],
+      "category": "crypto",
+      "section": "ctf"
+    },
+    {
+      "slug": "strings",
+      "name": "strings",
+      "summary": "Print the printable strings in a binary file.",
+      "tags": [
+        "ctf",
+        "reversing",
+        "binary",
+        "strings"
+      ],
+      "category": "reverse-engineering",
+      "section": "ctf"
+    },
+    {
+      "slug": "objdump",
+      "name": "objdump",
+      "summary": "Display information about object files.",
+      "tags": [
+        "ctf",
+        "reversing",
+        "disassemble"
+      ],
+      "category": "reverse-engineering",
+      "section": "ctf"
+    },
+    {
+      "slug": "gdb",
+      "name": "gdb",
+      "summary": "The GNU Debugger.",
+      "tags": [
+        "ctf",
+        "debugging",
+        "pwn",
+        "reversing"
+      ],
+      "category": "reverse-engineering",
+      "section": "ctf"
+    },
+    {
+      "slug": "binwalk",
+      "name": "binwalk",
+      "summary": "Firmware analysis tool for searching binary images for embedded files and executable code.",
+      "tags": [
+        "ctf",
+        "forensics",
+        "steganography",
+        "firmware"
+      ],
+      "category": "forensics",
+      "section": "ctf"
+    },
+    {
+      "slug": "exiftool",
+      "name": "exiftool",
+      "summary": "Read and write meta information in a wide variety of files.",
+      "tags": [
+        "ctf",
+        "forensics",
+        "metadata",
+        "images"
+      ],
+      "category": "forensics",
+      "section": "ctf"
+    },
+    {
+      "slug": "steghide",
+      "name": "steghide",
+      "summary": "Steganography program that hides data in various kinds of image and audio files.",
+      "tags": [
+        "ctf",
+        "forensics",
+        "steganography"
+      ],
+      "category": "forensics",
+      "section": "ctf"
+    },
+    {
+      "slug": "checksec",
+      "name": "checksec",
+      "summary": "Check binary security properties (RELRO, stack canary, NX, PIE).",
+      "tags": [
+        "ctf",
+        "pwn",
+        "security",
+        "mitigations"
+      ],
+      "category": "pwn",
+      "section": "ctf"
+    },
+    {
+      "slug": "ropgadget",
+      "name": "ropgadget",
+      "summary": "Framework for finding gadget chains in binaries.",
+      "tags": [
+        "ctf",
+        "pwn",
+        "rop",
+        "exploit"
+      ],
+      "category": "pwn",
+      "section": "ctf"
+    },
+    {
+      "slug": "theharvester",
+      "name": "theharvester",
+      "summary": "E-mail, subdomain and people gathering tool.",
+      "tags": [
+        "ctf",
+        "osint",
+        "recon",
+        "emails"
+      ],
+      "category": "osint",
+      "section": "ctf"
+    },
+    {
+      "slug": "whois",
+      "name": "whois",
+      "summary": "Client for the whois directory service.",
+      "tags": [
+        "ctf",
+        "osint",
+        "domain",
+        "whois"
+      ],
+      "category": "osint",
+      "section": "ctf"
+    },
+    {
+      "slug": "adb",
+      "name": "adb",
+      "summary": "Android Debug Bridge client.",
+      "tags": [
+        "ctf",
+        "mobile",
+        "android",
+        "adb"
+      ],
+      "category": "mobile",
+      "section": "ctf"
+    },
+    {
+      "slug": "apktool",
+      "name": "apktool",
+      "summary": "Tool for reverse engineering 3rd party, closed, binary Android apps.",
+      "tags": [
+        "ctf",
+        "mobile",
+        "android",
+        "reverse"
+      ],
+      "category": "mobile",
+      "section": "ctf"
+    },
+    {
+      "slug": "trivy",
+      "name": "trivy",
+      "summary": "Comprehensive vulnerability scanner for container images, filesystems, and Git repos.",
+      "tags": [
+        "ctf",
+        "containers",
+        "security",
+        "docker",
+        "scanner"
+      ],
+      "category": "containers",
+      "section": "ctf"
+    },
+    {
+      "slug": "chmod",
+      "name": "chmod",
+      "summary": "Change file mode bits and permissions.",
+      "tags": [
+        "permissions",
+        "mode",
+        "security"
+      ],
+      "category": "permissions-and-ownership",
+      "section": "linux"
+    },
+    {
+      "slug": "chown",
+      "name": "chown",
+      "summary": "Change file owner and group.",
+      "tags": [
+        "ownership",
+        "users",
+        "groups"
+      ],
+      "category": "permissions-and-ownership",
+      "section": "linux"
+    },
+    {
+      "slug": "chgrp",
+      "name": "chgrp",
+      "summary": "Change the group ownership of files.",
+      "tags": [
+        "groups",
+        "ownership",
+        "sharing"
+      ],
+      "category": "permissions-and-ownership",
+      "section": "linux"
+    },
+    {
+      "slug": "umask",
+      "name": "umask",
+      "summary": "Set the default file creation permission mask.",
+      "tags": [
+        "permissions",
+        "defaults",
+        "shell"
+      ],
+      "category": "permissions-and-ownership",
+      "section": "linux"
+    },
+    {
+      "slug": "setfacl",
+      "name": "setfacl",
+      "summary": "Modify access control lists for files and directories.",
+      "tags": [
+        "acl",
+        "permissions",
+        "access-control"
+      ],
+      "category": "permissions-and-ownership",
+      "section": "linux"
+    },
+    {
+      "slug": "getfacl",
+      "name": "getfacl",
+      "summary": "Display file access control lists.",
+      "tags": [
+        "acl",
+        "audit",
+        "permissions"
+      ],
+      "category": "permissions-and-ownership",
+      "section": "linux"
+    },
+    {
+      "slug": "chattr",
+      "name": "chattr",
+      "summary": "Change extended filesystem attributes.",
+      "tags": [
+        "filesystem",
+        "attributes",
+        "immutable"
+      ],
+      "category": "permissions-and-ownership",
+      "section": "linux"
+    },
+    {
+      "slug": "lsattr",
+      "name": "lsattr",
+      "summary": "List extended filesystem attributes.",
+      "tags": [
+        "filesystem",
+        "attributes",
+        "audit"
+      ],
+      "category": "permissions-and-ownership",
+      "section": "linux"
+    },
+    {
+      "slug": "more",
+      "name": "more",
+      "summary": "Page through text one screen at a time.",
+      "tags": [
+        "pager",
+        "text",
+        "terminal"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "tac",
+      "name": "tac",
+      "summary": "Concatenate files in reverse line order.",
+      "tags": [
+        "reverse",
+        "lines",
+        "text"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "nl",
+      "name": "nl",
+      "summary": "Number lines of files.",
+      "tags": [
+        "line-numbers",
+        "text",
+        "review"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "od",
+      "name": "od",
+      "summary": "Dump files in octal and other formats.",
+      "tags": [
+        "binary",
+        "bytes",
+        "hex"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "xxd",
+      "name": "xxd",
+      "summary": "Make a hexadecimal dump or reverse it.",
+      "tags": [
+        "hex",
+        "binary",
+        "dump"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "hexdump",
+      "name": "hexdump",
+      "summary": "Display file contents in hexadecimal and other formats.",
+      "tags": [
+        "hex",
+        "binary",
+        "inspection"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "file",
+      "name": "file",
+      "summary": "Determine file type from its contents.",
+      "tags": [
+        "file-type",
+        "mime",
+        "inspection"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "stat",
+      "name": "stat",
+      "summary": "Display file or filesystem status.",
+      "tags": [
+        "metadata",
+        "inode",
+        "filesystem"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "ln",
+      "name": "ln",
+      "summary": "Create links between files.",
+      "tags": [
+        "links",
+        "symlink",
+        "filesystem"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "readlink",
+      "name": "readlink",
+      "summary": "Read the value of a symbolic link.",
+      "tags": [
+        "symlink",
+        "path",
+        "resolve"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "basename",
+      "name": "basename",
+      "summary": "Strip directory and suffix components from a path.",
+      "tags": [
+        "path",
+        "filename",
+        "shell"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "dirname",
+      "name": "dirname",
+      "summary": "Strip the final component from a pathname.",
+      "tags": [
+        "path",
+        "directory",
+        "shell"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "realpath",
+      "name": "realpath",
+      "summary": "Print resolved absolute path names.",
+      "tags": [
+        "path",
+        "canonical",
+        "symlink"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "tree",
+      "name": "tree",
+      "summary": "Display directories as a tree.",
+      "tags": [
+        "tree",
+        "directory",
+        "listing"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "dd",
+      "name": "dd",
+      "summary": "Copy and convert raw data streams.",
+      "tags": [
+        "raw",
+        "copy",
+        "disk"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "split",
+      "name": "split",
+      "summary": "Split a file into fixed-size pieces.",
+      "tags": [
+        "split",
+        "files",
+        "transfer"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "csplit",
+      "name": "csplit",
+      "summary": "Split a file at context-defined boundaries.",
+      "tags": [
+        "split",
+        "patterns",
+        "text"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "shred",
+      "name": "shred",
+      "summary": "Overwrite files to make data recovery harder.",
+      "tags": [
+        "secure-delete",
+        "files",
+        "privacy"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "truncate",
+      "name": "truncate",
+      "summary": "Shrink or extend a file to a specified size.",
+      "tags": [
+        "files",
+        "size",
+        "sparse"
+      ],
+      "category": "file-and-directory",
+      "section": "linux"
+    },
+    {
+      "slug": "cut",
+      "name": "cut",
+      "summary": "Remove sections from each line of input.",
+      "tags": [
+        "fields",
+        "columns",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "paste",
+      "name": "paste",
+      "summary": "Merge lines of files side by side.",
+      "tags": [
+        "columns",
+        "merge",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "join",
+      "name": "join",
+      "summary": "Join lines of two files on a shared field.",
+      "tags": [
+        "join",
+        "fields",
+        "data"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "sort",
+      "name": "sort",
+      "summary": "Sort lines of text files.",
+      "tags": [
+        "sort",
+        "order",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "uniq",
+      "name": "uniq",
+      "summary": "Report or omit repeated adjacent lines.",
+      "tags": [
+        "deduplicate",
+        "count",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "wc",
+      "name": "wc",
+      "summary": "Count lines, words, and bytes.",
+      "tags": [
+        "count",
+        "lines",
+        "files"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "tr",
+      "name": "tr",
+      "summary": "Translate or delete characters.",
+      "tags": [
+        "translate",
+        "characters",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "tee",
+      "name": "tee",
+      "summary": "Copy standard input to files and standard output.",
+      "tags": [
+        "pipeline",
+        "logging",
+        "output"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "xargs",
+      "name": "xargs",
+      "summary": "Build and execute commands from standard input.",
+      "tags": [
+        "pipeline",
+        "batch",
+        "arguments"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "diff",
+      "name": "diff",
+      "summary": "Compare files line by line.",
+      "tags": [
+        "compare",
+        "diff",
+        "review"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "cmp",
+      "name": "cmp",
+      "summary": "Compare two files byte by byte.",
+      "tags": [
+        "compare",
+        "binary",
+        "verify"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "comm",
+      "name": "comm",
+      "summary": "Compare two sorted files line by line.",
+      "tags": [
+        "compare",
+        "sorted",
+        "sets"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "fmt",
+      "name": "fmt",
+      "summary": "Reformat paragraph text.",
+      "tags": [
+        "format",
+        "wrap",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "fold",
+      "name": "fold",
+      "summary": "Wrap each input line to a fixed width.",
+      "tags": [
+        "wrap",
+        "width",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "column",
+      "name": "column",
+      "summary": "Format input into aligned columns.",
+      "tags": [
+        "columns",
+        "table",
+        "format"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "expand",
+      "name": "expand",
+      "summary": "Convert tabs to spaces.",
+      "tags": [
+        "tabs",
+        "spaces",
+        "format"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "rev",
+      "name": "rev",
+      "summary": "Reverse characters on each line.",
+      "tags": [
+        "reverse",
+        "characters",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "egrep",
+      "name": "egrep",
+      "summary": "Search text using extended regular expressions.",
+      "tags": [
+        "regex",
+        "search",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "fgrep",
+      "name": "fgrep",
+      "summary": "Search for fixed strings without regular expressions.",
+      "tags": [
+        "fixed-string",
+        "search",
+        "text"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "ripgrep",
+      "name": "ripgrep",
+      "summary": "Fast recursive search tool for code and text.",
+      "tags": [
+        "search",
+        "regex",
+        "code"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "jq",
+      "name": "jq",
+      "summary": "Process JSON data from the command line.",
+      "tags": [
+        "json",
+        "data",
+        "query"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "yq",
+      "name": "yq",
+      "summary": "Process YAML and related structured data.",
+      "tags": [
+        "yaml",
+        "data",
+        "query"
+      ],
+      "category": "text-processing",
+      "section": "linux"
+    },
+    {
+      "slug": "ssh",
+      "name": "ssh",
+      "summary": "OpenSSH remote login client.",
+      "tags": [
+        "ssh",
+        "remote"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "scp",
+      "name": "scp",
+      "summary": "Secure copy.",
+      "tags": [
+        "scp",
+        "ssh",
+        "transfer"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "hydra",
+      "name": "hydra",
+      "summary": "Parallelized login cracker.",
+      "tags": [
+        "brute-force",
+        "auth",
+        "cracking"
+      ],
+      "category": "pwn",
+      "section": "ctf"
+    },
+    {
+      "slug": "searchsploit",
+      "name": "searchsploit",
+      "summary": "Exploit-DB's search tool for offline use.",
+      "tags": [
+        "exploits",
+        "search"
+      ],
+      "category": "pwn",
+      "section": "ctf"
+    },
+    {
+      "slug": "pkill",
+      "name": "pkill",
+      "summary": "Look up or signal processes based on name and other attributes.",
+      "tags": [
+        "process",
+        "signals"
+      ],
+      "category": "process-management",
+      "section": "linux"
+    },
+    {
+      "slug": "netstat",
+      "name": "netstat",
+      "summary": "Print network connections, routing tables, interface statistics.",
+      "tags": [
+        "network",
+        "ports"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "locate",
+      "name": "locate",
+      "summary": "Find files by name.",
+      "tags": [
+        "locate",
+        "search"
+      ],
+      "category": "search-and-find",
+      "section": "linux"
+    },
+    {
+      "slug": "ncat",
+      "name": "ncat",
+      "summary": "Concatenate and redirect sockets (Nmap version).",
+      "tags": [
+        "network",
+        "shell"
+      ],
+      "category": "recon",
+      "section": "ctf"
+    },
+    {
+      "slug": "nc",
+      "name": "nc",
+      "summary": "Arbitrary TCP and UDP connections and listens.",
+      "tags": [
+        "network",
+        "shell"
+      ],
+      "category": "recon",
+      "section": "ctf"
+    },
+    {
+      "slug": "wpscan",
+      "name": "wpscan",
+      "summary": "WordPress Security Scanner.",
+      "tags": [
+        "wordpress",
+        "web"
+      ],
+      "category": "web",
+      "section": "ctf"
+    },
+    {
+      "slug": "rsync",
+      "name": "rsync",
+      "summary": "Remote file copy (Synchronize file trees and files between directories/devices).",
+      "tags": [
+        "sync",
+        "transfer"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "lsof",
+      "name": "lsof",
+      "summary": "List open files.",
+      "tags": [
+        "files",
+        "network"
+      ],
+      "category": "networking",
+      "section": "linux"
+    },
+    {
+      "slug": "nikto",
+      "name": "nikto",
+      "summary": "Web server vulnerability scanner.",
+      "tags": [
+        "web",
+        "scanner",
+        "vuln"
+      ],
+      "category": "web",
+      "section": "ctf"
+    },
+    {
+      "slug": "wfuzz",
+      "name": "wfuzz",
+      "summary": "Web application fuzzer.",
+      "tags": [
+        "web",
+        "fuzz",
+        "bruteforce"
+      ],
+      "category": "web",
+      "section": "ctf"
+    },
+    {
+      "slug": "feroxbuster",
+      "name": "feroxbuster",
+      "summary": "Rust-based recursive content discovery tool.",
+      "tags": [
+        "web",
+        "rust",
+        "enum"
+      ],
+      "category": "web",
+      "section": "ctf"
+    },
+    {
+      "slug": "rustscan",
+      "name": "rustscan",
+      "summary": "Fast port scanner that pipes to nmap.",
+      "tags": [
+        "recon",
+        "rust",
+        "ports"
+      ],
+      "category": "recon",
+      "section": "ctf"
+    },
+    {
+      "slug": "masscan",
+      "name": "masscan",
+      "summary": "Extreme-speed TCP port scanner.",
+      "tags": [
+        "recon",
+        "mass",
+        "ports"
+      ],
+      "category": "recon",
+      "section": "ctf"
+    },
+    {
+      "slug": "smbclient",
+      "name": "smbclient",
+      "summary": "SMB/CIFS client for share access.",
+      "tags": [
+        "smb",
+        "windows",
+        "recon"
+      ],
+      "category": "recon",
+      "section": "ctf"
+    },
+    {
+      "slug": "subfinder",
+      "name": "subfinder",
+      "summary": "Passive subdomain discovery tool.",
+      "tags": [
+        "osint",
+        "dns",
+        "subdomains"
+      ],
+      "category": "osint",
+      "section": "ctf"
+    },
+    {
+      "slug": "volatility",
+      "name": "volatility",
+      "summary": "Memory forensics analysis framework.",
+      "tags": [
+        "forensics",
+        "memory"
+      ],
+      "category": "forensics",
+      "section": "ctf"
+    },
+    {
+      "slug": "foremost",
+      "name": "foremost",
+      "summary": "File carving utility.",
+      "tags": [
+        "forensics",
+        "carve"
+      ],
+      "category": "forensics",
+      "section": "ctf"
+    },
+    {
+      "slug": "hashid",
+      "name": "hashid",
+      "summary": "Identify hash and cipher types before cracking.",
+      "tags": [
+        "crypto",
+        "hashes"
+      ],
+      "category": "crypto",
+      "section": "ctf"
+    },
+    {
+      "slug": "openssl",
+      "name": "openssl",
+      "summary": "TLS/SSL toolkit and cryptography Swiss-army knife.",
+      "tags": [
+        "crypto",
+        "tls",
+        "certs"
+      ],
+      "category": "crypto",
+      "section": "ctf"
+    },
+    {
+      "slug": "radare2",
+      "name": "radare2",
+      "summary": "Scriptable reverse-engineering and binary analysis framework.",
+      "tags": [
+        "re",
+        "radare",
+        "asm"
+      ],
+      "category": "reverse-engineering",
+      "section": "ctf"
+    },
+    {
+      "slug": "jadx",
+      "name": "jadx",
+      "summary": "Android APK / bytecode decompiler.",
+      "tags": [
+        "mobile",
+        "android",
+        "re"
+      ],
+      "category": "mobile",
+      "section": "ctf"
+    }
+  ]
+}

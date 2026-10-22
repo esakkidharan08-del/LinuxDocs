@@ -1,0 +1,47 @@
+{
+  "slug": "masscan",
+  "name": "masscan",
+  "category": "recon",
+  "section": "ctf",
+  "summary": "Extreme-speed TCP port scanner.",
+  "syntax": "masscan -p1-65535 <cidr> --rate 10000",
+  "description": "masscan can scan the entire internet in minutes by transmitting up to ten million packets per second with custom TCP stacks.",
+  "options": [
+    {
+      "flag": "-p",
+      "description": "Port(s) to scan"
+    },
+    {
+      "flag": "--rate",
+      "description": "Packets per second"
+    },
+    {
+      "flag": "--exclude",
+      "description": "Exclude IPs from scanning"
+    },
+    {
+      "flag": "-oG",
+      "description": "Grep-able output file"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Full-port sweep",
+      "command": "masscan -p1-65535 10.0.0.5 --rate 10000",
+      "output": "Discovered open port 22/tcp on 10.0.0.5",
+      "explanation": "All 65535 ports in seconds — verify with nmap afterwards."
+    }
+  ],
+  "useCases": [
+    "internet-scale scanning"
+  ],
+  "related": [
+    "nmap",
+    "rustscan"
+  ],
+  "tags": [
+    "recon",
+    "mass",
+    "ports"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "slug": "uniq",
+  "name": "uniq",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Report or omit repeated adjacent lines.",
+  "syntax": "uniq [OPTION]... [INPUT [OUTPUT]]",
+  "description": "Filters adjacent matching lines; sort input first when duplicates may be separated.",
+  "options": [
+    {
+      "flag": "-c",
+      "description": "Prefix lines by occurrence counts.",
+      "example": "sort events.log | uniq -c"
+    },
+    {
+      "flag": "-d",
+      "description": "Print only duplicated lines.",
+      "example": "sort names.txt | uniq -d"
+    },
+    {
+      "flag": "-u",
+      "description": "Print only unique lines.",
+      "example": "sort names.txt | uniq -u"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Remove adjacent duplicates",
+      "command": "uniq events.txt",
+      "output": "login\nlogout\nlogin",
+      "explanation": "Collapses only consecutive equal lines."
+    },
+    {
+      "title": "Count event types",
+      "command": "sort events.txt | uniq -c",
+      "output": "      2 login\n      1 logout",
+      "explanation": "Sorts first, then counts each repeated line."
+    },
+    {
+      "title": "Show duplicates only",
+      "command": "sort names.txt | uniq -d",
+      "output": "alice",
+      "explanation": "Reports names appearing more than once."
+    }
+  ],
+  "useCases": [
+    "Counting repeated events",
+    "Finding duplicate records",
+    "Reducing sorted output"
+  ],
+  "related": [
+    "sort",
+    "wc",
+    "comm",
+    "grep"
+  ],
+  "tags": [
+    "deduplicate",
+    "count",
+    "text"
+  ]
+}

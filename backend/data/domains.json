@@ -1,0 +1,132 @@
+[
+  {
+    "id": "recon",
+    "name": "Reconnaissance",
+    "description": "Information gathering, port scanning, subdomain enumeration, and service fingerprinting.",
+    "tools": [
+      "nmap",
+      "gobuster",
+      "ffuf",
+      "wfuzz",
+      "nikto",
+      "whatweb",
+      "subfinder",
+      "theHarvester",
+      "whois",
+      "dnsrecon"
+    ],
+    "recommendedExternalTools": []
+  },
+  {
+    "id": "web",
+    "name": "Web Hacking",
+    "description": "HTTP parameter tampering, vulnerability scanning, SQL injection, and web application assessment.",
+    "tools": [
+      "sqlmap",
+      "curl-for-web-testing",
+      "nikto",
+      "gobuster",
+      "ffuf",
+      "wfuzz"
+    ],
+    "recommendedExternalTools": []
+  },
+  {
+    "id": "crypto",
+    "name": "Cryptography",
+    "description": "Symmetric/asymmetric encryption, hashing, decoding, and cryptographic protocol analysis.",
+    "tools": [
+      "openssl",
+      "hashid",
+      "john",
+      "hashcat",
+      "gpg",
+      "age"
+    ],
+    "recommendedExternalTools": []
+  },
+  {
+    "id": "reverse-engineering",
+    "name": "Reverse Engineering",
+    "description": "Decompiling, disassembling, patching, and analyzing compiled binaries and bytecode.",
+    "tools": [
+      "strings",
+      "objdump",
+      "gdb",
+      "ltrace",
+      "strace",
+      "radare2",
+      "binwalk",
+      "checksec",
+      "ROPgadget"
+    ],
+    "recommendedExternalTools": []
+  },
+  {
+    "id": "forensics",
+    "name": "Digital Forensics",
+    "description": "File carving, metadata extraction, memory dump analysis, and hidden data discovery.",
+    "tools": [
+      "binwalk",
+      "exiftool",
+      "steghide",
+      "foremost",
+      "volatility"
+    ],
+    "recommendedExternalTools": []
+  },
+  {
+    "id": "pwn",
+    "name": "Binary Exploitation (Pwn)",
+    "description": "Buffer overflows, format string vulnerabilities, shellcode crafting, and ROP chain development.",
+    "tools": [
+      "checksec",
+      "ROPgadget",
+      "gdb",
+      "pwntools-snippets"
+    ],
+    "recommendedExternalTools": []
+  },
+  {
+    "id": "osint",
+    "name": "OSINT",
+    "description": "Open-source intelligence gathering on people, organizations, domains, and infrastructure.",
+    "tools": [
+      "theHarvester",
+      "whois",
+      "dnsrecon",
+      "nmap"
+    ],
+    "recommendedExternalTools": []
+  },
+  {
+    "id": "mobile",
+    "name": "Mobile Security",
+    "description": "Android/iOS application analysis, decompilation, and dynamic instrumentation.",
+    "tools": [
+      "adb",
+      "apktool",
+      "jadx"
+    ],
+    "recommendedExternalTools": []
+  },
+  {
+    "id": "containers",
+    "name": "Container Security",
+    "description": "Docker inspection, container escape vulnerability scanning, and image analysis.",
+    "tools": [
+      "trivy"
+    ],
+    "recommendedExternalTools": []
+  },
+  {
+    "id": "cloud",
+    "name": "Cloud Security",
+    "description": "AWS/Azure/GCP permission auditing, misconfiguration detection, and credential enumeration.",
+    "tools": [
+      "aws-cli-enumeration",
+      "trivy"
+    ],
+    "recommendedExternalTools": []
+  }
+]

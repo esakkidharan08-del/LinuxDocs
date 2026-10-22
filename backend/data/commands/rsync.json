@@ -1,0 +1,47 @@
+{
+  "slug": "rsync",
+  "name": "rsync",
+  "category": "networking",
+  "section": "linux",
+  "summary": "Remote file copy (Synchronize file trees and files between directories/devices).",
+  "syntax": "rsync [OPTION]... SRC [SRC]... DEST",
+  "description": "rsync is a fast, versatile, remote (and local) file-copying tool.",
+  "options": [
+    {
+      "flag": "-a",
+      "description": "Archive mode"
+    },
+    {
+      "flag": "-v",
+      "description": "Verbose"
+    },
+    {
+      "flag": "-z",
+      "description": "Compress"
+    },
+    {
+      "flag": "--progress",
+      "description": "Show progress"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Sync directories",
+      "command": "rsync -avz /src/ user@host:/dest/",
+      "output": "sending incremental file list",
+      "explanation": "Efficient sync."
+    }
+  ],
+  "useCases": [
+    "Backups",
+    "Transfers"
+  ],
+  "related": [
+    "scp",
+    "ssh"
+  ],
+  "tags": [
+    "sync",
+    "transfer"
+  ]
+}

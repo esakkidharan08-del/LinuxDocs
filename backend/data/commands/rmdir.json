@@ -1,0 +1,35 @@
+{
+  "slug": "rmdir",
+  "name": "rmdir",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Remove empty directories.",
+  "syntax": "rmdir [OPTION]... DIRECTORY...",
+  "description": "Remove the DIRECTORY(ies), if they are empty.",
+  "options": [
+    {
+      "flag": "-p",
+      "description": "Remove DIRECTORY and its ancestors.",
+      "example": "rmdir -p a/b/c"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Remove empty directory",
+      "command": "rmdir old_folder",
+      "output": "",
+      "explanation": "Removes old_folder if it contains no files."
+    }
+  ],
+  "useCases": [
+    "Cleaning up empty directory placeholders"
+  ],
+  "related": [
+    "rm",
+    "mkdir"
+  ],
+  "tags": [
+    "directory",
+    "remove"
+  ]
+}

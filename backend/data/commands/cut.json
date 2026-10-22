@@ -1,0 +1,57 @@
+{
+  "slug": "cut",
+  "name": "cut",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Remove sections from each line of input.",
+  "syntax": "cut OPTION... [FILE]...",
+  "description": "Selects columns, fields, or byte ranges from lines of files and standard input.",
+  "options": [
+    {
+      "flag": "-d DELIM",
+      "description": "Use DELIM instead of tab as the field delimiter.",
+      "example": "cut -d: -f1 /etc/passwd"
+    },
+    {
+      "flag": "-f LIST",
+      "description": "Select the specified fields.",
+      "example": "cut -d, -f1,3 data.csv"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Extract usernames",
+      "command": "cut -d: -f1 /etc/passwd",
+      "output": "root\ndaemon\nbin",
+      "explanation": "Selects the first colon-delimited field."
+    },
+    {
+      "title": "Select CSV columns",
+      "command": "cut -d, -f1,3 users.csv",
+      "output": "id,role\n1,admin\n2,viewer",
+      "explanation": "Prints the first and third comma-separated fields."
+    },
+    {
+      "title": "Select a byte range",
+      "command": "printf 'abcdef\\n' | cut -b 2-4",
+      "output": "bcd",
+      "explanation": "Extracts bytes two through four."
+    }
+  ],
+  "useCases": [
+    "Extracting fields from system files",
+    "Selecting CSV columns",
+    "Building shell pipelines"
+  ],
+  "related": [
+    "awk",
+    "paste",
+    "sort",
+    "tr"
+  ],
+  "tags": [
+    "fields",
+    "columns",
+    "text"
+  ]
+}

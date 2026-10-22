@@ -1,0 +1,46 @@
+{
+  "slug": "steghide",
+  "name": "steghide",
+  "category": "forensics",
+  "section": "ctf",
+  "summary": "Steganography program that hides data in various kinds of image and audio files.",
+  "syntax": "steghide [command] [options]",
+  "description": "Steghide embeds a file in another file by replacing some of the least significant bits with data from the first file.",
+  "options": [
+    {
+      "flag": "embed",
+      "description": "Embed secret file into cover file.",
+      "example": "steghide embed -cf image.jpg -ef secret.txt"
+    },
+    {
+      "flag": "extract",
+      "description": "Extract embedded file from cover file.",
+      "example": "steghide extract -sf image.jpg"
+    },
+    {
+      "flag": "-p",
+      "description": "Specify passphrase for embedding/extraction.",
+      "example": "steghide extract -sf image.jpg -p secret123"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Extract hidden file with passphrase",
+      "command": "steghide extract -sf ctf_image.jpg -p \"password\"",
+      "output": "wrote extracted data to \"flag.txt\".",
+      "explanation": "Extracts concealed flag.txt from ctf_image.jpg."
+    }
+  ],
+  "useCases": [
+    "Solving steganography challenges in CTF competitions"
+  ],
+  "related": [
+    "binwalk",
+    "exiftool"
+  ],
+  "tags": [
+    "ctf",
+    "forensics",
+    "steganography"
+  ]
+}

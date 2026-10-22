@@ -1,0 +1,62 @@
+{
+  "slug": "chattr",
+  "name": "chattr",
+  "category": "permissions-and-ownership",
+  "section": "linux",
+  "summary": "Change extended filesystem attributes.",
+  "syntax": "chattr [ -RVf ] [ -+=AacdeijPsStu ] file...",
+  "description": "Changes Linux filesystem attributes on ext-family filesystems and other filesystems that support them.",
+  "options": [
+    {
+      "flag": "-R",
+      "description": "Recursively change attributes.",
+      "example": "sudo chattr -R +i archive/"
+    },
+    {
+      "flag": "+i",
+      "description": "Set the immutable attribute.",
+      "example": "sudo chattr +i release.txt"
+    },
+    {
+      "flag": "-i",
+      "description": "Clear the immutable attribute.",
+      "example": "sudo chattr -i release.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Protect a release file",
+      "command": "sudo chattr +i release.txt",
+      "output": "",
+      "explanation": "Marks the file immutable until the attribute is cleared."
+    },
+    {
+      "title": "Allow updates again",
+      "command": "sudo chattr -i release.txt",
+      "output": "",
+      "explanation": "Clears the immutable attribute."
+    },
+    {
+      "title": "Protect an archive tree",
+      "command": "sudo chattr -R +i archive/",
+      "output": "",
+      "explanation": "Sets immutable on each item in the archive tree."
+    }
+  ],
+  "useCases": [
+    "Protecting audit artifacts",
+    "Preventing accidental changes",
+    "Investigating filesystem attributes"
+  ],
+  "related": [
+    "lsattr",
+    "chmod",
+    "stat"
+  ],
+  "tags": [
+    "filesystem",
+    "attributes",
+    "immutable"
+  ],
+  "warnings": "the immutable attribute (+i) blocks writes, deletes, and even root edits until it is cleared, which can confuse backups and update tools."
+}

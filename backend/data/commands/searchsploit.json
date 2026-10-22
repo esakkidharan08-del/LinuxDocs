@@ -1,0 +1,33 @@
+{
+  "slug": "searchsploit",
+  "name": "searchsploit",
+  "category": "pwn",
+  "section": "ctf",
+  "summary": "Exploit-DB's search tool for offline use.",
+  "syntax": "searchsploit [options] term1 [term2] ...",
+  "description": "SearchSploit allows you to search through Exploit-DB from your local copy.",
+  "options": [
+    {
+      "flag": "-m",
+      "description": "Mirror an exploit to current directory."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Search exploits",
+      "command": "searchsploit apache 2.4",
+      "output": "Apache 2.4.x - Path Traversal & RCE",
+      "explanation": "Find public exploits."
+    }
+  ],
+  "useCases": [
+    "Exploit research"
+  ],
+  "related": [
+    "nmap"
+  ],
+  "tags": [
+    "exploits",
+    "search"
+  ]
+}

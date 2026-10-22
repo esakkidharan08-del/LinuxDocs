@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { IntroScene } from '../components/IntroScene';
 import { KineticTextLoader } from '../components/ui/KineticTextLoader';
-import { COMMANDS } from '../data/commands';
+import { useCatalog } from '../context/CatalogContext';
 import { useAuth } from '../context/AuthContext';
 
 const INTRO_SEEN_KEY = 'linuxdocs_intro_seen';
@@ -75,21 +75,24 @@ export const IntroPage = () => {
   const [progress, setProgress] = useState(0);
   const [leaving, setLeaving] = useState(false);
 
+  const { lights, loading: catalogLoading } = useCatalog();
   const counts = useMemo(() => {
-    const total = COMMANDS.length;
-    const linux = COMMANDS.filter((c) => c.section === 'linux').length;
+    const total = lights.length;
+    const linux = lights.filter((c) => c.section === 'linux').length;
     return { total, linux, ctf: total - linux };
-  }, []);
+  }, [lights]);
 
   const bootLines = useMemo(
     () => [
       'LINUXDOCS://KERNEL 6.6 — establishing uplink',
       'mounting /docs .......................... OK',
-      `indexing ${counts.total} command entries ..... OK`,
+      catalogLoading
+        ? 'indexing the command registry ........... OK'
+        : `indexing ${counts.total} command entries ..... OK`,
       'neon channels: MAGENTA ⟷ CYAN .......... OK',
       'uplink stable — system online',
     ],
-    [counts.total]
+    [counts.total, catalogLoading]
   );
 
   const { rendered, done: typingDone } = useTypewriter(bootLines, reducedMotion);

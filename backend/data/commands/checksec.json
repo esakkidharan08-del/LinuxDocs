@@ -1,0 +1,37 @@
+{
+  "slug": "checksec",
+  "name": "checksec",
+  "category": "pwn",
+  "section": "ctf",
+  "summary": "Check binary security properties (RELRO, stack canary, NX, PIE).",
+  "syntax": "checksec [options] --file=<binary>",
+  "description": "Evaluates binary security mitigations such as NX (No-Execute), ASLR, PIE, Stack Canaries, and RELRO.",
+  "options": [
+    {
+      "flag": "--file",
+      "description": "Specify binary file to check.",
+      "example": "checksec --file=pwn_chall"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Check binary protections",
+      "command": "checksec --file=pwn1",
+      "output": "    RELRO: Partial RELRO\n    Stack Canary: No canary found\n    NX: NX enabled\n    PIE: No PIE (0x400000)",
+      "explanation": "Reveals missing stack canary and disabled PIE, indicating exploitable buffer overflow."
+    }
+  ],
+  "useCases": [
+    "Determining exploitation strategy for binary pwn challenges"
+  ],
+  "related": [
+    "gdb",
+    "objdump"
+  ],
+  "tags": [
+    "ctf",
+    "pwn",
+    "security",
+    "mitigations"
+  ]
+}

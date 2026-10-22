@@ -1,0 +1,43 @@
+{
+  "slug": "exiftool",
+  "name": "exiftool",
+  "category": "forensics",
+  "section": "ctf",
+  "summary": "Read and write meta information in a wide variety of files.",
+  "syntax": "exiftool [options] file...",
+  "description": "ExifTool is a platform-independent Perl library plus command-line application for reading, writing and editing meta information in a wide variety of files.",
+  "options": [
+    {
+      "flag": "-a",
+      "description": "Allow duplicate tags in output.",
+      "example": "exiftool -a photo.jpg"
+    },
+    {
+      "flag": "-u",
+      "description": "Extract unknown tags.",
+      "example": "exiftool -u image.png"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Inspect image metadata",
+      "command": "exiftool flag.jpg",
+      "output": "ExifTool Version Number     : 12.50\nFile Name                   : flag.jpg\nComment                     : Pass: secret_flag_123",
+      "explanation": "Reveals hidden comments or GPS metadata embedded in image files."
+    }
+  ],
+  "useCases": [
+    "Finding hidden CTF flags stored in image metadata comments"
+  ],
+  "related": [
+    "binwalk",
+    "steghide",
+    "strings"
+  ],
+  "tags": [
+    "ctf",
+    "forensics",
+    "metadata",
+    "images"
+  ]
+}

@@ -2,6 +2,8 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './components/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
+import { CatalogProvider } from './context/CatalogContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Footer } from './components/Footer';
@@ -60,6 +62,7 @@ function introSeen() {
 
 function AppShell() {
   const location = useLocation();
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -71,12 +74,12 @@ function AppShell() {
 
   const closeShortcuts = useCallback(() => setShortcutsOpen(false), []);
 
-  // The intro owns the '/' route on first visit (and always owns '/intro',
-  // e.g. "Replay intro" from the footer). Reading sessionStorage on every
-  // render guarantees the redirect flash stays away: when the intro finishes,
-  // it writes the flag and navigates back to '/', and this flips to the app.
+  // Part 1: the intro plays once per session but ONLY for a signed-in user.
+  // A logged-out visitor on '/' is redirected to sign-in before anything
+  // renders (the '/' route itself is protected below), so an unauthenticated
+  // intro would expose app-shaped content before any round-trip.
   const showIntro =
-    location.pathname === '/intro' || (location.pathname === '/' && !introSeen());
+    !!user && (location.pathname === '/intro' || (location.pathname === '/' && !introSeen()));
 
   useEffect(() => {
     if (showIntro) return;
@@ -128,28 +131,31 @@ function AppShell() {
         <main id="main" className="min-w-0 flex-1">
           <Suspense fallback={<RouteFallback />}>
             <Routes>
-            <Route path="/" element={<LandingPage />} />
+            {/* Public surface (Part 1): auth pages, legal pages, the void 404.
+                Everything else demands a session; see ProtectedRoute. */}
+            <Route path="/" element={<ProtectedRoute><LandingPage /></ProtectedRoute>} />
+            <Route path="/intro" element={<ProtectedRoute><IntroPage /></ProtectedRoute>} />
             <Route path="/sign-in" element={<SignInPage />} />
             <Route path="/sign-up" element={<SignUpPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-            <Route path="/explain" element={<ExplainCommandPage />} />
-            <Route path="/practice-terminal" element={<PracticeTerminalPage />} />
-            <Route path="/learn" element={<LearningPage />} />
-            <Route path="/flashcards" element={<FlashcardsPage />} />
-            <Route path="/speed-drill" element={<SpeedDrillPage />} />
-            <Route path="/cheat-sheets" element={<CheatSheetsPage />} />
-            <Route path="/compare" element={<ComparePage />} />
-            <Route path="/command-of-the-day" element={<CommandOfDayPage />} />
-            <Route path="/export-import" element={<ExportImportPage />} />
+            <Route path="/explain" element={<ProtectedRoute><ExplainCommandPage /></ProtectedRoute>} />
+            <Route path="/practice-terminal" element={<ProtectedRoute><PracticeTerminalPage /></ProtectedRoute>} />
+            <Route path="/learn" element={<ProtectedRoute><LearningPage /></ProtectedRoute>} />
+            <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
+            <Route path="/speed-drill" element={<ProtectedRoute><SpeedDrillPage /></ProtectedRoute>} />
+            <Route path="/cheat-sheets" element={<ProtectedRoute><CheatSheetsPage /></ProtectedRoute>} />
+            <Route path="/compare" element={<ProtectedRoute><ComparePage /></ProtectedRoute>} />
+            <Route path="/command-of-the-day" element={<ProtectedRoute><CommandOfDayPage /></ProtectedRoute>} />
+            <Route path="/export-import" element={<ProtectedRoute><ExportImportPage /></ProtectedRoute>} />
             <Route path="/password-reset" element={<PasswordResetPage />} />
             <Route path="/privacy" element={<LegalPage />} />
             <Route path="/terms" element={<LegalPage />} />
-            <Route path="/linux/:categoryId" element={<CategoryPage />} />
-            <Route path="/linux/:categoryId/:slug" element={<CommandDetailPage />} />
-            <Route path="/ctf" element={<CTFHomePage />} />
-            <Route path="/ctf/:domainId" element={<CTFDomainPage />} />
-            <Route path="/ctf/:domainId/:slug" element={<CommandDetailPage />} />
+            <Route path="/linux/:categoryId" element={<ProtectedRoute><CategoryPage /></ProtectedRoute>} />
+            <Route path="/linux/:categoryId/:slug" element={<ProtectedRoute><CommandDetailPage /></ProtectedRoute>} />
+            <Route path="/ctf" element={<ProtectedRoute><CTFHomePage /></ProtectedRoute>} />
+            <Route path="/ctf/:domainId" element={<ProtectedRoute><CTFDomainPage /></ProtectedRoute>} />
+            <Route path="/ctf/:domainId/:slug" element={<ProtectedRoute><CommandDetailPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>
@@ -171,9 +177,13 @@ export function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <AppShell />
-        </BrowserRouter>
+        {/* Catalog data (index + per-slug docs) rides on the auth session:
+            loaded after sign-in, rebuilt on account switch, dropped on logout. */}
+        <CatalogProvider>
+          <BrowserRouter>
+            <AppShell />
+          </BrowserRouter>
+        </CatalogProvider>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -1,0 +1,58 @@
+{
+  "slug": "chgrp",
+  "name": "chgrp",
+  "category": "permissions-and-ownership",
+  "section": "linux",
+  "summary": "Change the group ownership of files.",
+  "syntax": "chgrp [OPTION]... GROUP FILE...",
+  "description": "Change the group ownership of each FILE to GROUP.",
+  "options": [
+    {
+      "flag": "-R",
+      "description": "Operate on files and directories recursively.",
+      "example": "chgrp -R developers shared/"
+    },
+    {
+      "flag": "--reference=RFILE",
+      "description": "Use the group of RFILE.",
+      "example": "chgrp --reference=template.conf app.conf"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Share a file with a team",
+      "command": "chgrp developers design.md",
+      "output": "",
+      "explanation": "Sets the file group to developers."
+    },
+    {
+      "title": "Update a shared directory",
+      "command": "sudo chgrp -R developers /srv/project",
+      "output": "",
+      "explanation": "Changes group ownership throughout the project tree."
+    },
+    {
+      "title": "Copy a reference group",
+      "command": "chgrp --reference=README.md notes.txt",
+      "output": "",
+      "explanation": "Uses the group owner of README.md for notes.txt."
+    }
+  ],
+  "useCases": [
+    "Maintaining team-shared files",
+    "Preparing group-based access",
+    "Repairing extracted archive ownership"
+  ],
+  "related": [
+    "chown",
+    "chmod",
+    "getfacl",
+    "ls"
+  ],
+  "tags": [
+    "groups",
+    "ownership",
+    "sharing"
+  ],
+  "warnings": "recursive group changes (chgrp -R) propagate to every file in the target tree, and system directories usually require root."
+}

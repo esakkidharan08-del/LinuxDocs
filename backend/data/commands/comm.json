@@ -1,0 +1,57 @@
+{
+  "slug": "comm",
+  "name": "comm",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Compare two sorted files line by line.",
+  "syntax": "comm [OPTION]... FILE1 FILE2",
+  "description": "Produces three columns for lines unique to the first file, unique to the second, and common to both.",
+  "options": [
+    {
+      "flag": "-1",
+      "description": "Suppress the first output column.",
+      "example": "comm -1 users-a users-b"
+    },
+    {
+      "flag": "-3",
+      "description": "Suppress the common-lines column.",
+      "example": "comm -3 users-a users-b"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Show all comparison columns",
+      "command": "comm a.txt b.txt",
+      "output": "alice\n\t\tbob\n\tcarol",
+      "explanation": "Displays unique-first, unique-second, and common lines as columns."
+    },
+    {
+      "title": "Find additions",
+      "command": "comm -23 old.txt new.txt",
+      "output": "",
+      "explanation": "Suppresses columns to show lines only in the new file."
+    },
+    {
+      "title": "Find lines removed",
+      "command": "comm -13 old.txt new.txt",
+      "output": "legacy-entry",
+      "explanation": "Shows entries present only in the old file."
+    }
+  ],
+  "useCases": [
+    "Comparing sorted inventories",
+    "Finding additions and removals",
+    "Auditing user lists"
+  ],
+  "related": [
+    "sort",
+    "diff",
+    "uniq",
+    "join"
+  ],
+  "tags": [
+    "compare",
+    "sorted",
+    "sets"
+  ]
+}

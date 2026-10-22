@@ -1,0 +1,48 @@
+{
+  "slug": "mkdir",
+  "name": "mkdir",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Create directories.",
+  "syntax": "mkdir [OPTION]... DIRECTORY...",
+  "description": "Create the DIRECTORY(ies), if they do not already exist.",
+  "options": [
+    {
+      "flag": "-p",
+      "description": "No error if existing, make parent directories as needed.",
+      "example": "mkdir -p /var/www/html/app"
+    },
+    {
+      "flag": "-m",
+      "description": "Set file mode (permissions), like chmod.",
+      "example": "mkdir -m 755 secure_dir"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Create single directory",
+      "command": "mkdir projects",
+      "output": "",
+      "explanation": "Creates a folder named projects in current directory."
+    },
+    {
+      "title": "Create nested directory structure",
+      "command": "mkdir -p src/components/ui",
+      "output": "",
+      "explanation": "Creates intermediate parent directories automatically."
+    }
+  ],
+  "useCases": [
+    "Setting up project directory structures",
+    "Preparing log or output directories"
+  ],
+  "related": [
+    "rmdir",
+    "touch",
+    "ls"
+  ],
+  "tags": [
+    "directory",
+    "create"
+  ]
+}

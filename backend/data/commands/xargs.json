@@ -1,0 +1,55 @@
+{
+  "slug": "xargs",
+  "name": "xargs",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Build and execute commands from standard input.",
+  "syntax": "xargs [OPTION]... [COMMAND [INITIAL-ARGS]]",
+  "description": "Constructs command lines from items read from standard input, with controls for batching and placement.",
+  "options": [
+    {
+      "flag": "-n MAX-ARGS",
+      "description": "Use at most MAX-ARGS input items per command line.",
+      "example": "printf 'a\\nb\\n' | xargs -n1 printf '<%s>\\n'"
+    },
+    {
+      "flag": "-0",
+      "description": "Expect NUL-delimited input.",
+      "example": "find . -print0 | xargs -0 -n1 file"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Run a command for each item",
+      "command": "printf 'a\\nb\\n' | xargs -n1 printf 'item=%s\\n'",
+      "output": "item=a\nitem=b",
+      "explanation": "Builds one printf invocation per input item."
+    },
+    {
+      "title": "Handle filenames safely",
+      "command": "find . -type f -print0 | xargs -0 file",
+      "output": "./README.md: ASCII text\n./app.bin: ELF 64-bit LSB executable",
+      "explanation": "Uses NUL delimiters so spaces do not split names."
+    },
+    {
+      "title": "Pass many arguments in batches",
+      "command": "printf '1\\n2\\n3\\n' | xargs -n2 echo batch",
+      "output": "batch 1 2\nbatch 3",
+      "explanation": "Limits each invocation to two input arguments."
+    }
+  ],
+  "useCases": [
+    "Applying commands to search results",
+    "Batching arguments",
+    "Building safe file pipelines"
+  ],
+  "related": [
+    "find",
+    "tee"
+  ],
+  "tags": [
+    "pipeline",
+    "batch",
+    "arguments"
+  ]
+}

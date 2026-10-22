@@ -1,0 +1,57 @@
+{
+  "slug": "paste",
+  "name": "paste",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Merge lines of files side by side.",
+  "syntax": "paste [OPTION]... [FILE]...",
+  "description": "Writes corresponding lines from input files separated by tabs or a chosen delimiter.",
+  "options": [
+    {
+      "flag": "-d LIST",
+      "description": "Reuse characters from LIST as delimiters.",
+      "example": "paste -d, names.txt ids.txt"
+    },
+    {
+      "flag": "-s",
+      "description": "Paste one file at a time instead of in parallel.",
+      "example": "paste -s -d, values.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Join two columns",
+      "command": "paste names.txt ids.txt",
+      "output": "alice\t1001\nbob\t1002",
+      "explanation": "Combines corresponding lines with tabs."
+    },
+    {
+      "title": "Create CSV-like output",
+      "command": "paste -d, names.txt ids.txt",
+      "output": "alice,1001\nbob,1002",
+      "explanation": "Uses commas between corresponding values."
+    },
+    {
+      "title": "Join a list into one line",
+      "command": "paste -s -d, values.txt",
+      "output": "red,green,blue",
+      "explanation": "Serializes all lines from one file."
+    }
+  ],
+  "useCases": [
+    "Combining parallel reports",
+    "Creating simple delimited output",
+    "Joining pipeline columns"
+  ],
+  "related": [
+    "cut",
+    "join",
+    "column",
+    "awk"
+  ],
+  "tags": [
+    "columns",
+    "merge",
+    "text"
+  ]
+}

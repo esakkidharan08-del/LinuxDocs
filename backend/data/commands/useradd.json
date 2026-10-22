@@ -1,0 +1,46 @@
+{
+  "slug": "useradd",
+  "name": "useradd",
+  "category": "users-and-groups",
+  "section": "linux",
+  "summary": "Create a new user or update default new user information.",
+  "syntax": "useradd [options] LOGIN",
+  "description": "Low-level utility for adding a new user account on Linux systems.",
+  "options": [
+    {
+      "flag": "-m",
+      "description": "Create the user's home directory.",
+      "example": "useradd -m -s /bin/bash newuser"
+    },
+    {
+      "flag": "-s",
+      "description": "Specify login shell for new user.",
+      "example": "useradd -s /bin/zsh dev"
+    },
+    {
+      "flag": "-g",
+      "description": "Specify primary group.",
+      "example": "useradd -g developers user1"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Create user with home directory and bash shell",
+      "command": "sudo useradd -m -s /bin/bash ctfuser",
+      "output": "",
+      "explanation": "Creates user ctfuser with home directory and /bin/bash shell."
+    }
+  ],
+  "useCases": [
+    "Provisioning new user accounts on servers"
+  ],
+  "related": [
+    "passwd"
+  ],
+  "tags": [
+    "users",
+    "admin",
+    "accounts"
+  ],
+  "warnings": "useradd typically requires root; new accounts immediately gain login and file-access rights on the system."
+}

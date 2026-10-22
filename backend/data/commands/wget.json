@@ -1,0 +1,44 @@
+{
+  "slug": "wget",
+  "name": "wget",
+  "category": "networking",
+  "section": "linux",
+  "summary": "The non-interactive network downloader.",
+  "syntax": "wget [options] [URL]",
+  "description": "Download files from the web using HTTP, HTTPS, and FTP protocols with support for resume and recursive mirroring.",
+  "options": [
+    {
+      "flag": "-c",
+      "description": "Resume aborted downloads.",
+      "example": "wget -c https://example.com/large.iso"
+    },
+    {
+      "flag": "-O",
+      "description": "Write document to file filename.",
+      "example": "wget -O output.tar.gz https://example.com/download"
+    },
+    {
+      "flag": "-r",
+      "description": "Specify recursive download (mirroring).",
+      "example": "wget -r https://example.com/docs/"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Download file and save as name",
+      "command": "wget -O release.zip https://github.com/repo/archive/refs/tags/v1.0.zip",
+      "output": "Saving to: 'release.zip'",
+      "explanation": "Downloads zip archive from URL."
+    }
+  ],
+  "useCases": [
+    "Downloading installation packages and archives in headless environments"
+  ],
+  "related": [
+    "curl"
+  ],
+  "tags": [
+    "networking",
+    "download"
+  ]
+}

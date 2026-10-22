@@ -1,0 +1,46 @@
+{
+  "slug": "hashcat",
+  "name": "hashcat",
+  "category": "crypto",
+  "section": "ctf",
+  "summary": "World's fastest and most advanced password recovery utility.",
+  "syntax": "hashcat [options]... hash|hashfile|hccapx [wordlist|mask|directory]...",
+  "description": "High-performance GPU-accelerated password recovery tool supporting hundreds of hash types.",
+  "options": [
+    {
+      "flag": "-m",
+      "description": "Hash type ID (e.g. 0 = MD5, 1000 = NTLM, 1800 = sha512crypt).",
+      "example": "hashcat -m 0 -a 0 hash.txt wordlist.txt"
+    },
+    {
+      "flag": "-a",
+      "description": "Attack mode (0 = Dictionary, 3 = Brute-force/Mask).",
+      "example": "hashcat -m 1000 -a 3 ntlm.hash ?l?l?l?l?l?l"
+    },
+    {
+      "flag": "--show",
+      "description": "Review previously cracked hashes.",
+      "example": "hashcat -m 0 hash.txt --show"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Crack MD5 hash using GPU acceleration",
+      "command": "hashcat -m 0 -a 0 md5hash.txt rockyou.txt",
+      "output": "5d41402abc4b2a76b9719d911017c592:hello",
+      "explanation": "Cracks MD5 hash against rockyou wordlist."
+    }
+  ],
+  "useCases": [
+    "High-speed password cracking using GPU power in CTFs"
+  ],
+  "related": [
+    "john"
+  ],
+  "tags": [
+    "ctf",
+    "crypto",
+    "gpu",
+    "passwords"
+  ]
+}

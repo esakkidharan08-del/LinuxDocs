@@ -1,0 +1,57 @@
+{
+  "slug": "realpath",
+  "name": "realpath",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Print resolved absolute path names.",
+  "syntax": "realpath [OPTION]... FILE...",
+  "description": "Resolves symbolic links, relative components, and repeated separators to canonical path names.",
+  "options": [
+    {
+      "flag": "-e",
+      "description": "Require all path components to exist.",
+      "example": "realpath -e ./config/app.conf"
+    },
+    {
+      "flag": "-m",
+      "description": "Resolve components without requiring them to exist.",
+      "example": "realpath -m ./build/new/file"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Resolve a relative path",
+      "command": "realpath ./src/../README.md",
+      "output": "/home/alice/project/README.md",
+      "explanation": "Normalizes the path against the current directory."
+    },
+    {
+      "title": "Resolve a symlink",
+      "command": "realpath current",
+      "output": "/srv/releases/release-2",
+      "explanation": "Follows the release symlink to its target."
+    },
+    {
+      "title": "Resolve a future path",
+      "command": "realpath -m ./build/output.bin",
+      "output": "/home/alice/project/build/output.bin",
+      "explanation": "Produces a canonical path even when the final file is absent."
+    }
+  ],
+  "useCases": [
+    "Passing canonical paths to tools",
+    "Comparing paths reliably",
+    "Writing deployment scripts"
+  ],
+  "related": [
+    "readlink",
+    "dirname",
+    "basename",
+    "ln"
+  ],
+  "tags": [
+    "path",
+    "canonical",
+    "symlink"
+  ]
+}

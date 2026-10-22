@@ -1,0 +1,57 @@
+{
+  "slug": "tr",
+  "name": "tr",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Translate or delete characters.",
+  "syntax": "tr [OPTION]... SET1 [SET2]",
+  "description": "Copies standard input to standard output while translating, squeezing, or deleting characters.",
+  "options": [
+    {
+      "flag": "-d",
+      "description": "Delete characters in SET1.",
+      "example": "tr -d '\\r' < windows.txt"
+    },
+    {
+      "flag": "-s",
+      "description": "Squeeze repeated characters in the result.",
+      "example": "tr -s ' ' < input.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Convert lowercase to uppercase",
+      "command": "printf 'linux\\n' | tr 'a-z' 'A-Z'",
+      "output": "LINUX",
+      "explanation": "Maps each lowercase letter to its uppercase counterpart."
+    },
+    {
+      "title": "Remove carriage returns",
+      "command": "tr -d '\\r' < windows.txt > unix.txt",
+      "output": "",
+      "explanation": "Strips CR characters from a text stream."
+    },
+    {
+      "title": "Collapse repeated spaces",
+      "command": "printf 'a    b\\n' | tr -s ' '",
+      "output": "a b",
+      "explanation": "Squeezes runs of spaces into one."
+    }
+  ],
+  "useCases": [
+    "Normalizing text",
+    "Removing control characters",
+    "Converting simple character sets"
+  ],
+  "related": [
+    "sed",
+    "cut",
+    "tee",
+    "fold"
+  ],
+  "tags": [
+    "translate",
+    "characters",
+    "text"
+  ]
+}

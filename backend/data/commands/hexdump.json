@@ -1,0 +1,57 @@
+{
+  "slug": "hexdump",
+  "name": "hexdump",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Display file contents in hexadecimal and other formats.",
+  "syntax": "hexdump [options] file...",
+  "description": "Displays file contents in a user-specified format, commonly as hexadecimal bytes with an ASCII column.",
+  "options": [
+    {
+      "flag": "-C",
+      "description": "Canonical hex plus ASCII display.",
+      "example": "hexdump -C packet.bin"
+    },
+    {
+      "flag": "-n LENGTH",
+      "description": "Interpret only LENGTH input bytes.",
+      "example": "hexdump -C -n 32 image.bin"
+    }
+  ],
+  "examples": [
+    {
+      "title": "View a binary header",
+      "command": "hexdump -C -n 16 image.bin",
+      "output": "00000000  89 50 4e 47 0d 0a 1a 0a  00 00 00 0d 49 48 44 52  |.PNG........IHDR|",
+      "explanation": "Uses canonical output for quick signature inspection."
+    },
+    {
+      "title": "Inspect a packet capture fragment",
+      "command": "hexdump -C packet.bin | head -n 2",
+      "output": "00000000  45 00 00 3c 1c 46 40 00  40 06 a6 ec c0 a8 01 02  |E..<.F@.@.......|",
+      "explanation": "Shows raw bytes alongside printable characters."
+    },
+    {
+      "title": "Read decimal bytes",
+      "command": "printf 'ABC' | hexdump -v -e '1/1 \"%u \"'",
+      "output": "65 66 67",
+      "explanation": "Uses a format string to print unsigned byte values."
+    }
+  ],
+  "useCases": [
+    "Inspecting binary formats",
+    "Reviewing packet bytes",
+    "Comparing raw data"
+  ],
+  "related": [
+    "xxd",
+    "od",
+    "file",
+    "strings"
+  ],
+  "tags": [
+    "hex",
+    "binary",
+    "inspection"
+  ]
+}

@@ -46,7 +46,7 @@ So LinuxDocs is:
 | 🔁 **Flashcards** | Flip-style spaced repetition over every Linux utility with "Again / Got it" marking |
 | ⚡ **Speed drill** | Timed command-identification drill with per-session scoring |
 | 🏆 **Progress** | Achievements, streaks, per-path progress, all synced to your account when signed in |
-| 🔐 **Accounts** | Register / sign in / silent refresh / sign out; bookmarks, per-command notes (Ctrl+S autosave), history — synced across devices |
+| 🔐 **Accounts** | Register / sign in / silent refresh / sign out; bookmarks, per-command notes (Ctrl+S autosave), history — synced across devices. **Sign-in first:** every page except the auth pages, legal pages and 404 sits behind `ProtectedRoute`; a signed-out deep link bounces to `/sign-in?next=<where>` and login returns you exactly there |
 
 <div align="center">
   <img src="docs/screenshots/landing.png" alt="Landing page" width="600">
@@ -85,26 +85,32 @@ npm run qa                                   # the one-shot full gate
 Individual suites:
 
 ```powershell
-# 109 pytest backend tests (incl. the 7-case dataset docs-accuracy suite)
-cd backend; .\venv\Scripts\pytest           # 109 passed
+# 117 pytest backend tests (incl. the 8-case catalog-API suite)
+cd backend; .\venv\Scripts\pytest           # 117 passed
 
-# 14-step API smoke test (stdlib only): register → login →
-# refresh → logout → revoked-after-logout → 401/404 shape checks
-python qa/smoke_api.py                      # 14/14 PASS
+# 19-step API smoke test (stdlib only): register → login → catalog under JWT →
+# refresh → logout → revoked-after-logout → unauth 401 gates on every
+# dataset endpoint → 401/404 shape checks
+python qa/smoke_api.py                      # 19/19 PASS
 
 # Dataset docs-accuracy audit (stdlib only): re-validates all 132 entries —
 # slug/category integrity, flag & example rules, destructive/root warning
-# coverage, TS↔JSON pipeline sync — see qa/dataset_audit.py
+# coverage, indexing against backend/data — see qa/dataset_audit.py
 python qa/dataset_audit.py                  # AUDIT PASSED
 
-# Real-browser QA (Chrome DevTools Protocol, headless): drives the exact
-# 10-minute manual checklist — sign-up redirect, session surviving a hard
-# reload, sign out, protected-route gate, fake-URL 404, the void-terminal
-# flag, 8 random command pages, docs-pending chip on thin vs. complete
-# entries, Ctrl+K palette, then a 390×844 phone viewport running the
-# practice terminal, a full quiz, and flashcards — while logging every
+# Real-browser QA (Chrome DevTools Protocol, headless): drives the auth-gated
+# world — logged-out deep links bounce to /sign-in?next=..., sign-up redirect,
+# session surviving a hard reload, 8 random command pages, docs-pending chip
+# on thin vs. complete entries, Ctrl+K palette, sign-in honoring ?next and
+# returning to the command page, logout + browser-back showing no command
+# content, the void-terminal 404 flag, then a 390×844 phone viewport running
+# the practice terminal, a full quiz, and flashcards — while logging every
 # console message per page.
-python qa/browser_check.py                  # 24/24 PASS
+python qa/browser_check.py                  # 34/34 PASS
+
+# Dataset-leak scan of the production bundle: pulls 5 distinctive sentences
+# from backend/data and greps every dist/ artifact for them (run after build)
+python qa/dist_probe.py                     # DIST CLEAN
 ```
 
 `qa/browser_check.py` types with real CDP input events (not synthetic ones), captures Network responses for the auth calls, and reports console errors per page — that last check is how a "signed-out visitor gets a 401 console line on every page" bug was found in the auth boot flow and fixed with a session-hint in `AuthContext`.
@@ -118,6 +124,7 @@ Browser ──(one origin)──► Vercel  ──/api/* proxy──► Render (
 ```
 
 - **Frontend** — Vite + React 19 + TypeScript + Tailwind CSS v4. Route-level code splitting (the intro's 3D scene loads only on `/intro` or first visit). All state flows through typed services (`src/services/api.ts`).
+- **Dataset API** — the documentation corpus lives only in `backend/data` (132 per-slug JSON files + a generated aggregate/index) and is served through two JWT-protected endpoints: `GET /api/catalog/index` (categories, domains, counts, plus a light index with only `name/summary/tags/slug/category`) and `GET /api/commands/<slug>` (the full doc), both ETag/304-stamped with `Cache-Control: private`. The SPA fetches the light index once after login and every command doc on demand into an in-memory cache cleared on logout/account switch — the shipped bundle carries zero command prose.
 - **Auth model** — JWT access token lives **in memory only** (15 min); the refresh credential is an **HttpOnly, SameSite=Strict cookie** (30 days) backed by opaque rotating session tokens with reuse (theft) detection. A single-flight refresh promise stops a tab full of failing requests from stampeding the auth endpoint.
 - **The same-origin trick** — `vercel.json` proxies `/api/*` to the Render API, so the browser only ever talks to one domain. That makes the refresh cookie first-party on the frontend origin — no `SameSite=None`, no third-party-cookie breakage, no CORS drama. In dev, `vite.config.ts` does the identical thing to `localhost:5000`.
 - **Backend** — Flask 3 + SQLAlchemy + Bcrypt + JWT-Extended. Env-driven config; request logging; per-endpoint **and** global rate limits; account lockout with attempt windows; CSRF origin checks; **Host-header allowlist**; payload clamps; hardened security headers (CSP/HSTS) in production.
@@ -196,6 +203,8 @@ All under `/api` (CORS restricted to `FRONTEND_ORIGIN`):
 | POST | `/auth/refresh` | Refresh cookie | New access token (single-flight on client) |
 | POST | `/auth/logout` | — | Revoke session + clear cookie |
 | GET | `/auth/me` | Access token | Current user |
+| GET | `/catalog/index` | Access token | Light catalog: categories, domains, counts + a name/summary/tags index (ETag/304, private cache) |
+| GET | `/commands/:slug` | Access token | Full doc for one command (ETag); the legacy full-doc list route was removed |
 | POST | `/auth/request-password-reset` | - | Email-token reset (generic response) |
 | POST | `/auth/reset-password` | — | Complete reset with token |
 | GET/POST | `/user/bookmarks` (+`/toggle`) | Access token | Bookmark sync |
@@ -211,13 +220,15 @@ All under `/api` (CORS restricted to `FRONTEND_ORIGIN`):
 LinuxDocs/
 ├── src/                      # Frontend (React 19 + TS)
 │   ├── components/           #   Command pages, palette, intro scene, header…
-│   ├── context/              #   Auth (silent refresh + session hint), Theme
-│   ├── data/                 #   132 hand-checked command entries (source of truth)
+│   ├── context/              #   Auth (silent refresh + session hint), Catalog (light index + per-slug doc cache), Theme
+│   ├── data/commandBuilders.ts # interactive builder specs (UI tool; command docs live behind the API)
 │   ├── pages/                #   Reference, Learn, PracticeTerminal, Flashcards, …
 │   └── services/api.ts       #   Typede API client + single-flight refresh
 ├── backend/                  # Flask 3 API
 │   ├── app/                  #   factory, models, auth, user, security, sessions, persistence
-│   ├── tests/                #   109 pytest cases (incl. mailer, user-data, dataset suites)
+│   ├── data/                 #   132 per-slug docs + generated aggregate/index (source of truth)
+│   ├── scripts/              #   build_commands.mjs (regenerate aggregate/index; fails on violations)
+│   ├── tests/                #   117 pytest cases (incl. catalog, mailer, user-data, dataset suites)
 │   └── requirements.txt      #   pinned (incl. gunicorn + psycopg2 for Render)
 ├── docs/screenshots/          # README assets (captured by the QA run)
 ├── qa/                        # browser_check.py / smoke_api.py (gitignored)

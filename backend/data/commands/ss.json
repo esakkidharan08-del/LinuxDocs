@@ -1,0 +1,52 @@
+{
+  "slug": "ss",
+  "name": "ss",
+  "category": "networking",
+  "section": "linux",
+  "summary": "Investigate sockets.",
+  "syntax": "ss [options]",
+  "description": "Dump socket statistics; faster and more detailed modern alternative to netstat.",
+  "options": [
+    {
+      "flag": "-t",
+      "description": "Display TCP sockets.",
+      "example": "ss -t -l"
+    },
+    {
+      "flag": "-u",
+      "description": "Display UDP sockets.",
+      "example": "ss -u"
+    },
+    {
+      "flag": "-l",
+      "description": "Display listening sockets.",
+      "example": "ss -tuln"
+    },
+    {
+      "flag": "-p",
+      "description": "Show process using socket.",
+      "example": "ss -p"
+    }
+  ],
+  "examples": [
+    {
+      "title": "List all listening ports with process names",
+      "command": "ss -tulnp",
+      "output": "Netid State Recv-Q Send-Q Local Address:Port Peer Address:Port Process\ntcp LISTEN 0 128 0.0.0.0:22 0.0.0.0:* users:((\"sshd\",pid=789,fd=3))",
+      "explanation": "Shows what services are listening on which ports and their PIDs."
+    }
+  ],
+  "useCases": [
+    "Checking open ports",
+    "Verifying server binding addresses"
+  ],
+  "related": [
+    "ip",
+    "nmap"
+  ],
+  "tags": [
+    "networking",
+    "sockets",
+    "ports"
+  ]
+}

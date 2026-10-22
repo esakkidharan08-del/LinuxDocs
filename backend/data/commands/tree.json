@@ -1,0 +1,57 @@
+{
+  "slug": "tree",
+  "name": "tree",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Display directories as a tree.",
+  "syntax": "tree [options] [directory]",
+  "description": "Recursively lists directories and files in an indented tree format when installed.",
+  "options": [
+    {
+      "flag": "-L LEVEL",
+      "description": "Limit recursion to LEVEL directory levels.",
+      "example": "tree -L 2 project"
+    },
+    {
+      "flag": "-d",
+      "description": "List directories only.",
+      "example": "tree -d project"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Show a project tree",
+      "command": "tree -L 2 project",
+      "output": "project\n├── README.md\n├── src\n│   ├── main.ts\n│   └── util.ts",
+      "explanation": "Limits output to the first two levels."
+    },
+    {
+      "title": "List directories only",
+      "command": "tree -d /etc/nginx",
+      "output": "/etc/nginx\n├── conf.d\n└── sites-enabled",
+      "explanation": "Omits regular files from the display."
+    },
+    {
+      "title": "Count a small tree",
+      "command": "tree -L 1 -a project",
+      "output": "project\n├── .gitignore\n├── README.md\n└── src",
+      "explanation": "Includes hidden entries at one level."
+    }
+  ],
+  "useCases": [
+    "Exploring unfamiliar projects",
+    "Documenting directory layouts",
+    "Auditing configuration trees"
+  ],
+  "related": [
+    "find",
+    "ls",
+    "du",
+    "dirname"
+  ],
+  "tags": [
+    "tree",
+    "directory",
+    "listing"
+  ]
+}

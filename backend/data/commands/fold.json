@@ -1,0 +1,57 @@
+{
+  "slug": "fold",
+  "name": "fold",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Wrap each input line to a fixed width.",
+  "syntax": "fold [OPTION]... [FILE]...",
+  "description": "Writes input lines with a maximum width, breaking long lines without paragraph reflow.",
+  "options": [
+    {
+      "flag": "-w WIDTH",
+      "description": "Use WIDTH as the maximum line width.",
+      "example": "fold -w 80 README.md"
+    },
+    {
+      "flag": "-s",
+      "description": "Break at spaces when possible.",
+      "example": "fold -s -w 72 paragraph.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Wrap a long line",
+      "command": "printf 'abcdefghijklmnopqrstuvwxyz\\n' | fold -w 10",
+      "output": "abcdefghij\nklmnopqrst\nuvwxyz",
+      "explanation": "Breaks the line every ten columns."
+    },
+    {
+      "title": "Prefer word boundaries",
+      "command": "printf 'alpha beta gamma\\n' | fold -s -w 10",
+      "output": "alpha beta\ngamma",
+      "explanation": "Breaks at a space instead of splitting a word."
+    },
+    {
+      "title": "Wrap a file",
+      "command": "fold -w 72 README.md | head -n 2",
+      "output": "LinuxDocs is a reference for Linux commands and authorized\nsecurity training tools.",
+      "explanation": "Limits displayed line width."
+    }
+  ],
+  "useCases": [
+    "Preparing text for narrow terminals",
+    "Wrapping generated output",
+    "Checking line-length limits"
+  ],
+  "related": [
+    "fmt",
+    "column",
+    "expand",
+    "tr"
+  ],
+  "tags": [
+    "wrap",
+    "width",
+    "text"
+  ]
+}

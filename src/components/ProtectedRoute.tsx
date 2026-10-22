@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 interface ProtectedRouteProps {
@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   if (loading) {
     return (
@@ -22,7 +23,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           <div className="terminal-body p-6 font-mono text-[var(--terminal-green)]">
             <div className="flex items-center gap-2">
               <span className="text-[var(--text-muted)]">$</span>
-              <span>Loading<span className="blinking">_</span></span>
+              <span>Verifying session<span className="blinking">_</span></span>
             </div>
           </div>
         </div>
@@ -31,7 +32,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/sign-in" state={{ from: location }} replace />;
+    // Sign-in flows round-trip through ?next=<path> so a logged-in session
+    // lands exactly where the visitor was headed (deep links included).
+    const intended = `${location.pathname}${location.search}`;
+    if (searchParams.get('next') !== intended) {
+      return <Navigate to={`/sign-in?next=${encodeURIComponent(intended)}`} replace />;
+    }
+    return <Navigate to="/sign-in" replace />;
   }
 
   return <>{children}</>;

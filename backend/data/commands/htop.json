@@ -1,0 +1,42 @@
+{
+  "slug": "htop",
+  "name": "htop",
+  "category": "process-management",
+  "section": "linux",
+  "summary": "Interactive process viewer and system monitor.",
+  "syntax": "htop [options]",
+  "description": "An interactive text-mode process viewer designed as a user-friendly alternative to top.",
+  "options": [
+    {
+      "flag": "-u",
+      "description": "Show only processes owned by given user.",
+      "example": "htop -u user"
+    },
+    {
+      "flag": "-d",
+      "description": "Delay between updates in tenths of seconds.",
+      "example": "htop -d 20"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Launch htop",
+      "command": "htop",
+      "output": "(interactive colored terminal dashboard)",
+      "explanation": "Allows mouse interaction, tree view, and signal sending."
+    }
+  ],
+  "useCases": [
+    "Interactive process management and visualization"
+  ],
+  "related": [
+    "top",
+    "ps",
+    "kill"
+  ],
+  "tags": [
+    "process",
+    "monitor",
+    "interactive"
+  ]
+}

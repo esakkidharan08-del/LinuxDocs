@@ -1,0 +1,68 @@
+{
+  "slug": "curl",
+  "name": "curl",
+  "category": "networking",
+  "section": "linux",
+  "summary": "Transfer data from or to a server.",
+  "syntax": "curl [options] [URL]",
+  "description": "Command line tool for transferring data with URL syntax supporting HTTP, HTTPS, FTP, and more.",
+  "options": [
+    {
+      "flag": "-X",
+      "description": "Specify request method (GET, POST, PUT, DELETE).",
+      "example": "curl -X POST https://api.example.com/data"
+    },
+    {
+      "flag": "-H",
+      "description": "Pass custom header(s) to server.",
+      "example": "curl -H \"Authorization: Bearer token\" https://api.example.com"
+    },
+    {
+      "flag": "-d",
+      "description": "Send data in HTTP POST request.",
+      "example": "curl -d \"user=admin\" https://example.com/login"
+    },
+    {
+      "flag": "-o",
+      "description": "Write output to file instead of stdout.",
+      "example": "curl -o file.zip https://example.com/file.zip"
+    },
+    {
+      "flag": "-s",
+      "description": "Silent mode (do not show progress meter).",
+      "example": "curl -s https://api.ipify.org"
+    },
+    {
+      "flag": "-I",
+      "description": "Fetch HTTP headers only.",
+      "example": "curl -I https://google.com"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Fetch webpage content",
+      "command": "curl -s https://icanhazip.com",
+      "output": "203.0.113.45",
+      "explanation": "Makes a silent HTTP GET request and returns public IP."
+    },
+    {
+      "title": "Send JSON POST request",
+      "command": "curl -X POST -H \"Content-Type: application/json\" -d '{\"status\":\"ok\"}' https://api.example.com/status",
+      "output": "{\"success\":true}",
+      "explanation": "Posts JSON payload with custom headers."
+    }
+  ],
+  "useCases": [
+    "Testing REST APIs",
+    "Downloading files from command line",
+    "Debugging HTTP headers"
+  ],
+  "related": [
+    "wget"
+  ],
+  "tags": [
+    "networking",
+    "http",
+    "api"
+  ]
+}

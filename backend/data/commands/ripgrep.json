@@ -1,0 +1,61 @@
+{
+  "slug": "ripgrep",
+  "name": "ripgrep",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Fast recursive search tool for code and text.",
+  "syntax": "rg [OPTIONS] PATTERN [PATH ...]",
+  "description": "Searches recursively while respecting ignore files and presenting concise, colored results.",
+  "options": [
+    {
+      "flag": "-n",
+      "description": "Show line numbers.",
+      "example": "rg -n 'TODO' src/"
+    },
+    {
+      "flag": "-g GLOB",
+      "description": "Include or exclude files matching a glob.",
+      "example": "rg -g '*.ts' 'fetch\\(' src/"
+    },
+    {
+      "flag": "-i",
+      "description": "Ignore case distinctions.",
+      "example": "rg -i 'timeout' logs/"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Search source recursively",
+      "command": "rg -n 'TODO' src/",
+      "output": "src/App.tsx:42: // TODO: add loading state",
+      "explanation": "Finds matches while honoring project ignore files."
+    },
+    {
+      "title": "Search only TypeScript",
+      "command": "rg -g '*.ts' 'fetch\\(' src/",
+      "output": "src/services/api.ts:4:const response = await fetch(url);",
+      "explanation": "Restricts the search to matching files."
+    },
+    {
+      "title": "Search case-insensitively",
+      "command": "rg -i 'timeout' logs/",
+      "output": "logs/app.log:18:request timeout after 5s",
+      "explanation": "Matches any capitalization of the term."
+    }
+  ],
+  "useCases": [
+    "Searching source trees",
+    "Finding configuration references",
+    "Inspecting logs quickly"
+  ],
+  "related": [
+    "grep",
+    "find",
+    "sed"
+  ],
+  "tags": [
+    "search",
+    "regex",
+    "code"
+  ]
+}

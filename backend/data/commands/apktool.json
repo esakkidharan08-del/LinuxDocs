@@ -1,0 +1,41 @@
+{
+  "slug": "apktool",
+  "name": "apktool",
+  "category": "mobile",
+  "section": "ctf",
+  "summary": "Tool for reverse engineering 3rd party, closed, binary Android apps.",
+  "syntax": "apktool [options] <command> <file>",
+  "description": "Decodes resources to nearly original form (Manifest, XMLs, smali bytecode) and rebuilds them after modification.",
+  "options": [
+    {
+      "flag": "d",
+      "description": "Decode APK file.",
+      "example": "apktool d app.apk"
+    },
+    {
+      "flag": "b",
+      "description": "Build decoded directory back into APK.",
+      "example": "apktool b app_folder"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Decode Android APK",
+      "command": "apktool d app.apk",
+      "output": "I: Using Apktool 2.7.0 on app.apk\nI: Loading resource table...\nI: Copying assets and lib...",
+      "explanation": "Extracts AndroidManifest.xml and resources for analysis."
+    }
+  ],
+  "useCases": [
+    "Decompiling Android app resources and inspecting manifests for security flaws"
+  ],
+  "related": [
+    "adb"
+  ],
+  "tags": [
+    "ctf",
+    "mobile",
+    "android",
+    "reverse"
+  ]
+}

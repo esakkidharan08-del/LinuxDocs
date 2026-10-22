@@ -1,0 +1,58 @@
+{
+  "slug": "chmod",
+  "name": "chmod",
+  "category": "permissions-and-ownership",
+  "section": "linux",
+  "summary": "Change file mode bits and permissions.",
+  "syntax": "chmod [OPTION]... MODE[,MODE]... FILE...",
+  "description": "Change the access permissions of each FILE according to MODE, using symbolic or octal notation.",
+  "options": [
+    {
+      "flag": "-R",
+      "description": "Change files and directories recursively.",
+      "example": "chmod -R u+rwX,go+rX project/"
+    },
+    {
+      "flag": "--reference=RFILE",
+      "description": "Use the mode of RFILE instead of MODE.",
+      "example": "chmod --reference=template.conf app.conf"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Add execute permission for the owner",
+      "command": "chmod u+x deploy.sh",
+      "output": "",
+      "explanation": "Allows the file owner to execute the deployment script."
+    },
+    {
+      "title": "Set a private key to owner-read only",
+      "command": "chmod 600 id_ed25519",
+      "output": "",
+      "explanation": "Restricts the key to its owner, as SSH expects."
+    },
+    {
+      "title": "Make a project tree readable and traversable",
+      "command": "chmod -R u+rwX,go+rX project/",
+      "output": "",
+      "explanation": "Adds owner write access and read/traverse access for other users."
+    }
+  ],
+  "useCases": [
+    "Securing private keys",
+    "Making scripts executable",
+    "Applying permissions to a project tree"
+  ],
+  "related": [
+    "chown",
+    "chgrp",
+    "umask",
+    "ls"
+  ],
+  "tags": [
+    "permissions",
+    "mode",
+    "security"
+  ],
+  "warnings": "permission changes take effect immediately; recursive modes (chmod -R) applied to the wrong path can expose or lock system files."
+}

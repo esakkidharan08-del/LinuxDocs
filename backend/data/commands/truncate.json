@@ -1,0 +1,58 @@
+{
+  "slug": "truncate",
+  "name": "truncate",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Shrink or extend a file to a specified size.",
+  "syntax": "truncate OPTION... FILE...",
+  "description": "Adjusts file sizes without changing file ownership or permissions; extending creates sparse regions when supported.",
+  "options": [
+    {
+      "flag": "-s SIZE",
+      "description": "Set or adjust the file size using SIZE notation.",
+      "example": "truncate -s 0 app.log"
+    },
+    {
+      "flag": "--no-create",
+      "description": "Do not create files that do not already exist.",
+      "example": "truncate --no-create -s 0 app.log"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Clear a log in place",
+      "command": "truncate -s 0 app.log",
+      "output": "",
+      "explanation": "Empties the log while preserving its path and metadata."
+    },
+    {
+      "title": "Limit a test file",
+      "command": "truncate -s 1M sample.bin",
+      "output": "",
+      "explanation": "Sets the file length to one mebibyte."
+    },
+    {
+      "title": "Extend a sparse file",
+      "command": "truncate -s 10G sparse.img",
+      "output": "",
+      "explanation": "Creates a logically large file without writing every block immediately."
+    }
+  ],
+  "useCases": [
+    "Rotating logs manually",
+    "Creating sparse test files",
+    "Adjusting fixture sizes"
+  ],
+  "related": [
+    "dd",
+    "stat",
+    "rm",
+    "shred"
+  ],
+  "tags": [
+    "files",
+    "size",
+    "sparse"
+  ],
+  "warnings": "truncate resizes files in place; with -s 0 the entire content is discarded immediately and cannot be recovered from the file."
+}

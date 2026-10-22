@@ -1,0 +1,48 @@
+{
+  "slug": "radare2",
+  "name": "radare2",
+  "category": "reverse-engineering",
+  "section": "ctf",
+  "summary": "Scriptable reverse-engineering and binary analysis framework.",
+  "syntax": "r2 <binary>",
+  "description": "radare2 (r2) is a feature-packed binary analysis suite: disassemble, patch, explore strings, and automate analysis from its interactive repl.",
+  "options": [
+    {
+      "flag": "aaa",
+      "description": "Analyse the binary thoroughly at load"
+    },
+    {
+      "flag": "pdf",
+      "description": "Disassemble a functioin on the visual page"
+    },
+    {
+      "flag": "iz",
+      "description": "List strings in data sections"
+    },
+    {
+      "flag": "V",
+      "description": "Switch to visual mode"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Quick look at a binary",
+      "command": "r2 -A ./crackme",
+      "output": "[0x00400530]> pdf @ main",
+      "explanation": "-A runs auto-analysis; pdf shows main's logic."
+    }
+  ],
+  "useCases": [
+    "binary analysis",
+    "disassembly"
+  ],
+  "related": [
+    "gdb",
+    "objdump"
+  ],
+  "tags": [
+    "re",
+    "radare",
+    "asm"
+  ]
+}

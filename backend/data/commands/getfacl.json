@@ -1,0 +1,57 @@
+{
+  "slug": "getfacl",
+  "name": "getfacl",
+  "category": "permissions-and-ownership",
+  "section": "linux",
+  "summary": "Display file access control lists.",
+  "syntax": "getfacl [OPTION]... FILE...",
+  "description": "Prints the access ACL and default ACL for each FILE, including the effective permissions after mask calculation.",
+  "options": [
+    {
+      "flag": "-R",
+      "description": "List ACLs recursively.",
+      "example": "getfacl -R project/"
+    },
+    {
+      "flag": "-e",
+      "description": "Print all effective rights, including rights masked by the ACL mask.",
+      "example": "getfacl -e report.csv"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Inspect a file ACL",
+      "command": "getfacl report.csv",
+      "output": "# file: report.csv\n# owner: alice\n# group: developers\nuser::rw-\ngroup::r--\nmask::rw-\nother::---",
+      "explanation": "Shows owner, group, named entries, and the ACL mask."
+    },
+    {
+      "title": "Inspect a project tree",
+      "command": "getfacl -R project/",
+      "output": "# file: project/\n# owner: alice\n# group: developers\nuser::rwx\ngroup::r-x\nother::---",
+      "explanation": "Reports ACLs for every item below project."
+    },
+    {
+      "title": "Show effective rights",
+      "command": "getfacl -e report.csv",
+      "output": "user:alice:rw-\nuser:bob:r--\nmask::rw-",
+      "explanation": "Includes effective permissions after the mask is applied."
+    }
+  ],
+  "useCases": [
+    "Auditing shared access",
+    "Verifying setfacl changes",
+    "Troubleshooting unexpected permissions"
+  ],
+  "related": [
+    "setfacl",
+    "ls",
+    "stat",
+    "chmod"
+  ],
+  "tags": [
+    "acl",
+    "audit",
+    "permissions"
+  ]
+}

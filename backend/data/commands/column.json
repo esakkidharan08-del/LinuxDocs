@@ -1,0 +1,57 @@
+{
+  "slug": "column",
+  "name": "column",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Format input into aligned columns.",
+  "syntax": "column [OPTION]... [FILE]...",
+  "description": "Formats delimited text into columns suitable for terminal display.",
+  "options": [
+    {
+      "flag": "-t",
+      "description": "Create a table by determining column widths.",
+      "example": "column -t -s, users.csv"
+    },
+    {
+      "flag": "-s SEP",
+      "description": "Use SEP as the input delimiter.",
+      "example": "column -t -s: /etc/passwd"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Align whitespace data",
+      "command": "printf 'name score\\nalice 98\\nbob 74\\n' | column -t",
+      "output": "name  score\nalice 98\nbob   74",
+      "explanation": "Aligns fields by their widest value."
+    },
+    {
+      "title": "Display CSV as a table",
+      "command": "column -t -s, users.csv",
+      "output": "id  name   role\n1   alice  admin\n2   bob    viewer",
+      "explanation": "Uses commas to split and align columns."
+    },
+    {
+      "title": "Format passwd fields",
+      "command": "cut -d: -f1,7 /etc/passwd | column -t -s:",
+      "output": "root    /bin/bash\ndaemon  /usr/sbin/nologin",
+      "explanation": "Combines cut and column for readable output."
+    }
+  ],
+  "useCases": [
+    "Making reports readable",
+    "Inspecting delimited files",
+    "Formatting command output"
+  ],
+  "related": [
+    "cut",
+    "paste",
+    "expand",
+    "sort"
+  ],
+  "tags": [
+    "columns",
+    "table",
+    "format"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "slug": "ps",
+  "name": "ps",
+  "category": "process-management",
+  "section": "linux",
+  "summary": "Report a snapshot of current processes.",
+  "syntax": "ps [options]",
+  "description": "Display information about a selection of the active processes.",
+  "options": [
+    {
+      "flag": "aux",
+      "description": "Show all processes across all users with user and start time.",
+      "example": "ps aux"
+    },
+    {
+      "flag": "-ef",
+      "description": "Full format listing of all processes.",
+      "example": "ps -ef"
+    }
+  ],
+  "examples": [
+    {
+      "title": "List all running processes",
+      "command": "ps aux | head -n 3",
+      "output": "USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND\nroot 1 0.0 0.1 168200 11200 ? Ss Oct11 0:01 /sbin/init\nuser 1024 0.5 1.2 2450000 102400 ? Sl Oct11 5:30 node",
+      "explanation": "Shows process status, resource usage, and command arguments."
+    }
+  ],
+  "useCases": [
+    "Identifying rogue or hung processes",
+    "Checking process IDs (PIDs)"
+  ],
+  "related": [
+    "top",
+    "htop",
+    "kill"
+  ],
+  "tags": [
+    "process",
+    "monitoring"
+  ]
+}

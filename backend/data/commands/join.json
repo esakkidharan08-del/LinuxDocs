@@ -1,0 +1,57 @@
+{
+  "slug": "join",
+  "name": "join",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Join lines of two files on a shared field.",
+  "syntax": "join [OPTION]... FILE1 FILE2",
+  "description": "Performs a relational-style join of two sorted files using a common field.",
+  "options": [
+    {
+      "flag": "-1 FIELD",
+      "description": "Join on FIELD in FILE1.",
+      "example": "join -1 1 -2 1 users.txt roles.txt"
+    },
+    {
+      "flag": "-t CHAR",
+      "description": "Use CHAR as the input and output field separator.",
+      "example": "join -t, users.csv roles.csv"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Join two sorted tables",
+      "command": "join users.txt roles.txt",
+      "output": "1001 alice admin\n1002 bob viewer",
+      "explanation": "Matches the default first field in both sorted files."
+    },
+    {
+      "title": "Join CSV files",
+      "command": "join -t, -1 1 -2 1 users.csv roles.csv",
+      "output": "1001,alice,admin\n1002,bob,viewer",
+      "explanation": "Uses the first comma-delimited field as the key."
+    },
+    {
+      "title": "Keep unmatched records",
+      "command": "join -a 1 users.txt roles.txt",
+      "output": "1001 alice admin\n1002 bob viewer\n1003 carol",
+      "explanation": "Includes records found only in the first file."
+    }
+  ],
+  "useCases": [
+    "Combining sorted reports",
+    "Matching IDs to metadata",
+    "Building shell-based data joins"
+  ],
+  "related": [
+    "sort",
+    "cut",
+    "paste",
+    "awk"
+  ],
+  "tags": [
+    "join",
+    "fields",
+    "data"
+  ]
+}

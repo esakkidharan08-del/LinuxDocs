@@ -1,0 +1,57 @@
+{
+  "slug": "jq",
+  "name": "jq",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Process JSON data from the command line.",
+  "syntax": "jq [options] filter [files...]",
+  "description": "Parses JSON and transforms it with a filter language, producing valid JSON or raw text output.",
+  "options": [
+    {
+      "flag": "-r",
+      "description": "Output strings without JSON quotes.",
+      "example": "jq -r '.name' package.json"
+    },
+    {
+      "flag": "-c",
+      "description": "Print compact JSON output.",
+      "example": "jq -c '.items[]' data.json"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Read a JSON field",
+      "command": "printf '{\"name\":\"LinuxDocs\"}\\n' | jq -r '.name'",
+      "output": "LinuxDocs",
+      "explanation": "Extracts a string as plain text."
+    },
+    {
+      "title": "List array values",
+      "command": "printf '{\"items\":[1,2]}\\n' | jq '.items[]'",
+      "output": "1\n2",
+      "explanation": "Iterates over each array element."
+    },
+    {
+      "title": "Select objects",
+      "command": "jq '.users[] | select(.active == true) | .email' users.json",
+      "output": "\"alice@example.test\"",
+      "explanation": "Filters objects and selects a field."
+    }
+  ],
+  "useCases": [
+    "Inspecting API responses",
+    "Transforming configuration JSON",
+    "Filtering structured logs"
+  ],
+  "related": [
+    "yq",
+    "grep",
+    "sort",
+    "column"
+  ],
+  "tags": [
+    "json",
+    "data",
+    "query"
+  ]
+}

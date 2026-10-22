@@ -1,0 +1,58 @@
+{
+  "slug": "systemctl",
+  "name": "systemctl",
+  "category": "services-and-logs",
+  "section": "linux",
+  "summary": "Control the systemd system and service manager.",
+  "syntax": "systemctl [OPTIONS] COMMAND [NAME...]",
+  "description": "Query or control the systemd system and service manager state and services.",
+  "options": [
+    {
+      "flag": "start",
+      "description": "Start (activate) one or more units.",
+      "example": "sudo systemctl start nginx"
+    },
+    {
+      "flag": "stop",
+      "description": "Stop (deactivate) one or more units.",
+      "example": "sudo systemctl stop nginx"
+    },
+    {
+      "flag": "restart",
+      "description": "Restart one or more units.",
+      "example": "sudo systemctl restart nginx"
+    },
+    {
+      "flag": "status",
+      "description": "Show terse runtime status of one or more units.",
+      "example": "systemctl status nginx"
+    },
+    {
+      "flag": "enable",
+      "description": "Enable unit(s) to start on boot.",
+      "example": "sudo systemctl enable nginx"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Check status of ssh service",
+      "command": "systemctl status ssh",
+      "output": "● ssh.service - OpenBSD Secure Shell server\n   Loaded: loaded (/lib/systemd/system/ssh.service; enabled)\n   Active: active (running) since Mon 2026-10-12 10:00:00 UTC",
+      "explanation": "Displays systemd service status and recent logs."
+    }
+  ],
+  "useCases": [
+    "Managing system daemons and services",
+    "Configuring auto-start on boot"
+  ],
+  "related": [
+    "journalctl",
+    "ps"
+  ],
+  "tags": [
+    "services",
+    "systemd",
+    "daemon"
+  ],
+  "warnings": "systemctl changes the state of system services; enabling or stopping the wrong unit (especially as root) can affect boot or connectivity."
+}

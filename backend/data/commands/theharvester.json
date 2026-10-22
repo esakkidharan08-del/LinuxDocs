@@ -1,0 +1,47 @@
+{
+  "slug": "theharvester",
+  "name": "theharvester",
+  "category": "osint",
+  "section": "ctf",
+  "summary": "E-mail, subdomain and people gathering tool.",
+  "syntax": "theHarvester [options]",
+  "description": "Gather emails, subdomains, hosts, employee names from public sources (search engines, PGP key servers, Shodan).",
+  "options": [
+    {
+      "flag": "-d",
+      "description": "Company name or domain to search.",
+      "example": "theHarvester -d target.com -b google"
+    },
+    {
+      "flag": "-b",
+      "description": "Data source (google, linkedin, shodan, all).",
+      "example": "theHarvester -d target.com -b all"
+    },
+    {
+      "flag": "-l",
+      "description": "Limit results to browser/search engine count.",
+      "example": "theHarvester -d target.com -l 100 -b baidu"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Gather OSINT emails and subdomains",
+      "command": "theHarvester -d example.com -b google -l 50",
+      "output": "[-] Searching Google...\n[+] Found 3 emails:\n    admin@example.com\n[+] Found 5 subdomains:\n    mail.example.com",
+      "explanation": "Harvests exposed emails and hostnames from search indexes."
+    }
+  ],
+  "useCases": [
+    "Initial OSINT reconnaissance and attack surface mapping"
+  ],
+  "related": [
+    "whois",
+    "nmap"
+  ],
+  "tags": [
+    "ctf",
+    "osint",
+    "recon",
+    "emails"
+  ]
+}

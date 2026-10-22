@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Terminal, Shield, ArrowRight, Command, FileText, GitCompare, GraduationCap, Layers, Zap, CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { COMMANDS, LINUX_CATEGORIES, CTF_DOMAINS } from '../data/commands';
+import { useCatalog } from '../context/CatalogContext';
 import SocialFlipButton from '../components/ui/SocialFlipButton';
 
 const SAMPLE_COMMANDS = [
@@ -56,6 +56,9 @@ const tileDividers = (index: number, total: number) => {
 
 export const LandingPage = () => {
   const [currentCmdIndex, setCurrentCmdIndex] = useState(0);
+  // Counts come from the authed catalog index dropdown (Part 1) — this page is
+  // only reachable signed-in, so the stats fill in as soon as the index lands.
+  const { lights, categories, domains, counts, loading: catalogLoading, error: catalogError, clearError } = useCatalog();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -64,9 +67,9 @@ export const LandingPage = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const totalLinuxCount = COMMANDS.filter((c) => c.section === 'linux').length;
-  const totalCTFCount = COMMANDS.filter((c) => c.section === 'ctf').length;
-  const totalCategories = LINUX_CATEGORIES.length + CTF_DOMAINS.length;
+  const totalLinuxCount = lights.filter((c) => c.section === 'linux').length;
+  const totalCTFCount = lights.filter((c) => c.section === 'ctf').length;
+  const totalCategories = categories.length + domains.length;
 
   const stats = [
     { value: totalLinuxCount, label: 'Linux commands', accent: 'text-[var(--terminal-green)]' },
@@ -76,6 +79,22 @@ export const LandingPage = () => {
 
   return (
     <div className="pb-20">
+      {/* Catalog status: hero numbers and category cards depend on the authed
+          index, so loading/error states live here once, discreetly. */}
+      {catalogLoading && (
+        <div className="border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 font-mono text-[11px] text-[var(--text-muted)]">
+          indexing the command catalog<span className="blinking">_</span>
+        </div>
+      )}
+      {catalogError && (
+        <div className="flex items-center justify-between gap-4 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 font-mono text-[11px] text-[var(--ctf-red)]">
+          <span>{catalogError}</span>
+          <button type="button" onClick={clearError} className="rounded border border-[var(--border)] px-2 py-0.5 hover:text-[var(--text)]">
+            retry
+          </button>
+        </div>
+      )}
+
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-[var(--border)]">
         <div className="ambient absolute inset-0" aria-hidden="true" />
@@ -174,7 +193,7 @@ export const LandingPage = () => {
               </div>
             </div>
             <p className="mt-3 text-right font-mono text-[11px] text-[var(--text-muted)]">
-              One of {COMMANDS.length} documented entries
+              {catalogLoading ? 'documented entries: indexing…' : `One of ${lights.length} documented entries`}
             </p>
           </div>
         </div>
@@ -225,8 +244,8 @@ export const LandingPage = () => {
         </header>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {LINUX_CATEGORIES.map((cat, index) => {
-            const count = COMMANDS.filter((c) => c.section === 'linux' && c.category === cat.id).length;
+          {categories.filter((cat) => cat.section === 'linux').map((cat, index) => {
+            const count = counts[cat.id] ?? 0;
             return (
               <Link
                 key={cat.id}
@@ -280,8 +299,8 @@ export const LandingPage = () => {
         </header>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {CTF_DOMAINS.map((domain, index) => {
-            const count = COMMANDS.filter((c) => c.section === 'ctf' && c.category === domain.id).length;
+          {domains.map((domain, index) => {
+            const count = counts[domain.id] ?? 0;
             return (
               <Link
                 key={domain.id}

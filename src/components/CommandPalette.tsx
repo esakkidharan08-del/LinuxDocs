@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Search, Terminal, Shield, CornerDownLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
-import { COMMANDS, getPathForCommand } from '../data/commands';
-import type { Command } from '../types';
+import { getPathForLight, useCatalog } from '../context/CatalogContext';
+import type { CommandLight } from '../types';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -16,15 +16,21 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const fuse = useRef(
-    new Fuse(COMMANDS, {
-      keys: ['name', 'summary', 'tags', 'syntax'],
-      threshold: 0.35,
-      distance: 100,
-    }),
-  ).current;
+  // The palette searches the authed light index (Part 1) — built in-memory
+  // from the catalog, never from a bundled dataset.
+  const { lights, loading: catalogLoading, error: catalogError } = useCatalog();
 
-  const results: Command[] = query.trim() ? fuse.search(query).map((res) => res.item) : COMMANDS.slice(0, 10);
+  const fuse = useMemo(
+    () =>
+      new Fuse(lights, {
+        keys: ['name', 'summary', 'tags', 'slug'],
+        threshold: 0.35,
+        distance: 100,
+      }),
+    [lights],
+  );
+
+  const results: CommandLight[] = query.trim() ? fuse.search(query).map((res) => res.item) : lights.slice(0, 10);
 
   useEffect(() => {
     if (isOpen) {
@@ -50,7 +56,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
       } else if (e.key === 'Enter') {
         e.preventDefault();
         if (results[selectedIndex]) {
-          navigate(getPathForCommand(results[selectedIndex]));
+          navigate(getPathForLight(results[selectedIndex]));
           onClose();
         }
       }
@@ -105,7 +111,16 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
           role="listbox"
           className="max-h-96 divide-y divide-[var(--border-subtle)] overflow-y-auto p-2"
         >
-          {results.length === 0 ? (
+          {catalogLoading ? (
+            <div className="py-12 text-center font-mono text-sm text-[var(--text-muted)]">
+              <p>loading command index<span className="blinking">_</span></p>
+            </div>
+          ) : catalogError ? (
+            <div className="py-12 text-center font-mono text-sm text-[var(--ctf-red)]">
+              <p>{catalogError}</p>
+              <p className="mt-1 text-xs opacity-70">Close and reopen the palette to retry.</p>
+            </div>
+          ) : results.length === 0 ? (
             <div className="py-12 text-center font-mono text-sm text-[var(--text-muted)]">
               <p>bash: {query}: command not found in database</p>
               <p className="mt-1 text-xs opacity-70">
@@ -122,7 +137,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => {
-                    navigate(getPathForCommand(cmd));
+                    navigate(getPathForLight(cmd));
                     onClose();
                   }}
                   onMouseEnter={() => setSelectedIndex(idx)}

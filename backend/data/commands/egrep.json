@@ -1,0 +1,57 @@
+{
+  "slug": "egrep",
+  "name": "egrep",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Search text using extended regular expressions.",
+  "syntax": "egrep [OPTION]... PATTERNS [FILE]...",
+  "description": "Historical name for grep -E; searches using extended regular expressions. Prefer grep -E in new scripts.",
+  "options": [
+    {
+      "flag": "-i",
+      "description": "Ignore case distinctions.",
+      "example": "egrep -i 'warning|error' app.log"
+    },
+    {
+      "flag": "-n",
+      "description": "Prefix matching lines with line numbers.",
+      "example": "egrep -n '^(GET|POST) ' access.log"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Find warnings or errors",
+      "command": "egrep -i 'warning|error' app.log",
+      "output": "warning: cache miss\nERROR: request failed",
+      "explanation": "Uses alternation in an extended regular expression."
+    },
+    {
+      "title": "Match HTTP methods",
+      "command": "egrep -n '^(GET|POST) ' access.log",
+      "output": "4:GET /health\n9:POST /login",
+      "explanation": "Matches either method at the beginning of a line."
+    },
+    {
+      "title": "Count matching lines",
+      "command": "egrep -c '^#' config.ini",
+      "output": "8",
+      "explanation": "Counts comment lines."
+    }
+  ],
+  "useCases": [
+    "Searching logs with alternation",
+    "Filtering structured text",
+    "Maintaining older shell scripts"
+  ],
+  "related": [
+    "grep",
+    "fgrep",
+    "sed",
+    "awk"
+  ],
+  "tags": [
+    "regex",
+    "search",
+    "text"
+  ]
+}

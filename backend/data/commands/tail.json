@@ -1,0 +1,44 @@
+{
+  "slug": "tail",
+  "name": "tail",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Output the last part of files.",
+  "syntax": "tail [OPTION]... [FILE]...",
+  "description": "Print the last 10 lines of each FILE to standard output. With more than one file, precede each with a header.",
+  "options": [
+    {
+      "flag": "-n",
+      "description": "Output the last NUM lines, instead of last 10.",
+      "example": "tail -n 50 log.txt"
+    },
+    {
+      "flag": "-f",
+      "description": "Output appended data as the file grows (follow mode).",
+      "example": "tail -f /var/log/nginx/access.log"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Follow log file in real time",
+      "command": "tail -f app.log",
+      "output": "[2026-10-12 10:00:00] Server started on port 5000\n[2026-10-12 10:01:23] GET /api/health 200 OK",
+      "explanation": "Continuously streams new lines appended to app.log."
+    }
+  ],
+  "useCases": [
+    "Monitoring active server logs in real time",
+    "Checking recent log entries"
+  ],
+  "related": [
+    "head",
+    "cat",
+    "less",
+    "journalctl"
+  ],
+  "tags": [
+    "text",
+    "logs",
+    "monitor"
+  ]
+}

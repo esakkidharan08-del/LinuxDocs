@@ -1,0 +1,60 @@
+{
+  "slug": "cd",
+  "name": "cd",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Change the shell working directory.",
+  "syntax": "cd [dir]",
+  "description": "Change the current working directory to dir. If dir is not supplied, the value of the HOME shell variable is used.",
+  "options": [
+    {
+      "flag": "..",
+      "description": "Move up one directory level to the parent directory.",
+      "example": "cd .."
+    },
+    {
+      "flag": "~",
+      "description": "Change to the current user's home directory.",
+      "example": "cd ~"
+    },
+    {
+      "flag": "-",
+      "description": "Switch to the previous working directory.",
+      "example": "cd -"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Change to subdirectory",
+      "command": "cd /var/log",
+      "output": "",
+      "explanation": "Navigates directly to the absolute path /var/log."
+    },
+    {
+      "title": "Move up to parent directory",
+      "command": "cd ..",
+      "output": "",
+      "explanation": "Moves up one level in the directory tree."
+    },
+    {
+      "title": "Return to home directory",
+      "command": "cd ~",
+      "output": "",
+      "explanation": "Instantly navigates to your home directory."
+    }
+  ],
+  "useCases": [
+    "Navigating the filesystem tree",
+    "Quickly returning to home directory"
+  ],
+  "related": [
+    "ls",
+    "pwd",
+    "mkdir"
+  ],
+  "tags": [
+    "navigation",
+    "directory",
+    "shell"
+  ]
+}

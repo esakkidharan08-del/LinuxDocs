@@ -6,7 +6,7 @@ import {
   KeyRound, Lock, RotateCcw, ScrollText, Server, Shield, Sparkles, Target, Terminal, Trophy, Wrench, Workflow,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { getCommand, getPathForCommand } from '../data/commands';
+import { useCatalog, getPathForLight } from '../context/CatalogContext';
 import { readStreak } from '../lib/streak';
 
 /* ============================================================
@@ -1482,15 +1482,18 @@ function MasteryCard({ commandsRunHint }: { commandsRunHint: number }) {
   );
 }
 
-/* ---- command chip: links into the real dataset whenever possible ---- */function CommandChip({ name }: { name: string }) {
-  const command = getCommand(name);
-  if (!command) {
+/* ---- command chip: links into the authed catalog whenever possible ---- */
+function CommandChip({ name }: { name: string }) {
+  // Chip linking only needs the light index (slug/name/section) — no doc fetch.
+  const { lights } = useCatalog();
+  const light = lights.find((l) => l.slug === name || l.name.toLowerCase() === name.toLowerCase());
+  if (!light) {
     return <span className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 font-mono text-xs text-[var(--text-muted)]">{name}</span>;
   }
-  const isCTF = command.section === 'ctf';
+  const isCTF = light.section === 'ctf';
   return (
     <Link
-      to={getPathForCommand(command)}
+      to={getPathForLight(light)}
       className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-xs transition-colors hover:opacity-80"
       style={{
         borderColor: (isCTF ? '#f87171' : '#22c55e') + '55',

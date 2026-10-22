@@ -1,0 +1,42 @@
+{
+  "slug": "du",
+  "name": "du",
+  "category": "disk-and-storage",
+  "section": "linux",
+  "summary": "Estimate file space usage.",
+  "syntax": "du [OPTION]... [FILE]...",
+  "description": "Summarize disk usage of each FILE, recursively for directories.",
+  "options": [
+    {
+      "flag": "-h",
+      "description": "Print sizes in human readable format.",
+      "example": "du -sh *"
+    },
+    {
+      "flag": "-s",
+      "description": "Display only a total for each argument.",
+      "example": "du -sh /var/log"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Check size of files and folders in current dir",
+      "command": "du -sh *",
+      "output": "4.2M    src\n120K    package.json\n45M     node_modules",
+      "explanation": "Shows disk consumption per item in current directory."
+    }
+  ],
+  "useCases": [
+    "Finding large folders consuming disk space"
+  ],
+  "related": [
+    "df",
+    "ls",
+    "find"
+  ],
+  "tags": [
+    "disk",
+    "space",
+    "folder"
+  ]
+}

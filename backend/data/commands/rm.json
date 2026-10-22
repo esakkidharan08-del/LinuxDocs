@@ -1,0 +1,55 @@
+{
+  "slug": "rm",
+  "name": "rm",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Remove files or directories.",
+  "syntax": "rm [OPTION]... [FILE]...",
+  "description": "Remove (unlink) the FILE(s). By default does not remove directories.",
+  "options": [
+    {
+      "flag": "-r, -R",
+      "description": "Remove directories and their contents recursively.",
+      "example": "rm -rf node_modules/"
+    },
+    {
+      "flag": "-f",
+      "description": "Ignore nonexistent files and arguments, never prompt.",
+      "example": "rm -f temp.txt"
+    },
+    {
+      "flag": "-i",
+      "description": "Prompt before every removal.",
+      "example": "rm -i important.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Remove a single file",
+      "command": "rm temp.log",
+      "output": "",
+      "explanation": "Deletes temp.log from the filesystem."
+    },
+    {
+      "title": "Recursively force remove a directory",
+      "command": "rm -rf build/",
+      "output": "",
+      "explanation": "Deletes build directory and all its contents without prompting."
+    }
+  ],
+  "useCases": [
+    "Deleting temporary files",
+    "Cleaning build outputs"
+  ],
+  "warnings": "Using rm -rf without caution can instantly delete critical system files if run with root privileges.",
+  "related": [
+    "rmdir",
+    "cp",
+    "mv"
+  ],
+  "tags": [
+    "files",
+    "delete",
+    "remove"
+  ]
+}

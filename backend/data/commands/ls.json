@@ -1,0 +1,73 @@
+{
+  "slug": "ls",
+  "name": "ls",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "List directory contents.",
+  "syntax": "ls [OPTION]... [FILE]...",
+  "description": "List information about the FILEs (the current directory by default). Sort entries alphabetically if none of -cftuvSUX nor --sort is specified.",
+  "options": [
+    {
+      "flag": "-l",
+      "description": "Use a long listing format showing permissions, links, owner, size, and timestamp.",
+      "example": "ls -l"
+    },
+    {
+      "flag": "-a",
+      "description": "Do not ignore entries starting with . (hidden files).",
+      "example": "ls -la"
+    },
+    {
+      "flag": "-h",
+      "description": "With -l and -s, print sizes like 1K, 234M, 2G etc.",
+      "example": "ls -lh"
+    },
+    {
+      "flag": "-t",
+      "description": "Sort by modification time, newest first.",
+      "example": "ls -lt"
+    },
+    {
+      "flag": "-R",
+      "description": "List subdirectories recursively.",
+      "example": "ls -R"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Basic listing",
+      "command": "ls",
+      "output": "Documents  Downloads  Music  script.sh",
+      "explanation": "Lists files and directories in the current working directory in brief format."
+    },
+    {
+      "title": "Detailed listing with hidden files",
+      "command": "ls -la",
+      "output": "total 32\ndrwxr-xr-x  6 user user 4096 Oct 12 10:00 .\ndrwxr-xr-x 20 user user 4096 Oct 12 09:30 ..\n-rw-r--r--  1 user user  220 Oct 12 09:30 .bashrc\ndrwxr-xr-x  2 user user 4096 Oct 12 09:45 Documents",
+      "explanation": "Shows detailed file attributes including hidden dotfiles."
+    },
+    {
+      "title": "Human readable sizes sorted by time",
+      "command": "ls -lht",
+      "output": "total 12M\n-rw-r--r-- 1 user user 12M Oct 12 10:02 archive.tar.gz\n-rw-r--r-- 1 user user 4K Oct 12 09:50 notes.txt",
+      "explanation": "Combines long listing, human-readable file sizes, and newest-first sorting."
+    }
+  ],
+  "useCases": [
+    "Inspecting directory contents",
+    "Checking file permissions and modification dates",
+    "Finding hidden configuration files"
+  ],
+  "related": [
+    "cd",
+    "pwd",
+    "cp",
+    "mv",
+    "rm"
+  ],
+  "tags": [
+    "files",
+    "directory",
+    "listing"
+  ]
+}

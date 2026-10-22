@@ -1,0 +1,48 @@
+{
+  "slug": "ffuf",
+  "name": "ffuf",
+  "category": "web",
+  "section": "ctf",
+  "summary": "Fast web fuzzer written in Go.",
+  "syntax": "ffuf [options]",
+  "description": "A fast web fuzzer used for discovering directories, virtual hosts, and parameters using keyword injection.",
+  "options": [
+    {
+      "flag": "-u",
+      "description": "Target URL with FUZZ keyword placeholder.",
+      "example": "ffuf -u http://target.htb/FUZZ -w wordlist.txt"
+    },
+    {
+      "flag": "-H",
+      "description": "Header(s) for HTTP requests.",
+      "example": "ffuf -u http://target.htb -H \"Host: FUZZ.target.htb\" -w subs.txt"
+    },
+    {
+      "flag": "-fc",
+      "description": "Filter out specified HTTP status codes.",
+      "example": "ffuf -u http://target.htb/FUZZ -w list.txt -fc 404"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Fuzz web directories",
+      "command": "ffuf -u http://10.10.11.50/FUZZ -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -fc 404",
+      "output": ":: Method       : GET\n:: URL          : http://10.10.11.50/FUZZ\n:: Wordlist     : ...\n/login                  [Status: 200]\n/assets                 [Status: 301]",
+      "explanation": "High-speed discovery of web paths."
+    }
+  ],
+  "useCases": [
+    "Web enumeration",
+    "Virtual host discovery",
+    "Parameter fuzzing"
+  ],
+  "related": [
+    "gobuster",
+    "sqlmap"
+  ],
+  "tags": [
+    "ctf",
+    "web",
+    "fuzzing"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "slug": "cmp",
+  "name": "cmp",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Compare two files byte by byte.",
+  "syntax": "cmp [OPTION]... FILE1 [FILE2 [SKIP1 [SKIP2]]]",
+  "description": "Reports the first byte and line where two files differ, or confirms that they match.",
+  "options": [
+    {
+      "flag": "-l",
+      "description": "Print byte numbers and differing byte values.",
+      "example": "cmp -l image-a image-b"
+    },
+    {
+      "flag": "-s",
+      "description": "Produce no output and report status only.",
+      "example": "cmp -s file-a file-b"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Find the first difference",
+      "command": "cmp image-a image-b",
+      "output": "image-a image-b differ: byte 129, line 4",
+      "explanation": "Reports the first mismatch."
+    },
+    {
+      "title": "Check equality in a script",
+      "command": "cmp -s expected.bin actual.bin; echo $?",
+      "output": "0",
+      "explanation": "Uses the exit status to indicate identical files."
+    },
+    {
+      "title": "List all differing bytes",
+      "command": "cmp -l a.bin b.bin",
+      "output": "129  12  14",
+      "explanation": "Lists byte positions and values for differences."
+    }
+  ],
+  "useCases": [
+    "Verifying binary copies",
+    "Testing generated artifacts",
+    "Checking exact equality"
+  ],
+  "related": [
+    "diff",
+    "comm",
+    "xxd"
+  ],
+  "tags": [
+    "compare",
+    "binary",
+    "verify"
+  ]
+}

@@ -1,26 +1,64 @@
-import { useState, type ChangeEvent } from 'react';
-import { ArrowRight, Download, GitCompare, Shuffle, Upload, Info } from 'lucide-react';
-import { allCommands, getPathForCommand } from '../data/commands';
+import { useState, useMemo, type ChangeEvent } from 'react';
+import { Download, GitCompare, Shuffle, Upload, Info } from 'lucide-react';
+import { getPathForLight, useCatalog, useAllCommands, useCommandDocs } from '../context/CatalogContext';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import type { Command, CommandLight } from '../types';
 
-const allCmdsSorted = [...allCommands].sort((a, b) => a.section.localeCompare(b.section) || a.name.localeCompare(b.name));
-const linuxCommands = allCommands.filter((command) => command.section === 'linux');
+/** Shared loading/error panel for the doc-backed tools pages. */
+const DocsGate = ({ loading, error, children }: { loading: boolean; error: string | null; children: React.ReactNode }) => {
+  if (error) {
+    return (
+      <div className="rounded-xl border border-rose-400/40 bg-[var(--bg-surface)] p-8 text-center">
+        <p className="font-mono text-sm text-rose-400">{error}</p>
+      </div>
+    );
+  }
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-surface)] p-10 text-center font-mono text-sm text-[var(--text-muted)]">
+        loading command docs<span className="blinking">_</span>
+      </div>
+    );
+  }
+  return <>{children}</>;
+};
 
 export const ComparePage = () => {
   const [leftSlug, setLeftSlug] = useState('grep');
   const [rightSlug, setRightSlug] = useState('sed');
   const [viewAll, setViewAll] = useState(false);
-  const left = allCommands.find((command) => command.slug === leftSlug) || linuxCommands[0];
-  const right = allCommands.find((command) => command.slug === rightSlug) || linuxCommands[1];
-  const cmdList = viewAll ? allCmdsSorted : linuxCommands;
-  const select = (value: string, onChange: (value: string) => void) => <select value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 font-mono text-sm text-[var(--text)] focus:border-[var(--terminal-green)] focus:outline-none">{cmdList.map((command) => <option key={command.slug} value={command.slug}>{command.section === 'ctf' ? '[CTF]' : '[LINUX]'} {command.name}</option>)}</select>;
-  return <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6"><header className="space-y-4"><div className="flex flex-wrap items-center gap-3"><div className="inline-flex items-center gap-2 rounded border border-[var(--terminal-green)]/30 bg-[var(--terminal-green-bg)] px-3 py-1 font-mono text-xs text-[var(--terminal-green)]"><GitCompare className="h-4 w-4" /> Side-by-Side Comparison</div><button onClick={() => setViewAll(!viewAll)} className="inline-flex items-center gap-2 rounded border border-[var(--border)] px-3 py-1 font-mono text-xs text-[var(--text-muted)] hover:text-[var(--terminal-green)] hover:border-[var(--terminal-green)]">{viewAll ? 'Show Linux only' : 'Show all commands (Linux + CTF)'}</button></div><div><h1 className="font-display text-4xl sm:text-5xl font-bold text-[var(--text-heading)] tracking-tight">Compare Commands</h1><p className="mt-3 text-lg text-[var(--text-muted)] max-w-3xl">Compare purpose, syntax, options, use cases, examples, and related commands side-by-side. Perfect for understanding differences between similar tools.</p></div></header><div className="grid gap-6 lg:grid-cols-2"><article className="space-y-4 rounded-xl border-2 border-[var(--border)] bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg)] p-6 shadow-lg"><label className="block space-y-2"><span className="font-mono text-xs uppercase tracking-widest text-[var(--terminal-green)]">Command A</span>{select(leftSlug, setLeftSlug)}</label><CommandColumn command={left} /></article><article className="space-y-4 rounded-xl border-2 border-[var(--border)] bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg)] p-6 shadow-lg"><label className="block space-y-2"><span className="font-mono text-xs uppercase tracking-widest text-[var(--terminal-green)]">Command B</span>{select(rightSlug, setRightSlug)}</label><CommandColumn command={right} /></article></div><ComparisonSummary left={left} right={right} /></div>;
+  // The picker list comes from the light index; only the two chosen commands
+  // load their full docs (on demand, cached in memory — Part 1).
+  const { lights } = useCatalog();
+  const linuxLights = useMemo(() => lights.filter((command) => command.section === 'linux'), [lights]);
+  const cmdLights = useMemo(
+    () => (viewAll ? [...lights].sort((a, b) => a.section.localeCompare(b.section) || a.name.localeCompare(b.name)) : linuxLights),
+    [viewAll, lights, linuxLights],
+  );
+  const compareSlugs = useMemo(() => [leftSlug, rightSlug], [leftSlug, rightSlug]);
+  const { docs, loading, error } = useCommandDocs(compareSlugs);
+
+  const left = docs.find((command) => command.slug === leftSlug) || docs[0];
+  const right = docs.find((command) => command.slug === rightSlug) || docs[1];
+  const hasBoth = !!left && !!right;
+
+  const select = (value: string, onChange: (value: string) => void) => <select value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 font-mono text-sm text-[var(--text)] focus:border-[var(--terminal-green)] focus:outline-none">{cmdLights.map((command) => <option key={command.slug} value={command.slug}>{command.section === 'ctf' ? '[CTF]' : '[LINUX]'} {command.name}</option>)}</select>;
+
+  return <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6"><header className="space-y-4"><div className="flex flex-wrap items-center gap-3"><div className="inline-flex items-center gap-2 rounded border border-[var(--terminal-green)]/30 bg-[var(--terminal-green-bg)] px-3 py-1 font-mono text-xs text-[var(--terminal-green)]"><GitCompare className="h-4 w-4" /> Side-by-Side Comparison</div><button onClick={() => setViewAll(!viewAll)} className="inline-flex items-center gap-2 rounded border border-[var(--border)] px-3 py-1 font-mono text-xs text-[var(--text-muted)] hover:text-[var(--terminal-green)] hover:border-[var(--terminal-green)]">{viewAll ? 'Show Linux only' : 'Show all commands (Linux + CTF)'}</button></div><div><h1 className="font-display text-4xl sm:text-5xl font-bold text-[var(--text-heading)] tracking-tight">Compare Commands</h1><p className="mt-3 text-lg text-[var(--text-muted)] max-w-3xl">Compare purpose, syntax, options, use cases, examples, and related commands side-by-side. Perfect for understanding differences between similar tools.</p></div></header>
+    <DocsGate loading={loading || !lights.length} error={error}>
+      {hasBoth && (
+        <>
+          <div className="grid gap-6 lg:grid-cols-2"><article className="space-y-4 rounded-xl border-2 border-[var(--border)] bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg)] p-6 shadow-lg"><label className="block space-y-2"><span className="font-mono text-xs uppercase tracking-widest text-[var(--terminal-green)]">Command A</span>{select(leftSlug, setLeftSlug)}</label><CommandColumn command={left!} /></article><article className="space-y-4 rounded-xl border-2 border-[var(--border)] bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg)] p-6 shadow-lg"><label className="block space-y-2"><span className="font-mono text-xs uppercase tracking-widest text-[var(--terminal-green)]">Command B</span>{select(rightSlug, setRightSlug)}</label><CommandColumn command={right!} /></article></div><ComparisonSummary left={left!} right={right!} />
+        </>
+      )}
+    </DocsGate>
+  </div>;
 };
 
-const CommandColumn = ({ command }: { command: (typeof allCommands)[number] }) => <div className="space-y-5"><div className="pb-4 border-b border-[var(--border)]"><div className="flex items-center gap-2 mb-2"><h2 className="font-display text-3xl font-semibold text-[var(--terminal-green)]">{command.name}</h2><span className="px-2 py-0.5 rounded text-xs font-mono bg-[var(--border)] text-[var(--text-muted)]">{command.section}</span></div><p className="text-sm text-[var(--text)] leading-relaxed">{command.summary}</p><p className="mt-2 text-xs text-[var(--text-muted)]">Category: <span className="text-[var(--text)]">{command.category}</span></p></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Description</p><p className="text-sm text-[var(--text)] leading-relaxed">{command.description}</p></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Syntax</p><code className="block rounded-lg bg-[var(--code-bg)] p-4 text-sm text-[var(--terminal-green)] font-mono break-all">{command.syntax}</code></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-3">Options / Flags ({command.options.length})</p><ul className="space-y-2">{command.options.length > 0 ? command.options.map((option) => <li key={option.flag} className="flex gap-3 text-sm"><code className="text-[var(--terminal-green)] font-mono shrink-0">{option.flag}</code><span className="text-[var(--text)]">{option.description}{option.example ? <span className="text-[var(--text-muted)]"> — {option.example}</span> : null}</span></li>) : <li className="text-xs text-[var(--text-muted)] italic">No options documented</li>}</ul></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-3">Use Cases</p><div className="flex flex-wrap gap-2">{command.useCases.map((use) => <span key={use} className="px-2.5 py-1 rounded border border-[var(--border)] text-xs text-[var(--text)]">{use}</span>)}</div></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-3">Examples ({command.examples.length})</p><div className="space-y-3">{command.examples.map((ex, idx) => <div key={idx} className="rounded-lg bg-[var(--code-bg)] p-3 space-y-1.5"><div className="flex items-center justify-between"><span className="text-xs text-[var(--terminal-green)] font-mono">{ex.title}</span></div><code className="block text-xs text-[var(--terminal-green)] font-mono break-all">$ {ex.command}</code>{ex.explanation && <p className="text-xs text-[var(--text-muted)]">{ex.explanation}</p>}</div>)}</div></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-3">Related Commands</p><div className="flex flex-wrap gap-2">{command.related.map((rel) => { const relCmd = allCommands.find(c => c.slug === rel); return relCmd ? <Link key={rel} to={getPathForCommand(relCmd)} className="px-2.5 py-1 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border)] font-mono text-xs text-[var(--terminal-green)] hover:border-[var(--terminal-green)]">{relCmd.name}</Link> : <span key={rel} className="px-2.5 py-1 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border)] font-mono text-xs text-[var(--text-muted)]">{rel}</span>; })}</div></div><Link to={getPathForCommand(command)} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--terminal-green)] font-mono text-sm font-bold text-[var(--bg)] hover:opacity-90 transition-opacity">Open Full Documentation <ArrowRight className="h-4 w-4" /></Link></div>;
+const CommandColumn = ({ command }: { command: Command }) => <div className="space-y-5"><div className="pb-4 border-b border-[var(--border)]"><div className="flex items-center gap-2 mb-2"><h2 className="font-display text-3xl font-semibold text-[var(--terminal-green)]">{command.name}</h2><span className="px-2 py-0.5 rounded text-xs font-mono bg-[var(--border)] text-[var(--text-muted)]">{command.section}</span></div><p className="text-sm text-[var(--text)] leading-relaxed">{command.summary}</p><p className="mt-2 text-xs text-[var(--text-muted)]">Category: <span className="text-[var(--text)]">{command.category}</span></p></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Description</p><p className="text-sm text-[var(--text)] leading-relaxed">{command.description}</p></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Syntax</p><code className="block rounded-lg bg-[var(--code-bg)] p-4 text-sm text-[var(--terminal-green)] font-mono break-all">{command.syntax}</code></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-3">Options / Flags ({command.options.length})</p><ul className="space-y-2">{command.options.length > 0 ? command.options.map((option) => <li key={option.flag} className="flex gap-3 text-sm"><code className="text-[var(--terminal-green)] font-mono shrink-0">{option.flag}</code><span className="text-[var(--text)]">{option.description}{option.example ? <span className="text-[var(--text-muted)]"> — {option.example}</span> : null}</span></li>) : <li className="text-xs text-[var(--text-muted)] italic">No options documented</li>}</ul></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-3">Use Cases</p><div className="flex flex-wrap gap-2">{command.useCases.map((use) => <span key={use} className="px-2.5 py-1 rounded border border-[var(--border)] text-xs text-[var(--text)]">{use}</span>)}</div></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-3">Examples</p><div className="space-y-3">{command.examples.slice(0, 3).map((example) => <div key={example.title} className="rounded-lg bg-[var(--code-bg)] p-3"><p className="text-xs font-medium text-[var(--text)]">{example.title}</p><code className="mt-1 block text-sm text-[var(--terminal-green)] font-mono break-all">${' '}{example.command}</code></div>)}</div></div><div><p className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Related</p><div className="flex flex-wrap gap-1">{command.related.map((slug) => <code key={slug} className="rounded bg-[var(--code-bg)] px-1.5 py-0.5 text-xs text-[var(--text-muted)]">{slug}</code>)}</div></div></div>;
 
-const ComparisonSummary = ({ left, right }: { left: (typeof allCommands)[number], right: (typeof allCommands)[number] }) => (
+const ComparisonSummary = ({ left, right }: { left: Command, right: Command }) => (
   <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 space-y-4">
     <div className="flex items-center gap-2">
       <Info className="h-5 w-5 text-[var(--terminal-green)]" />
@@ -36,10 +74,37 @@ const ComparisonSummary = ({ left, right }: { left: (typeof allCommands)[number]
 );
 
 export const CommandOfDayPage = () => {
-  const dayIndex = Math.floor(Date.now() / 86400000) % allCommands.length;
-  const command = allCommands[dayIndex];
-  const [random, setRandom] = useState(command);
-  return <div className="mx-auto max-w-3xl space-y-8 px-4 py-12 sm:px-6"><header className="space-y-3"><div className="inline-flex items-center gap-2 rounded border border-amber-400/30 bg-amber-400/10 px-3 py-1 font-mono text-xs text-amber-300"><Shuffle className="h-4 w-4" /> daily dispatch</div><h1 className="font-display text-3xl font-semibold text-[var(--text-heading)]">Command of the day</h1><p className="text-sm text-[var(--text-muted)]">A deterministic daily pick, plus a random command when you want another challenge.</p></header><article className="space-y-5 rounded-xl border border-[var(--terminal-green)]/40 bg-[var(--terminal-green-bg)] p-6"><p className="font-mono text-xs uppercase text-[var(--text-muted)]">{random === command ? 'Today’s command' : 'Random command'}</p><h2 className="font-mono text-4xl font-bold text-[var(--terminal-green)]">{random.name}</h2><p className="text-[var(--text)]">{random.summary}</p><code className="block rounded-lg bg-[var(--code-bg)] p-4 text-sm text-[var(--terminal-green)]">$ {random.examples[0]?.command || random.syntax}</code><div className="flex flex-wrap gap-3"><Link to={getPathForCommand(random)} className="rounded-lg bg-[var(--terminal-green)] px-4 py-2 font-mono text-sm font-bold text-[var(--bg)]">Study command</Link><button onClick={() => setRandom(allCommands[Math.floor(Math.random() * allCommands.length)])} className="rounded-lg border border-[var(--border)] px-4 py-2 font-mono text-sm text-[var(--text)]">Pick another</button></div></article></div>;
+  // The deterministic daily pick walks the aggregate order, so this page
+  // loads the full dataset wave once (then it is instant every visit).
+  const { commands, loading, error } = useAllCommands();
+  const { lights } = useCatalog();
+  const dayIndex = commands.length ? Math.floor(Date.now() / 86400000) % commands.length : 0;
+  const command = commands[dayIndex];
+  const [randomSlug, setRandomSlug] = useState<string | null>(null);
+  /* The tile shows the daily pick until "Pick another" selects a fresh doc. */
+  const picked = randomSlug ? commands.find((cmd) => cmd.slug === randomSlug) || command : command;
+
+  // Keep the tile's footer link resolvable even while docs stream in.
+  const lightFor = (cmd: Command | undefined): CommandLight | undefined =>
+    cmd ? lights.find((light) => light.slug === cmd.slug) : undefined;
+
+  return <div className="mx-auto max-w-3xl space-y-8 px-4 py-12 sm:px-6">
+    <header className="space-y-3"><div className="inline-flex items-center gap-2 rounded border border-amber-400/30 bg-amber-400/10 px-3 py-1 font-mono text-xs text-amber-300"><Shuffle className="h-4 w-4" /> daily dispatch</div><h1 className="font-display text-3xl font-semibold text-[var(--text-heading)]">Command of the day</h1><p className="text-sm text-[var(--text-muted)]">A deterministic daily pick, plus a random command when you want another challenge.</p></header>
+    <DocsGate loading={loading || !command} error={error}>
+      {picked && (
+        <article className="space-y-5 rounded-xl border border-[var(--terminal-green)]/40 bg-[var(--terminal-green-bg)] p-6">
+          <p className="font-mono text-xs uppercase text-[var(--text-muted)]">{!randomSlug ? 'Today’s command' : 'Random command'}</p>
+          <h2 className="font-mono text-4xl font-bold text-[var(--terminal-green)]">{picked.name}</h2>
+          <p className="text-[var(--text)]">{picked.summary}</p>
+          <code className="block rounded-lg bg-[var(--code-bg)] p-4 text-sm text-[var(--terminal-green)]">$ {picked.examples[0]?.command || picked.syntax}</code>
+          <div className="flex flex-wrap gap-3">
+            {lightFor(picked) && <Link to={getPathForLight(lightFor(picked)!)} className="rounded-lg bg-[var(--terminal-green)] px-4 py-2 font-mono text-sm font-bold text-[var(--bg)]">Study command</Link>}
+            <button onClick={() => setRandomSlug(commands[Math.floor(Math.random() * commands.length)].slug)} className="rounded-lg border border-[var(--border)] px-4 py-2 font-mono text-sm text-[var(--text)]">Pick another</button>
+          </div>
+        </article>
+      )}
+    </DocsGate>
+  </div>;
 };
 
 export const ExportImportPage = () => {

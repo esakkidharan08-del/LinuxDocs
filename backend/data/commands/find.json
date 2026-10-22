@@ -1,0 +1,56 @@
+{
+  "slug": "find",
+  "name": "find",
+  "category": "search-and-find",
+  "section": "linux",
+  "summary": "Search for files in a directory hierarchy.",
+  "syntax": "find [path...] [expression]",
+  "description": "Search for files matching specified criteria across a directory tree.",
+  "options": [
+    {
+      "flag": "-name",
+      "description": "Base of file name matches pattern.",
+      "example": "find . -name \"*.ts\""
+    },
+    {
+      "flag": "-type",
+      "description": "File is of type f (file) or d (directory).",
+      "example": "find /var -type d"
+    },
+    {
+      "flag": "-mtime",
+      "description": "File data was last modified n*24 hours ago.",
+      "example": "find . -mtime -1"
+    },
+    {
+      "flag": "-exec",
+      "description": "Execute command on each matched file.",
+      "example": "find . -name \"*.tmp\" -exec rm {} \\;"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Find all TypeScript files",
+      "command": "find src -name \"*.ts\"",
+      "output": "src/main.tsx\nsrc/App.tsx\nsrc/types.ts",
+      "explanation": "Searches src/ recursively for files ending in .ts."
+    },
+    {
+      "title": "Find directories modified in last day",
+      "command": "find . -type d -mtime -1",
+      "output": "./src\n./src/data",
+      "explanation": "Finds directories modified within the past 24 hours."
+    }
+  ],
+  "useCases": [
+    "Locating misplaced files",
+    "Bulk file cleanups and batch operations"
+  ],
+  "related": [
+    "grep"
+  ],
+  "tags": [
+    "search",
+    "files"
+  ]
+}

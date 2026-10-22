@@ -1,0 +1,47 @@
+{
+  "slug": "rustscan",
+  "name": "rustscan",
+  "category": "recon",
+  "section": "ctf",
+  "summary": "Fast port scanner that pipes to nmap.",
+  "syntax": "rustscan -a <host> -- -sV -sC",
+  "description": "RustScan scans all ports extremely fast in Rust and passes found ports to nmap for deep service enumeration in a single command.",
+  "options": [
+    {
+      "flag": "-a",
+      "description": "Target address"
+    },
+    {
+      "flag": "--",
+      "description": "Arguments passed through to nmap"
+    },
+    {
+      "flag": "-u",
+      "description": "ulimit cap for concurrent scans"
+    },
+    {
+      "flag": "-t",
+      "description": "Timeout per scan"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Scan then enumerate",
+      "command": "rustscan -a 10.0.0.5 -- -sV -sC",
+      "output": "Open 10.0.0.5:22\nOpen 10.0.0.5:80",
+      "explanation": "Open ports are immediately fed into nmap for versions/scripts."
+    }
+  ],
+  "useCases": [
+    "fast port discovery"
+  ],
+  "related": [
+    "nmap",
+    "masscan"
+  ],
+  "tags": [
+    "recon",
+    "rust",
+    "ports"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "slug": "history",
+  "name": "history",
+  "category": "shell-and-scripting",
+  "section": "linux",
+  "summary": "Display or manipulate the command history.",
+  "syntax": "history [n]",
+  "description": "Display the command history list with line numbers.",
+  "options": [
+    {
+      "flag": "-c",
+      "description": "Clear the history list by deleting all entries.",
+      "example": "history -c"
+    },
+    {
+      "flag": "-d",
+      "description": "Delete history entry at offset offset.",
+      "example": "history -d 104"
+    }
+  ],
+  "examples": [
+    {
+      "title": "View last 10 commands",
+      "command": "history 10",
+      "output": " 1001  sudo apt update\n 1002  git status\n 1003  npm run dev",
+      "explanation": "Outputs the last 10 executed shell commands."
+    }
+  ],
+  "useCases": [
+    "Recalling previous complex commands",
+    "Auditing command history"
+  ],
+  "related": [],
+  "tags": [
+    "shell",
+    "history"
+  ],
+  "warnings": "shell history records every command in a plaintext file, including arguments typed after sudo; avoid putting secrets on a command line you keep."
+}

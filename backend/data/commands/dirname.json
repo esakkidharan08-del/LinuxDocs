@@ -1,0 +1,52 @@
+{
+  "slug": "dirname",
+  "name": "dirname",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Strip the final component from a pathname.",
+  "syntax": "dirname NAME...",
+  "description": "Prints the directory portion of each pathname.",
+  "options": [
+    {
+      "flag": "-z",
+      "description": "End each output line with NUL instead of newline.",
+      "example": "dirname -z /srv/app/file"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Get a parent directory",
+      "command": "dirname /var/log/nginx/access.log",
+      "output": "/var/log/nginx",
+      "explanation": "Removes the final filename component."
+    },
+    {
+      "title": "Process multiple paths",
+      "command": "dirname /tmp/a /srv/app/b",
+      "output": "/tmp\n/srv/app",
+      "explanation": "Prints one parent directory for each input."
+    },
+    {
+      "title": "Use NUL-delimited output",
+      "command": "dirname -z /tmp/report.txt | od -An -t x1",
+      "output": " 2f 74 6d 70 00",
+      "explanation": "Uses NUL termination for robust pipelines."
+    }
+  ],
+  "useCases": [
+    "Creating parent directories",
+    "Splitting paths in scripts",
+    "Handling filenames with whitespace"
+  ],
+  "related": [
+    "basename",
+    "realpath",
+    "readlink",
+    "mkdir"
+  ],
+  "tags": [
+    "path",
+    "directory",
+    "shell"
+  ]
+}

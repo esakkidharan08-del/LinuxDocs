@@ -1,0 +1,43 @@
+{
+  "slug": "strings",
+  "name": "strings",
+  "category": "reverse-engineering",
+  "section": "ctf",
+  "summary": "Print the printable strings in a binary file.",
+  "syntax": "strings [options] file...",
+  "description": "For each file given, GNU strings prints the printable character sequences that are of at least the specified length (default 4).",
+  "options": [
+    {
+      "flag": "-n",
+      "description": "Specify minimum string length (default is 4).",
+      "example": "strings -n 6 binary"
+    },
+    {
+      "flag": "-t",
+      "description": "Print the offset within the file before each string.",
+      "example": "strings -t x binary"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Extract embedded strings from binary",
+      "command": "strings challenge_binary | grep \"FLAG\"",
+      "output": "FLAG{str1ngs_ar3_3asy}",
+      "explanation": "Searches compiled binary for readable text or flags."
+    }
+  ],
+  "useCases": [
+    "Quick CTF reversing triage to find hardcoded flags, URLs, or keys"
+  ],
+  "related": [
+    "objdump",
+    "gdb",
+    "binwalk"
+  ],
+  "tags": [
+    "ctf",
+    "reversing",
+    "binary",
+    "strings"
+  ]
+}

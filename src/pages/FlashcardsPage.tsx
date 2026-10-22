@@ -5,17 +5,19 @@ import {
   ArrowLeft, ArrowRight, Bookmark, Layers, RotateCcw, Shield, Shuffle, Terminal,
   X, CheckCircle2, GraduationCap,
 } from 'lucide-react';
-import type { Command } from '../types';
-import { COMMANDS, CTF_DOMAINS, LINUX_CATEGORIES, getCommand, getPathForCommand } from '../data/commands';
+import type { Command, CommandLight } from '../types';
+import { getPathForLight, useCatalog, useCommandDocs } from '../context/CatalogContext';
 import { useAuth } from '../context/AuthContext';
 
 /* ============================================================
-   Flashcards: deck study mode over the command dataset.
+   Flashcards: deck study mode over the authed catalog (Part 1).
    Decks = all Linux, per category, all CTF, per domain, bookmarks.
+   Deck tiles are built from the light index; the session fetches
+   the full docs for its slugs on demand (in-memory cache + ETag).
    Flip cards, mark got it / again, session summary at the end.
    ============================================================ */
 
-type Deck = { id: string; title: string; blurb: string; accent: 'linux' | 'ctf'; commands: Command[] };
+type Deck = { id: string; title: string; blurb: string; accent: 'linux' | 'ctf'; lights: CommandLight[] };
 
 type FlashcardStore = { lastDeck: string | null; completes: Record<string, number> };
 const STORE_KEY = 'linuxdocs.flashcards';
@@ -52,55 +54,62 @@ function shuffled<T>(items: T[]): T[] {
 
 export function FlashcardsPage() {
   const { bookmarks } = useAuth();
+  const { lights, categories, domains } = useCatalog();
   const [storeState, setStoreState] = useState<FlashcardStore>(loadStore);
   const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
 
   const decks = useMemo<Deck[]>(() => {
+    const lightIn = (section: 'linux' | 'ctf', category?: string) =>
+      lights.filter((c) => c.section === section && (!category || c.category === category));
+
     const linuxDeck: Deck = {
       id: 'linux',
       title: 'All Linux utilities',
       blurb: 'The full collection, shuffled - great as a daily warm-up.',
       accent: 'linux',
-      commands: COMMANDS.filter((c) => c.section === 'linux'),
+      lights: lightIn('linux'),
     };
-    const categoryDecks = LINUX_CATEGORIES.map((category) => ({
-      id: `linux:${category.id}`,
-      title: category.name,
-      blurb: category.description,
-      accent: 'linux' as const,
-      commands: COMMANDS.filter((c) => c.section === 'linux' && c.category === category.id),
-    })).filter((deck) => deck.commands.length > 0);
+    const categoryDecks = categories
+      .filter((category) => category.section === 'linux')
+      .map((category) => ({
+        id: `linux:${category.id}`,
+        title: category.name,
+        blurb: category.description,
+        accent: 'linux' as const,
+        lights: lightIn('linux', category.id),
+      })).filter((deck) => deck.lights.length > 0);
 
     const ctfDeck: Deck = {
       id: 'ctf',
       title: 'All CTF & security tools',
       blurb: 'Every offensive toolkit command in one shuffled deck.',
       accent: 'ctf',
-      commands: COMMANDS.filter((c) => c.section === 'ctf'),
+      lights: lightIn('ctf'),
     };
-    const domainDecks = CTF_DOMAINS.map((domain) => ({
+    const domainDecks = domains.map((domain) => ({
       id: `ctf:${domain.id}`,
       title: domain.name,
       blurb: domain.description,
       accent: 'ctf' as const,
-      commands: COMMANDS.filter((c) => c.section === 'ctf' && c.category === domain.id),
-    })).filter((deck) => deck.commands.length > 0);
+      lights: lightIn('ctf', domain.id),
+    })).filter((deck) => deck.lights.length > 0);
 
+    const lightBySlug = new Map(lights.map((light) => [light.slug, light]));
     const bookmarkCommands = Array.from(bookmarks)
-      .map((slug) => getCommand(slug))
-      .filter((command): command is Command => Boolean(command));
+      .map((slug) => lightBySlug.get(slug))
+      .filter((light): light is CommandLight => Boolean(light));
     const bookmarkDeck: Deck | null = bookmarkCommands.length
       ? {
           id: 'bookmarks',
           title: 'Your bookmarks',
           blurb: 'The commands you starred - the ones you clearly care about.',
           accent: 'linux',
-          commands: bookmarkCommands,
+          lights: bookmarkCommands,
         }
       : null;
 
     return [linuxDeck, ...categoryDecks, ctfDeck, ...domainDecks, ...(bookmarkDeck ? [bookmarkDeck] : [])];
-  }, [bookmarks]);
+  }, [bookmarks, lights, categories, domains]);
 
   const activeDeck = activeDeckId ? decks.find((deck) => deck.id === activeDeckId) ?? null : null;
 
@@ -210,7 +219,7 @@ function DecksView({
                     <GraduationCap className="h-5 w-5" />
                   )}
                 </span>
-                <span className="font-mono text-xs text-[var(--text-muted)]">{deck.commands.length} cards</span>
+                <span className="font-mono text-xs text-[var(--text-muted)]">{deck.lights.length} cards</span>
               </div>
               <h3 className="mt-3 text-base font-bold leading-snug">{deck.title}</h3>
               <p className="mt-1 line-clamp-2 flex-1 text-sm text-[var(--text-muted)]">{deck.blurb}</p>
@@ -226,7 +235,7 @@ function DecksView({
 }
 
 /* ============================================================
-   Study session
+   Study session — loads the deck's full docs before the first flip
    ============================================================ */
 
 function FlashcardSession({
@@ -241,29 +250,42 @@ function FlashcardSession({
   onRestartCompleted: () => void;
 }) {
   type Mark = 'ok' | 'again';
-  const [cards, setCards] = useState<Command[]>(() => shuffled(deck.commands));
+  // The session fetches this deck's full docs on demand (cached per session).
+  const deckSlugs = useMemo(() => deck.lights.map((light) => light.slug), [deck.lights]);
+  const { docs, error: docsError } = useCommandDocs(deckSlugs);
+  const loaded = docs.length > 0 && docs.length === deckSlugs.length;
+
+  const [cards, setCards] = useState<Command[]>([]);
   const [useShuffle, setUseShuffle] = useState(true);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [marks, setMarks] = useState<Record<string, Mark>>({});
 
   const card = cards[index];
-  const finished = index >= cards.length;
+  const finished = loaded && index >= cards.length;
   const okCount = Object.entries(marks).filter(([, mark]) => mark === 'ok').length;
   const againCount = cards.filter((c) => marks[c.slug] === 'again').length;
   const isCTF = deck.accent === 'ctf';
   const accentText = isCTF ? 'text-[var(--ctf-red)]' : 'text-[var(--terminal-green)]';
   const accentBorder = isCTF ? 'border-[var(--ctf-red)]/50' : 'border-[var(--terminal-green)]/50';
 
+  /* first deal: as soon as the docs wave lands, shuffle into session order */
+  useEffect(() => {
+    if (loaded && cards.length === 0) {
+      setCards(shuffled(docs));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, docs]);
+
   const restart = useCallback(
     (shuffle: boolean) => {
       setUseShuffle(shuffle);
-      setCards(shuffle ? shuffled(deck.commands) : [...deck.commands]);
+      setCards(shuffle ? shuffled(docs) : [...docs]);
       setIndex(0);
       setFlipped(false);
       setMarks({});
     },
-    [deck.commands],
+    [docs],
   );
 
   /* completion is recorded once per finished session */
@@ -324,6 +346,46 @@ function FlashcardSession({
     return () => window.removeEventListener('keydown', onKey);
   }, [finished, goNext, goPrev, mark]);
 
+  if (docsError) {
+    return (
+      <div>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <button
+            onClick={onExit}
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 font-mono text-xs text-[var(--text-muted)] transition-colors hover:text-[var(--text)]"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> All decks
+          </button>
+        </div>
+        <div className="rounded-2xl border border-[var(--ctf-red)]/40 bg-[var(--surface)] p-10 text-center">
+          <p className="font-mono text-sm text-[var(--ctf-red)]">{docsError}</p>
+          <p className="mt-2 text-xs text-[var(--text-muted)]">The deck's cards could not be loaded.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!loaded) {
+    return (
+      <div>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <button
+            onClick={onExit}
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 font-mono text-xs text-[var(--text-muted)] transition-colors hover:text-[var(--text)]"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> All decks
+          </button>
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-10 text-center">
+          <p className="font-mono text-sm text-[var(--text-muted)]">
+            dealing {deck.lights.length} cards<span className="blinking">_</span>
+          </p>
+          <p className="mt-2 text-xs text-[var(--text-muted)]">fetching documentation for this deck…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* session top bar */}
@@ -349,7 +411,7 @@ function FlashcardSession({
         </button>
       </div>
 
-      {finished ? (
+      {finished && cards.length > 0 ? (
         <SessionSummary
           deck={deck}
           total={cards.length}
@@ -393,7 +455,7 @@ function FlashcardSession({
           >
             <span className="absolute left-5 top-5 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
               {isCTF ? 'ctf · ' : 'linux · '}
-              {card.category}
+              {card?.category}
               <span className="ml-2">{flipped ? '(back)' : '(front)'}</span>
             </span>
             <span className="absolute right-5 top-5 font-mono text-xs text-[var(--text-muted)]">
@@ -402,9 +464,9 @@ function FlashcardSession({
 
             {!flipped ? (
               <div className="flex h-[300px] flex-col items-center justify-center gap-4 sm:h-[330px]">
-                <code className={`font-mono text-4xl font-bold sm:text-5xl ${accentText}`}>{card.name}</code>
+                <code className={`font-mono text-4xl font-bold sm:text-5xl ${accentText}`}>{card?.name}</code>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {card.tags.slice(0, 4).map((tag) => (
+                  {card?.tags.slice(0, 4).map((tag) => (
                     <span key={tag} className="rounded-full bg-[var(--border)] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
                       {tag}
                     </span>
@@ -414,38 +476,40 @@ function FlashcardSession({
               </div>
             ) : (
               <div className="flex h-[300px] flex-col gap-3 overflow-y-auto sm:h-[330px]">
-                <p className="text-base font-semibold sm:text-lg">{card.summary}</p>
+                <p className="text-base font-semibold sm:text-lg">{card?.summary}</p>
                 <pre className="whitespace-pre-wrap rounded-lg bg-[var(--code-bg)] px-3 py-2 font-mono text-sm text-[var(--terminal-green)]">
-                  {card.syntax}
+                  {card?.syntax}
                 </pre>
                 <div className="flex flex-wrap gap-2">
-                  {card.options.slice(0, 5).map((option) => (
+                  {card?.options.slice(0, 5).map((option) => (
                     <span key={option.flag} className="rounded-md border border-[var(--border)] px-2 py-1 font-mono text-xs text-[var(--text)]">
                       {option.flag}
                     </span>
                   ))}
-                  {card.options.length > 5 && (
-                    <span className="px-1 py-1 font-mono text-xs text-[var(--text-muted)]">+{card.options.length - 5} more flags</span>
+                  {(card?.options.length ?? 0) > 5 && (
+                    <span className="px-1 py-1 font-mono text-xs text-[var(--text-muted)]">+{(card?.options.length ?? 0) - 5} more flags</span>
                   )}
                 </div>
-                {card.examples[0] && (
+                {card?.examples[0] && (
                   <p className="truncate font-mono text-xs text-[var(--text-muted)]">
                     <span className="text-[var(--terminal-green)]">$ </span>
                     {card.examples[0].command}
                   </p>
                 )}
-                {card.warnings && (
+                {card?.warnings && (
                   <p className="flex items-start gap-1.5 text-xs text-amber-400">
                     <X className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {card.warnings}
                   </p>
                 )}
-                <Link
-                  to={getPathForCommand(card)}
-                  onClick={(event) => event.stopPropagation()}
-                  className={`mt-auto inline-flex items-center gap-1.5 font-mono text-xs hover:underline ${accentText}`}
-                >
-                  Open full documentation <ArrowRight className="h-3 w-3" />
-                </Link>
+                {card && (
+                  <Link
+                    to={getPathForLight(card)}
+                    onClick={(event) => event.stopPropagation()}
+                    className={`mt-auto inline-flex items-center gap-1.5 font-mono text-xs hover:underline ${accentText}`}
+                  >
+                    Open full documentation <ArrowRight className="h-3 w-3" />
+                  </Link>
+                )}
               </div>
             )}
           </button>
@@ -519,11 +583,13 @@ function SessionSummary({
   onRestart: (shuffle: boolean) => void;
   onExit: () => void;
 }) {
+  const { lights } = useCatalog();
+  const lightBySlug = useMemo(() => new Map(lights.map((light) => [light.slug, light])), [lights]);
   const pct = total ? Math.round((okCount / total) * 100) : 0;
   const againCards = Object.entries(marks)
     .filter(([, mark]) => mark === 'again')
-    .map(([slug]) => getCommand(slug))
-    .filter(Boolean);
+    .map(([slug]) => lightBySlug.get(slug))
+    .filter((light): light is CommandLight => Boolean(light));
   const isCTF = deck.accent === 'ctf';
 
   return (
@@ -541,13 +607,13 @@ function SessionSummary({
         <div className="mt-6 rounded-xl border border-amber-400/30 bg-amber-400/5 p-4 text-left">
           <p className="font-mono text-[11px] uppercase tracking-wider text-amber-400">Marked for revisit · {againCards.length}</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {againCards.map((command) => (
+            {againCards.map((light) => (
               <Link
-                key={command!.slug}
-                to={getPathForCommand(command!)}
+                key={light.slug}
+                to={getPathForLight(light)}
                 className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 font-mono text-xs text-[var(--text)] transition-colors hover:text-[var(--text-heading)]"
               >
-                {command!.name}
+                {light.name}
               </Link>
             ))}
           </div>

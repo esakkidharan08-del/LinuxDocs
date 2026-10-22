@@ -1,9 +1,36 @@
-import { CTF_DOMAINS, COMMANDS, getPathForCommand } from '../data/commands';
+import { useCatalog, getPathForLight } from '../context/CatalogContext';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const CTFHomePage = () => {
+  const { lights, domains, loading: catalogLoading, error: catalogError, clearError } = useCatalog();
+
+  if (catalogLoading && domains.length === 0) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-24 text-center">
+        <p className="font-mono text-sm text-[var(--text-muted)]">
+          loading CTF index<span className="blinking">_</span>
+        </p>
+      </div>
+    );
+  }
+
+  if (catalogError && domains.length === 0) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-24 text-center">
+        <p className="font-mono text-sm text-[var(--ctf-red)]">{catalogError}</p>
+        <button
+          type="button"
+          onClick={clearError}
+          className="mt-4 inline-block rounded-lg border border-[var(--border)] px-5 py-2.5 font-mono text-sm text-[var(--text)] hover:border-[var(--ctf-red)]/50"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-10 sm:px-6 lg:px-8">
       <Breadcrumbs items={[{ label: 'CTF & Security' }]} />
@@ -23,8 +50,8 @@ export const CTFHomePage = () => {
       </header>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        {CTF_DOMAINS.map((domain, index) => {
-          const tools = COMMANDS.filter((c) => c.section === 'ctf' && c.category === domain.id);
+        {domains.map((domain, index) => {
+          const tools = lights.filter((c) => c.section === 'ctf' && c.category === domain.id);
           return (
             <div
               key={domain.id}
@@ -50,7 +77,7 @@ export const CTFHomePage = () => {
                   {tools.map((t) => (
                     <Link
                       key={t.slug}
-                      to={getPathForCommand(t)}
+                      to={getPathForLight(t)}
                       className="rounded border border-[var(--border)] bg-[var(--code-bg)] px-2.5 py-1 font-mono text-xs text-[var(--text)] hover:border-[var(--ctf-red)]/60 hover:text-[var(--ctf-red)]"
                     >
                       {t.name}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LINUX_CATEGORIES, CTF_DOMAINS, CATEGORY_COUNTS } from '../data/commandsIndex';
 import { Terminal, Shield, X, ChevronDown, BookOpen, Layers, Command, FileText, CalendarDays, Zap } from 'lucide-react';
+import { useCatalog } from '../context/CatalogContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,6 +24,10 @@ const STUDY_LINKS = [
  */
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const location = useLocation();
+  // Category tree + counts come from the authed catalog index (Part 1) — not
+  // from any bundled dataset. Signed-out visitors simply see no categories.
+  const { categories, domains, counts: categoryCounts } = useCatalog();
+  const linuxCategories = categories.filter((cat) => cat.section === 'linux');
   const [linuxOpen, setLinuxOpen] = useState(true);
   const [ctfOpen, setCtfOpen] = useState(true);
 
@@ -121,8 +125,8 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             </button>
             {linuxOpen && (
               <div className="space-y-0.5">
-                {LINUX_CATEGORIES.map((cat) => {
-                  const count = CATEGORY_COUNTS[cat.id] ?? 0;
+                {linuxCategories.map((cat) => {
+                  const count = categoryCounts[cat.id] ?? 0;
                   return (
                     <NavLink
                       key={cat.id}
@@ -157,8 +161,8 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             </button>
             {ctfOpen && (
               <div className="space-y-0.5">
-                {CTF_DOMAINS.map((domain) => {
-                  const count = CATEGORY_COUNTS[domain.id] ?? 0;
+                {domains.map((domain) => {
+                  const count = categoryCounts[domain.id] ?? 0;
                   return (
                     <NavLink
                       key={domain.id}

@@ -1,0 +1,57 @@
+{
+  "slug": "lsattr",
+  "name": "lsattr",
+  "category": "permissions-and-ownership",
+  "section": "linux",
+  "summary": "List extended filesystem attributes.",
+  "syntax": "lsattr [ -RVadlpv ] [ files... ]",
+  "description": "Displays the filesystem attributes of files and directories on supported filesystems.",
+  "options": [
+    {
+      "flag": "-R",
+      "description": "Recursively list attributes.",
+      "example": "lsattr -R archive/"
+    },
+    {
+      "flag": "-d",
+      "description": "List directory attributes rather than directory contents.",
+      "example": "lsattr -d archive/"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Inspect a file",
+      "command": "lsattr release.txt",
+      "output": "----i---------e---- release.txt",
+      "explanation": "Shows immutable and extent-related attributes when present."
+    },
+    {
+      "title": "Inspect a directory itself",
+      "command": "lsattr -d archive/",
+      "output": "------------------ archive/",
+      "explanation": "Reports attributes on the directory entry."
+    },
+    {
+      "title": "Inspect a tree",
+      "command": "lsattr -R archive/",
+      "output": "archive/:\n------------------ archive/2026.log",
+      "explanation": "Lists attributes recursively below archive."
+    }
+  ],
+  "useCases": [
+    "Auditing immutable files",
+    "Checking filesystem metadata",
+    "Verifying chattr operations"
+  ],
+  "related": [
+    "chattr",
+    "stat",
+    "ls",
+    "getfacl"
+  ],
+  "tags": [
+    "filesystem",
+    "attributes",
+    "audit"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "slug": "wfuzz",
+  "name": "wfuzz",
+  "category": "web",
+  "section": "ctf",
+  "summary": "Web application fuzzer.",
+  "syntax": "wfuzz -w wordlist.txt <url> --hc 404",
+  "description": "wfuzz brute-forces web applications by injecting wordlist entries into the URL, headers, or POST parameters, filtering results by status/length.",
+  "options": [
+    {
+      "flag": "-w",
+      "description": "Wordlist to use"
+    },
+    {
+      "flag": "-u",
+      "description": "Target URL with FUZZ placeholder"
+    },
+    {
+      "flag": "--hc",
+      "description": "Hide responses with the given status code"
+    },
+    {
+      "flag": "-z",
+      "description": "Preset payload type (file, list, range)"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Fuzz directories",
+      "command": "wfuzz -w dirs.txt -u http://10.0.0.5/FUZZ --hc 404",
+      "output": "000000020: 200  121 l  415 w  7255 ch  \"admin\"",
+      "explanation": "FUZZ is replaced by each entry; 404s are hidden."
+    }
+  ],
+  "useCases": [
+    "directory discovery",
+    "parameter fuzzing"
+  ],
+  "related": [
+    "ffuf",
+    "gobuster"
+  ],
+  "tags": [
+    "web",
+    "fuzz",
+    "bruteforce"
+  ]
+}

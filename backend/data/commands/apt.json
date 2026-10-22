@@ -1,0 +1,57 @@
+{
+  "slug": "apt",
+  "name": "apt",
+  "category": "package-management",
+  "section": "linux",
+  "summary": "Advanced Package Tool (package manager for Debian/Ubuntu).",
+  "syntax": "apt [options] [command]",
+  "description": "Command-line interface for package management, handling installation, upgrades, and removal of software packages.",
+  "options": [
+    {
+      "flag": "update",
+      "description": "Download new lists of packages from repositories.",
+      "example": "sudo apt update"
+    },
+    {
+      "flag": "upgrade",
+      "description": "Perform safe upgrade of all installed packages.",
+      "example": "sudo apt upgrade"
+    },
+    {
+      "flag": "install",
+      "description": "Install new package(s).",
+      "example": "sudo apt install nginx"
+    },
+    {
+      "flag": "remove",
+      "description": "Remove package(s).",
+      "example": "sudo apt remove apache2"
+    },
+    {
+      "flag": "search",
+      "description": "Search in package descriptions.",
+      "example": "apt search postgresql"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Install git package",
+      "command": "sudo apt update && sudo apt install -y git",
+      "output": "Reading package lists... Done\nBuilding dependency tree...\nSetting up git (1:2.34.1)...",
+      "explanation": "Updates package index and installs Git non-interactively."
+    }
+  ],
+  "useCases": [
+    "Installing software on Ubuntu/Debian systems",
+    "Keeping system packages patched"
+  ],
+  "related": [
+    "dpkg"
+  ],
+  "tags": [
+    "package",
+    "debian",
+    "ubuntu"
+  ],
+  "warnings": "apt installs packages with root privileges, and package maintainer scripts run arbitrary code; install only from trusted repositories."
+}

@@ -1,0 +1,37 @@
+{
+  "slug": "ssh",
+  "name": "ssh",
+  "category": "networking",
+  "section": "linux",
+  "summary": "OpenSSH remote login client.",
+  "syntax": "ssh [user@]hostname [command]",
+  "description": "ssh is a program for logging into a remote machine and executing commands.",
+  "options": [
+    {
+      "flag": "-p",
+      "description": "Port to connect to."
+    },
+    {
+      "flag": "-i",
+      "description": "Select identity file."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Connect to remote host",
+      "command": "ssh user@192.168.1.100",
+      "output": "user@host:~$",
+      "explanation": "Start SSH session."
+    }
+  ],
+  "useCases": [
+    "Remote access"
+  ],
+  "related": [
+    "scp"
+  ],
+  "tags": [
+    "ssh",
+    "remote"
+  ]
+}

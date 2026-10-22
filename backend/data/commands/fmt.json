@@ -1,0 +1,57 @@
+{
+  "slug": "fmt",
+  "name": "fmt",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Reformat paragraph text.",
+  "syntax": "fmt [OPTION]... [FILE]...",
+  "description": "Fills and joins lines to create readable paragraphs while preserving indentation conventions.",
+  "options": [
+    {
+      "flag": "-w WIDTH",
+      "description": "Set the target output width.",
+      "example": "fmt -w 72 README.txt"
+    },
+    {
+      "flag": "-s",
+      "description": "Split long lines but do not join short lines.",
+      "example": "fmt -s -w 80 notes.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Wrap documentation",
+      "command": "fmt -w 72 README.txt",
+      "output": "LinuxDocs is a reference for commands and authorized security\ntraining tools.",
+      "explanation": "Reflows paragraphs to a target width."
+    },
+    {
+      "title": "Format standard input",
+      "command": "printf 'one two three four\\n' | fmt -w 7",
+      "output": "one two\nthree\nfour",
+      "explanation": "Wraps the input at the selected width."
+    },
+    {
+      "title": "Split only long lines",
+      "command": "fmt -s -w 20 report.txt",
+      "output": "A short line remains\nwrapped at twenty\ncolumns.",
+      "explanation": "Avoids joining existing short lines."
+    }
+  ],
+  "useCases": [
+    "Formatting plain-text documentation",
+    "Wrapping generated reports",
+    "Normalizing paragraph layout"
+  ],
+  "related": [
+    "fold",
+    "column",
+    "expand",
+    "sed"
+  ],
+  "tags": [
+    "format",
+    "wrap",
+    "text"
+  ]
+}

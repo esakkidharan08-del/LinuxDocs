@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Home, Search, Terminal, Shield } from 'lucide-react';
-import { LINUX_CATEGORIES } from '../data/commands';
+import { useCatalog } from '../context/CatalogContext';
 
 type VoidLine = { text: string; tone?: 'ok' | 'dim' | 'err' };
 
@@ -48,6 +48,7 @@ function resolveVoidCommand(raw: string, alreadyFound: boolean): { lines: VoidLi
 }
 
 export const NotFoundPage: React.FC = () => {
+  const { categories } = useCatalog();
   const [lines, setLines] = useState<VoidLine[]>(VOID_GREETING);
   const [value, setValue] = useState('');
   const [foundVoid, setFoundVoid] = useState(false);
@@ -103,17 +104,21 @@ export const NotFoundPage: React.FC = () => {
             <Search className="h-3.5 w-3.5" />
             Or jump into a category
           </p>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {LINUX_CATEGORIES.slice(0, 8).map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/linux/${cat.id}`}
-                className="rounded border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1 font-mono text-xs text-[var(--text)] hover:border-[var(--terminal-green)]/50 hover:text-[var(--terminal-green)]"
-              >
-                {cat.name}
-              </Link>
-            ))}
-          </div>
+          {/* Category chips come from the catalog (auth-gated). Signed-out
+              visitors keep the void shell — no dataset metadata leaks here. */}
+          {categories.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {categories.filter((cat) => cat.section === 'linux').slice(0, 8).map((cat) => (
+                <Link
+                  key={cat.id}
+                  to={`/linux/${cat.id}`}
+                  className="rounded border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1 font-mono text-xs text-[var(--text)] hover:border-[var(--terminal-green)]/50 hover:text-[var(--terminal-green)]"
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* stray shell mini-easter-egg */}

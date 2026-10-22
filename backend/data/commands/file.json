@@ -1,0 +1,57 @@
+{
+  "slug": "file",
+  "name": "file",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Determine file type from its contents.",
+  "syntax": "file [OPTION...] [FILE...]",
+  "description": "Classifies files using filesystem tests, magic numbers, and language or encoding checks.",
+  "options": [
+    {
+      "flag": "-b",
+      "description": "Do not prepend file names to output.",
+      "example": "file -b archive.tar"
+    },
+    {
+      "flag": "-i",
+      "description": "Print MIME type information.",
+      "example": "file -i upload.bin"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Identify an archive",
+      "command": "file backup.tar.gz",
+      "output": "backup.tar.gz: gzip compressed data, original size modulo 2^32 10240",
+      "explanation": "Reports the detected compression format."
+    },
+    {
+      "title": "Inspect MIME type",
+      "command": "file -i image.png",
+      "output": "image.png: image/png; charset=binary",
+      "explanation": "Prints a MIME-oriented classification."
+    },
+    {
+      "title": "Classify standard input",
+      "command": "printf '#!/bin/sh\\necho ok\\n' | file -",
+      "output": "/dev/stdin: POSIX shell script, ASCII text executable",
+      "explanation": "Reads content from standard input when given a dash."
+    }
+  ],
+  "useCases": [
+    "Checking uploads before processing",
+    "Identifying unknown artifacts",
+    "Verifying generated files"
+  ],
+  "related": [
+    "stat",
+    "xxd",
+    "strings",
+    "ls"
+  ],
+  "tags": [
+    "file-type",
+    "mime",
+    "inspection"
+  ]
+}

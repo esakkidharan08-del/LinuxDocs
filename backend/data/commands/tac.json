@@ -1,0 +1,56 @@
+{
+  "slug": "tac",
+  "name": "tac",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Concatenate files in reverse line order.",
+  "syntax": "tac [OPTION]... [FILE]...",
+  "description": "Writes each file to standard output with the last line first.",
+  "options": [
+    {
+      "flag": "-s STRING",
+      "description": "Use STRING as the record separator.",
+      "example": "tac -s ':' /etc/passwd"
+    },
+    {
+      "flag": "-r",
+      "description": "Treat the separator as a regular expression.",
+      "example": "tac -r -s '[[:space:]]' report.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Read the newest log line first",
+      "command": "tac app.log | head -n 3",
+      "output": "2026-10-12 INFO shutdown\n2026-10-12 INFO request complete\n2026-10-12 INFO server started",
+      "explanation": "Reverses a log before limiting the output."
+    },
+    {
+      "title": "Reverse a short list",
+      "command": "printf 'one\\ntwo\\nthree\\n' | tac",
+      "output": "three\ntwo\none",
+      "explanation": "Prints lines from bottom to top."
+    },
+    {
+      "title": "Inspect reverse passwd order",
+      "command": "tac /etc/passwd | head -n 1",
+      "output": "backup:x:998:998:backup:/var/backups:/usr/sbin/nologin",
+      "explanation": "Shows the final record first."
+    }
+  ],
+  "useCases": [
+    "Inspecting newest log entries",
+    "Reversing line-oriented reports",
+    "Processing records from the end"
+  ],
+  "related": [
+    "tail",
+    "cat",
+    "head"
+  ],
+  "tags": [
+    "reverse",
+    "lines",
+    "text"
+  ]
+}

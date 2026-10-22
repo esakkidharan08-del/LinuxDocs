@@ -1,11 +1,41 @@
 import { useParams, Link } from 'react-router-dom';
-import { getCategory, COMMANDS, getPathForCommand } from '../data/commands';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { getPathForLight, useCatalog } from '../context/CatalogContext';
 import { Terminal, ArrowRight } from 'lucide-react';
 
 export const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
-  const category = getCategory(categoryId || '');
+  // Category metadata + membership come from the authed catalog (Part 1);
+  // this page only needs the light index, no full docs.
+  const { lights, categoryMap, loading: catalogLoading, error: catalogError, clearError } = useCatalog();
+
+  const lightsInCat = lights.filter((c) => c.section === 'linux' && c.category === categoryId);
+  const category = categoryId ? categoryMap.get(categoryId) || null : null;
+
+  if (catalogLoading && !category) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-24 text-center">
+        <p className="font-mono text-sm text-[var(--text-muted)]">
+          loading category<span className="blinking">_</span>
+        </p>
+      </div>
+    );
+  }
+
+  if (catalogError && !category) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-24 text-center">
+        <p className="font-mono text-sm text-[var(--ctf-red)]">{catalogError}</p>
+        <button
+          type="button"
+          onClick={clearError}
+          className="mt-4 inline-block rounded-lg border border-[var(--border)] px-5 py-2.5 font-mono text-sm text-[var(--text)] hover:border-[var(--terminal-green)]/50"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   if (!category) {
     return (
@@ -27,8 +57,6 @@ export const CategoryPage = () => {
     );
   }
 
-  const commandsInCat = COMMANDS.filter((c) => c.section === 'linux' && c.category === category.id);
-
   return (
     <div className="mx-auto max-w-6xl space-y-10 px-4 py-10 sm:px-6 lg:px-8">
       <Breadcrumbs items={[{ label: 'Linux Reference', to: '/' }, { label: category.name }]} />
@@ -43,11 +71,11 @@ export const CategoryPage = () => {
         </h1>
         <p className="max-w-[62ch] text-base leading-relaxed text-[var(--text-muted)]">{category.description}</p>
         <p className="font-mono text-xs text-[var(--text-muted)]">
-          {commandsInCat.length} {commandsInCat.length === 1 ? 'command' : 'commands'} in this category
+          {lightsInCat.length} {lightsInCat.length === 1 ? 'command' : 'commands'} in this category
         </p>
       </header>
 
-      {commandsInCat.length === 0 ? (
+      {lightsInCat.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-surface)] p-12 text-center">
           <p className="font-display text-lg text-[var(--text-heading)]">Nothing documented here yet</p>
           <p className="mx-auto mt-2 max-w-sm text-sm text-[var(--text-muted)]">
@@ -56,10 +84,10 @@ export const CategoryPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {commandsInCat.map((cmd, index) => (
+          {lightsInCat.map((cmd, index) => (
             <Link
               key={cmd.slug}
-              to={getPathForCommand(cmd)}
+              to={getPathForLight(cmd)}
               className="group flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 hover:-translate-y-0.5 hover:border-[var(--terminal-green)]/50"
             >
               <div className="flex items-start justify-between gap-3">
@@ -71,7 +99,7 @@ export const CategoryPage = () => {
                 </span>
               </div>
               <code className="w-fit rounded border border-[var(--border)] bg-[var(--code-bg)] px-2 py-0.5 font-mono text-[11px] text-[var(--text-muted)]">
-                {cmd.syntax.split(' ')[0]}
+                {cmd.name}
               </code>
               <p className="line-clamp-2 text-xs leading-relaxed text-[var(--text-muted)]">{cmd.summary}</p>
               <div className="mt-auto flex items-center justify-between border-t border-[var(--border-subtle)] pt-3 font-mono text-xs text-[var(--terminal-green)]">

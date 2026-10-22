@@ -1,0 +1,57 @@
+{
+  "slug": "ln",
+  "name": "ln",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Create links between files.",
+  "syntax": "ln [OPTION]... [-T] TARGET LINK_NAME",
+  "description": "Creates hard links or symbolic links to files and directories.",
+  "options": [
+    {
+      "flag": "-s",
+      "description": "Create a symbolic link instead of a hard link.",
+      "example": "ln -s /opt/app/current app"
+    },
+    {
+      "flag": "-f",
+      "description": "Remove existing destination files before linking.",
+      "example": "ln -sf release-2 current"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Create a symbolic link",
+      "command": "ln -s /var/log/app.log app.log",
+      "output": "",
+      "explanation": "Creates a convenient path to the log file."
+    },
+    {
+      "title": "Create a hard link",
+      "command": "ln report.txt report.backup",
+      "output": "",
+      "explanation": "Creates another directory entry for the same file data."
+    },
+    {
+      "title": "Update a release pointer",
+      "command": "ln -sfn release-2 current",
+      "output": "",
+      "explanation": "Replaces a symbolic link with a new target."
+    }
+  ],
+  "useCases": [
+    "Maintaining release pointers",
+    "Creating alternate file names",
+    "Exposing logs at stable paths"
+  ],
+  "related": [
+    "readlink",
+    "realpath",
+    "cp",
+    "mv"
+  ],
+  "tags": [
+    "links",
+    "symlink",
+    "filesystem"
+  ]
+}

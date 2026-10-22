@@ -1,0 +1,57 @@
+{
+  "slug": "nl",
+  "name": "nl",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Number lines of files.",
+  "syntax": "nl [OPTION]... [FILE]...",
+  "description": "Writes files to standard output with configurable line numbering.",
+  "options": [
+    {
+      "flag": "-b a",
+      "description": "Number all lines, including blank lines.",
+      "example": "nl -b a config.ini"
+    },
+    {
+      "flag": "-ba",
+      "description": "Equivalent shorthand for numbering all lines.",
+      "example": "nl -ba script.sh"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Number source lines",
+      "command": "nl script.sh",
+      "output": "     1  #!/bin/sh\n     2  echo ready",
+      "explanation": "Adds numbers to non-empty lines by default."
+    },
+    {
+      "title": "Number blank lines too",
+      "command": "nl -ba config.ini",
+      "output": "     1  [server]\n     2\n     3  port=8080",
+      "explanation": "Makes every line addressable during review."
+    },
+    {
+      "title": "Number a pipeline",
+      "command": "printf 'alpha\\nbeta\\n' | nl -ba",
+      "output": "     1  alpha\n     2  beta",
+      "explanation": "Numbers standard input as well as files."
+    }
+  ],
+  "useCases": [
+    "Referencing source lines",
+    "Reviewing configuration files",
+    "Creating readable diagnostics"
+  ],
+  "related": [
+    "cat",
+    "less",
+    "head",
+    "tail"
+  ],
+  "tags": [
+    "line-numbers",
+    "text",
+    "review"
+  ]
+}

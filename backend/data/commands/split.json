@@ -1,0 +1,57 @@
+{
+  "slug": "split",
+  "name": "split",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Split a file into fixed-size pieces.",
+  "syntax": "split [OPTION]... [FILE [PREFIX]]",
+  "description": "Writes consecutive sections of FILE to separate output files.",
+  "options": [
+    {
+      "flag": "-b SIZE",
+      "description": "Place SIZE bytes per output file.",
+      "example": "split -b 100M archive.tar part-"
+    },
+    {
+      "flag": "-l NUMBER",
+      "description": "Place NUMBER lines per output file.",
+      "example": "split -l 1000 access.log log-"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Split a large archive",
+      "command": "split -b 100M archive.tar archive.part-",
+      "output": "",
+      "explanation": "Creates 100-megabyte pieces with a stable prefix."
+    },
+    {
+      "title": "Split a log by line count",
+      "command": "split -l 1000 access.log access-",
+      "output": "",
+      "explanation": "Creates files containing at most 1000 lines each."
+    },
+    {
+      "title": "Reassemble split pieces",
+      "command": "cat archive.part-* > archive.restored.tar",
+      "output": "",
+      "explanation": "Concatenates the split pieces in lexical order to restore the original stream."
+    }
+  ],
+  "useCases": [
+    "Transferring large files in pieces",
+    "Processing logs in parallel",
+    "Working around file-size limits"
+  ],
+  "related": [
+    "csplit",
+    "cat",
+    "dd",
+    "wc"
+  ],
+  "tags": [
+    "split",
+    "files",
+    "transfer"
+  ]
+}

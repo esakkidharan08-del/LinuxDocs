@@ -1,0 +1,39 @@
+{
+  "slug": "scp",
+  "name": "scp",
+  "category": "networking",
+  "section": "linux",
+  "summary": "Secure copy.",
+  "syntax": "scp [options] source target",
+  "description": "scp copies files between hosts on a network using ssh.",
+  "options": [
+    {
+      "flag": "-r",
+      "description": "Recursively copy entire directories."
+    },
+    {
+      "flag": "-P",
+      "description": "Specifies remote host ssh port."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Copy file to remote",
+      "command": "scp file.txt user@host:/home/user/",
+      "output": "file.txt 100% 1KB",
+      "explanation": "Securely copy file."
+    }
+  ],
+  "useCases": [
+    "File transfer"
+  ],
+  "related": [
+    "ssh",
+    "rsync"
+  ],
+  "tags": [
+    "scp",
+    "ssh",
+    "transfer"
+  ]
+}

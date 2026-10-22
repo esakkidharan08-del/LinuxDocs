@@ -1,0 +1,49 @@
+{
+  "slug": "feroxbuster",
+  "name": "feroxbuster",
+  "category": "web",
+  "section": "ctf",
+  "summary": "Rust-based recursive content discovery tool.",
+  "syntax": "feroxbuster -u <url> -w <wordlist>",
+  "description": "feroxbuster combines wordlist-based directory scanning with automatic recursion, fast concurrency, and link extraction written in Rust.",
+  "options": [
+    {
+      "flag": "-u",
+      "description": "Target URL"
+    },
+    {
+      "flag": "-w",
+      "description": "Wordlist path"
+    },
+    {
+      "flag": "-x",
+      "description": "Filter status codes"
+    },
+    {
+      "flag": "-r",
+      "description": "Follow redirects and recurse"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Recursive scan",
+      "command": "feroxbuster -u http://10.0.0.5 -w dirs.txt -x 500",
+      "output": "200      8l      45w     1204c http://10.0.0.5/uploads",
+      "explanation": "Discovers directories and automatically scans their children."
+    }
+  ],
+  "useCases": [
+    "content discovery",
+    "web recon"
+  ],
+  "related": [
+    "gobuster",
+    "wfuzz",
+    "ffuf"
+  ],
+  "tags": [
+    "web",
+    "rust",
+    "enum"
+  ]
+}

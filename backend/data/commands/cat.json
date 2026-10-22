@@ -1,0 +1,55 @@
+{
+  "slug": "cat",
+  "name": "cat",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Concatenate files and print on the standard output.",
+  "syntax": "cat [OPTION]... [FILE]...",
+  "description": "Concatenate FILE(s) to standard output.",
+  "options": [
+    {
+      "flag": "-n",
+      "description": "Number all output lines.",
+      "example": "cat -n file.txt"
+    },
+    {
+      "flag": "-b",
+      "description": "Number nonempty output lines.",
+      "example": "cat -b file.txt"
+    },
+    {
+      "flag": "-E",
+      "description": "Display $ at end of each line.",
+      "example": "cat -E file.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Display file contents",
+      "command": "cat README.md",
+      "output": "# LinuxDocs\nReference guide...",
+      "explanation": "Outputs the full contents of README.md to terminal."
+    },
+    {
+      "title": "Combine multiple files",
+      "command": "cat part1.txt part2.txt > combined.txt",
+      "output": "",
+      "explanation": "Concatenates two files into a new file."
+    }
+  ],
+  "useCases": [
+    "Quickly viewing small configuration files",
+    "Concatenating text files"
+  ],
+  "related": [
+    "less",
+    "head",
+    "tail",
+    "grep"
+  ],
+  "tags": [
+    "text",
+    "view",
+    "files"
+  ]
+}

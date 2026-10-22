@@ -1,0 +1,49 @@
+{
+  "slug": "sed",
+  "name": "sed",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Stream editor for filtering and transforming text.",
+  "syntax": "sed [OPTION]... 'script' [INPUT_FILE]...",
+  "description": "sed is a stream editor used to perform basic text transformations on an input stream (a file or input from a pipeline).",
+  "options": [
+    {
+      "flag": "-i",
+      "description": "Edit files in place (makes changes directly to file).",
+      "example": "sed -i \"s/old/new/g\" file.txt"
+    },
+    {
+      "flag": "-e",
+      "description": "Add the script to the commands to be executed.",
+      "example": "sed -e \"s/a/b/\" -e \"s/c/d/\" file.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Replace string globally",
+      "command": "echo \"hello world\" | sed \"s/world/linux/g\"",
+      "output": "hello linux",
+      "explanation": "Replaces all instances of \"world\" with \"linux\"."
+    },
+    {
+      "title": "Delete comment lines",
+      "command": "sed '/^#/d' config.conf",
+      "output": "port=5000\nhost=localhost",
+      "explanation": "Removes lines starting with #."
+    }
+  ],
+  "useCases": [
+    "Automated text replacement in configuration files",
+    "Stripping comments from code"
+  ],
+  "related": [
+    "awk",
+    "grep",
+    "tr"
+  ],
+  "tags": [
+    "text",
+    "stream",
+    "edit"
+  ]
+}

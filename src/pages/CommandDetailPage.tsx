@@ -1,17 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getCommand, getPathForCommand, getCategory, getCTFDomain } from '../data/commands';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { TableOfContents } from '../components/TableOfContents';
 import { CodeBlock } from '../components/CodeBlock';
 import { Terminal, Shield, AlertTriangle, Tag, Bookmark, BookmarkCheck, Save, FileText, FileQuestion } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getPathForLight, useCatalog, useCommandDoc } from '../context/CatalogContext';
 import { commandBuilderSpecs } from '../data/commandBuilders';
 import { CommandBuilder } from '../components/CommandBuilder';
 
 export const CommandDetailPage = () => {
   const { slug } = useParams<{ category?: string; domain?: string; slug?: string }>();
-  const command = getCommand(slug || '');
+  // Full docs load on demand from the authed API (Part 1): one GET per slug,
+  // ETag-revalidated on repeat visits, held in memory only.
+  const { command, loading: docLoading, error: docError, retry } = useCommandDoc(slug);
+  const { lights, categoryMap, domainMap } = useCatalog();
   const { user, bookmarks, notes, toggleBookmark, saveNote, deleteNote, addHistory } = useAuth();
 
   const [localNote, setLocalNote] = useState('');
@@ -31,8 +34,8 @@ export const CommandDetailPage = () => {
       command.useCases.length === 0 ||
       command.tags.length === 0);
   const parentName = isCTF
-    ? getCTFDomain(command?.category || '')?.name || command?.category || ''
-    : getCategory(command?.category || '')?.name || command?.category || '';
+    ? domainMap.get(command?.category || '')?.name || command?.category || ''
+    : categoryMap.get(command?.category || '')?.name || command?.category || '';
 
   const tocItems = [
     { id: 'overview', label: 'Overview' },
@@ -43,8 +46,8 @@ export const CommandDetailPage = () => {
     ...(command?.related.length ? [{ id: 'related', label: 'Related Commands' }] : []),
   ];
 
-  // Track recently viewed (server-synced when signed in, device-local for guests
-  // and replayed into the account history at sign-in).
+  // Track recently viewed (server-synced; the local guest store no longer
+  // exists — Part 1 removed guest mode).
   useEffect(() => {
     if (slug && command) {
       addHistory(slug);
@@ -92,30 +95,54 @@ export const CommandDetailPage = () => {
     }
   };
 
-  if (!command) {
+  if (docLoading && !command) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-24 text-center">
-        <p className="font-mono text-sm text-[var(--ctf-red)]">bash: {slug || 'command'}: command not found</p>
-        <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--text-heading)]">
-          No entry for that command
-        </h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[var(--text-muted)]">
-          It is not in the LinuxDocs dataset. Search with Ctrl K, or browse the reference from the home page.
+        <p className="font-mono text-sm text-[var(--text-muted)]">
+          fetch man page<span className="blinking">_</span>
         </p>
-        <div className="mt-6 flex justify-center gap-3">
-          <Link
-            to="/"
-            className="rounded-lg bg-[var(--terminal-green)] px-5 py-2.5 font-mono text-sm font-semibold text-[var(--bg)] hover:bg-[var(--terminal-green-dim)]"
-          >
-            Home
-          </Link>
-          <Link
-            to="/ctf"
-            className="rounded-lg border border-[var(--ctf-red)]/45 px-5 py-2.5 font-mono text-sm font-semibold text-[var(--ctf-red)] hover:bg-[var(--ctf-red-bg)]"
-          >
-            CTF tools
-          </Link>
+      </div>
+    );
+  }
+
+  if (!command) {
+    if (docError === 'Command not found') {
+      return (
+        <div className="mx-auto max-w-3xl px-4 py-24 text-center">
+          <p className="font-mono text-sm text-[var(--ctf-red)]">bash: {slug || 'command'}: command not found</p>
+          <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--text-heading)]">
+            No entry for that command
+          </h1>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[var(--text-muted)]">
+            It is not in the LinuxDocs dataset. Search with Ctrl K, or browse the reference from the home page.
+          </p>
+          <div className="mt-6 flex justify-center gap-3">
+            <Link
+              to="/"
+              className="rounded-lg bg-[var(--terminal-green)] px-5 py-2.5 font-mono text-sm font-semibold text-[var(--bg)] hover:bg-[var(--terminal-green-dim)]"
+            >
+              Home
+            </Link>
+            <Link
+              to="/ctf"
+              className="rounded-lg border border-[var(--ctf-red)]/45 px-5 py-2.5 font-mono text-sm font-semibold text-[var(--ctf-red)] hover:bg-[var(--ctf-red-bg)]"
+            >
+              CTF tools
+            </Link>
+          </div>
         </div>
+      );
+    }
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-24 text-center">
+        <p className="font-mono text-sm text-[var(--ctf-red)]">{docError || 'Something went wrong loading this page.'}</p>
+        <button
+          type="button"
+          onClick={retry}
+          className="mt-4 inline-block rounded-lg border border-[var(--border)] px-5 py-2.5 font-mono text-sm text-[var(--text)] hover:border-[var(--terminal-green)]/50"
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -348,16 +375,16 @@ export const CommandDetailPage = () => {
               <h2 className="font-display text-2xl font-semibold text-[var(--text-heading)]">Related utilities</h2>
               <div className="flex flex-wrap gap-2">
                 {command.related.map((relSlug) => {
-                  const relCmd = getCommand(relSlug);
-                  if (!relCmd) return null;
+                  const relLight = lights.find((light) => light.slug === relSlug);
+                  if (!relLight) return null;
                   return (
                     <Link
                       key={relSlug}
-                      to={getPathForCommand(relCmd)}
+                      to={getPathForLight(relLight)}
                       className="flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 font-mono text-xs text-[var(--text)] hover:border-[var(--terminal-green)]/50 hover:text-[var(--terminal-green)]"
                     >
                       <Terminal className="h-3.5 w-3.5" />
-                      {relCmd.name}
+                      {relLight.name}
                     </Link>
                   );
                 })}

@@ -1,0 +1,57 @@
+{
+  "slug": "fgrep",
+  "name": "fgrep",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Search for fixed strings without regular expressions.",
+  "syntax": "fgrep [OPTION]... PATTERNS [FILE]...",
+  "description": "Historical name for grep -F; treats patterns as literal strings. Prefer grep -F in new scripts.",
+  "options": [
+    {
+      "flag": "-i",
+      "description": "Ignore case distinctions.",
+      "example": "fgrep -i 'connection refused' app.log"
+    },
+    {
+      "flag": "-n",
+      "description": "Prefix matching lines with line numbers.",
+      "example": "fgrep -n 'TODO[' source.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Find a literal message",
+      "command": "fgrep 'connection refused' app.log",
+      "output": "2026-10-12 connection refused from 192.0.2.4",
+      "explanation": "Searches the exact phrase without regex interpretation."
+    },
+    {
+      "title": "Match regex punctuation literally",
+      "command": "fgrep 'TODO[' source.txt",
+      "output": "TODO[review]",
+      "explanation": "Treats the opening bracket as an ordinary character."
+    },
+    {
+      "title": "Read patterns from a file",
+      "command": "fgrep -f needles.txt report.txt",
+      "output": "service: ssh\nservice: nginx",
+      "explanation": "Uses each line of needles.txt as a fixed pattern."
+    }
+  ],
+  "useCases": [
+    "Searching literal messages",
+    "Matching user-provided text safely",
+    "Filtering logs with punctuation"
+  ],
+  "related": [
+    "grep",
+    "egrep",
+    "sed",
+    "cut"
+  ],
+  "tags": [
+    "fixed-string",
+    "search",
+    "text"
+  ]
+}

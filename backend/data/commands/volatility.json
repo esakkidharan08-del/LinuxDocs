@@ -1,0 +1,46 @@
+{
+  "slug": "volatility",
+  "name": "volatility",
+  "category": "forensics",
+  "section": "ctf",
+  "summary": "Memory forensics analysis framework.",
+  "syntax": "volatility -f <memory-dump> <profile> <plugin>",
+  "description": "Volatility extracts processes, network connections, and hidden artifacts from raw memory dumps - essential for memory forensics challenges.",
+  "options": [
+    {
+      "flag": "-f",
+      "description": "Memory dump file"
+    },
+    {
+      "flag": "--profile",
+      "description": "OS profile (e.g. WinXPsp2x86)"
+    },
+    {
+      "flag": "pslist",
+      "description": "Plugin: list running processes"
+    },
+    {
+      "flag": "netscan",
+      "description": "Plugin: dump network artifacts"
+    }
+  ],
+  "examples": [
+    {
+      "title": "List processes from a dump",
+      "command": "volatility -f dump.vmem --profile Win7SP1x64 pslist",
+      "output": "Offset(V)  Name          PID\n0xfffffa8... explorer.exe  1184",
+      "explanation": "Reconstructs process state at capture time."
+    }
+  ],
+  "useCases": [
+    "memory dump analysis"
+  ],
+  "related": [
+    "foremost",
+    "binwalk"
+  ],
+  "tags": [
+    "forensics",
+    "memory"
+  ]
+}

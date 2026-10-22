@@ -1,0 +1,58 @@
+{
+  "slug": "chown",
+  "name": "chown",
+  "category": "permissions-and-ownership",
+  "section": "linux",
+  "summary": "Change file owner and group.",
+  "syntax": "chown [OPTION]... [OWNER][:[GROUP]] FILE...",
+  "description": "Change the user and optionally the group ownership of each FILE.",
+  "options": [
+    {
+      "flag": "-R",
+      "description": "Operate on files and directories recursively.",
+      "example": "chown -R www-data:www-data /srv/www"
+    },
+    {
+      "flag": "--reference=RFILE",
+      "description": "Use the owner and group of RFILE.",
+      "example": "chown --reference=template.conf app.conf"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Assign a web directory to its service account",
+      "command": "sudo chown -R www-data:www-data /srv/www",
+      "output": "",
+      "explanation": "Transfers ownership of the document root to the web service account."
+    },
+    {
+      "title": "Change only the owner",
+      "command": "sudo chown alice report.txt",
+      "output": "",
+      "explanation": "Changes the user owner while retaining the existing group."
+    },
+    {
+      "title": "Change only the group",
+      "command": "sudo chown :developers build.log",
+      "output": "",
+      "explanation": "Assigns the file to the developers group without changing its owner."
+    }
+  ],
+  "useCases": [
+    "Assigning service directory ownership",
+    "Repairing ownership after extraction",
+    "Sharing files with a group"
+  ],
+  "related": [
+    "chmod",
+    "chgrp",
+    "ls",
+    "getfacl"
+  ],
+  "tags": [
+    "ownership",
+    "users",
+    "groups"
+  ],
+  "warnings": "changing ownership on system paths usually requires root; recursive changes (chown -R) are hard to revert once service accounts are reassigned."
+}

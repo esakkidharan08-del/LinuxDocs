@@ -1,0 +1,30 @@
+{
+  "slug": "whois",
+  "name": "whois",
+  "category": "osint",
+  "section": "ctf",
+  "summary": "Client for the whois directory service.",
+  "syntax": "whois [options] object",
+  "description": "Query database stores holding registration details of domains, IP blocks, and Autonomous Systems.",
+  "options": [],
+  "examples": [
+    {
+      "title": "Query domain registration details",
+      "command": "whois example.com",
+      "output": "Domain Name: EXAMPLE.COM\nRegistry Domain ID: 2336799_DOMAIN_COM-VRSN\nRegistrar: Reserved Domain Name",
+      "explanation": "Retrieves domain ownership, registrar, and nameserver details."
+    }
+  ],
+  "useCases": [
+    "Finding domain registration records and contact info in OSINT"
+  ],
+  "related": [
+    "theharvester"
+  ],
+  "tags": [
+    "ctf",
+    "osint",
+    "domain",
+    "whois"
+  ]
+}

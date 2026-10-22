@@ -1,0 +1,62 @@
+{
+  "slug": "tar",
+  "name": "tar",
+  "category": "archiving-and-compression",
+  "section": "linux",
+  "summary": "An archiving utility.",
+  "syntax": "tar [options] [archive-file] [file-or-directory...]",
+  "description": "Create, extract, or list files from tape archives (tarballs).",
+  "options": [
+    {
+      "flag": "-c",
+      "description": "Create a new archive.",
+      "example": "tar -cvf archive.tar folder/"
+    },
+    {
+      "flag": "-x",
+      "description": "Extract files from an archive.",
+      "example": "tar -xvf archive.tar"
+    },
+    {
+      "flag": "-z",
+      "description": "Filter archive through gzip (compression/decompression).",
+      "example": "tar -czvf archive.tar.gz folder/"
+    },
+    {
+      "flag": "-f",
+      "description": "Use archive file or device.",
+      "example": "tar -tf archive.tar"
+    },
+    {
+      "flag": "-v",
+      "description": "Verbosely list files processed.",
+      "example": "tar -xzvf archive.tar.gz"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Compress directory to tar.gz",
+      "command": "tar -czvf project.tar.gz src/ package.json",
+      "output": "src/\nsrc/App.tsx\npackage.json",
+      "explanation": "Bundles and compresses src/ and package.json into project.tar.gz."
+    },
+    {
+      "title": "Extract tar.gz archive",
+      "command": "tar -xzvf project.tar.gz",
+      "output": "src/\npackage.json",
+      "explanation": "Extracts compressed archive contents."
+    }
+  ],
+  "useCases": [
+    "Backing up source code",
+    "Distributing software packages"
+  ],
+  "related": [
+    "gzip"
+  ],
+  "tags": [
+    "archive",
+    "compress",
+    "tarball"
+  ]
+}

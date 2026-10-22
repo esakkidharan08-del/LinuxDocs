@@ -1,0 +1,41 @@
+{
+  "slug": "ncat",
+  "name": "ncat",
+  "category": "recon",
+  "section": "ctf",
+  "summary": "Concatenate and redirect sockets (Nmap version).",
+  "syntax": "ncat [options] [host] [port]",
+  "description": "Ncat is a feature-packed networking utility read from stdin and write to networks using TCP or UDP.",
+  "options": [
+    {
+      "flag": "-l",
+      "description": "Listen mode"
+    },
+    {
+      "flag": "-v",
+      "description": "Verbose"
+    },
+    {
+      "flag": "-e",
+      "description": "Execute command"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Listen on port",
+      "command": "ncat -lvp 4444",
+      "output": "",
+      "explanation": "Listen for reverse shell."
+    }
+  ],
+  "useCases": [
+    "Netcat-like operations"
+  ],
+  "related": [
+    "nc"
+  ],
+  "tags": [
+    "network",
+    "shell"
+  ]
+}

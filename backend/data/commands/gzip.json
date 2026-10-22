@@ -1,0 +1,44 @@
+{
+  "slug": "gzip",
+  "name": "gzip",
+  "category": "archiving-and-compression",
+  "section": "linux",
+  "summary": "Compress or expand files.",
+  "syntax": "gzip [OPTION]... [FILE]...",
+  "description": "Compress files using Lempel-Ziv coding (LZ77).",
+  "options": [
+    {
+      "flag": "-d",
+      "description": "Decompress compressed files.",
+      "example": "gzip -d file.txt.gz"
+    },
+    {
+      "flag": "-k",
+      "description": "Keep (don't delete) input files during compression.",
+      "example": "gzip -k file.txt"
+    },
+    {
+      "flag": "-v",
+      "description": "Verbose mode showing compression ratio.",
+      "example": "gzip -v large.sql"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Compress a log file",
+      "command": "gzip -k access.log",
+      "output": "access.log: 75.2% -- replaced with access.log.gz",
+      "explanation": "Compresses access.log into access.log.gz while keeping original."
+    }
+  ],
+  "useCases": [
+    "Compressing log files and single data files"
+  ],
+  "related": [
+    "tar"
+  ],
+  "tags": [
+    "compress",
+    "gzip"
+  ]
+}

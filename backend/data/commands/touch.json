@@ -1,0 +1,48 @@
+{
+  "slug": "touch",
+  "name": "touch",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Change file timestamps or create empty files.",
+  "syntax": "touch [OPTION]... FILE...",
+  "description": "Update the access and modification times of each FILE to the current time. A FILE argument that does not exist is created empty.",
+  "options": [
+    {
+      "flag": "-c",
+      "description": "Do not create any files.",
+      "example": "touch -c existing.txt"
+    },
+    {
+      "flag": "-t",
+      "description": "Use specified timestamp instead of current time.",
+      "example": "touch -t 202610121200 file.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Create a new empty file",
+      "command": "touch index.ts",
+      "output": "",
+      "explanation": "Creates index.ts if it does not exist."
+    },
+    {
+      "title": "Update modification timestamp",
+      "command": "touch script.sh",
+      "output": "",
+      "explanation": "Updates script.sh last modified timestamp to current time."
+    }
+  ],
+  "useCases": [
+    "Initializing placeholder source files",
+    "Updating makefile dependency timestamps"
+  ],
+  "related": [
+    "cat",
+    "mkdir"
+  ],
+  "tags": [
+    "files",
+    "timestamp",
+    "create"
+  ]
+}

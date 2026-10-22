@@ -9,6 +9,7 @@ __pycache__/
 *.sqlite
 qa/*
 !qa/run_all.py
+!qa/check-links.ts
 .claude/
 .DS_Store
 

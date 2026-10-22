@@ -1,0 +1,42 @@
+{
+  "slug": "less",
+  "name": "less",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Opposite of more; interactive file pager.",
+  "syntax": "less [OPTION]... [FILE]",
+  "description": "less is a program similar to more, but which allows backward movement in the file as well as forward movement.",
+  "options": [
+    {
+      "flag": "-N",
+      "description": "Cause line numbers to be displayed in each line.",
+      "example": "less -N large_log.txt"
+    },
+    {
+      "flag": "-S",
+      "description": "Causes lines longer than the screen width to be chopped rather than wrapped.",
+      "example": "less -S code.py"
+    }
+  ],
+  "examples": [
+    {
+      "title": "View large log file interactively",
+      "command": "less /var/log/syslog",
+      "output": "(interactive pager view)",
+      "explanation": "Allows scrolling up and down through massive log files without loading all into memory."
+    }
+  ],
+  "useCases": [
+    "Browsing large log files or source code files page by page"
+  ],
+  "related": [
+    "cat",
+    "head",
+    "tail"
+  ],
+  "tags": [
+    "text",
+    "pager",
+    "logs"
+  ]
+}

@@ -11,7 +11,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "qa": "python qa/run_all.py",
-    "check:links": "node --loader ts-node/esm qa/check-links.ts"
+    "check:links": "node qa/check-links.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

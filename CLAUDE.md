@@ -12,7 +12,7 @@ An MDN-style reference for Linux commands plus a CTF security & hacking tools se
 
 ## Folder Layout
 - `src/`
-  - `data/` — Single source of truth (`commands.ts`, helper functions, link validation)
+  - `data/commandBuilders.ts` — interactive builder specs (UI tool; command docs come from the authed API, source of truth is `backend/data`)
   - `components/` — Layout, Header, Sidebar, CommandCard, TerminalSimulator, CommandPalette, etc.
   - `pages/` — LandingPage, CategoryPage, CommandDetailPage, CTFHomePage, CTFDomainPage, NotFoundPage
   - `App.tsx` — Main router and layout wrapper
@@ -24,7 +24,7 @@ An MDN-style reference for Linux commands plus a CTF security & hacking tools se
 - `npm run dev` — Start Vite dev server
 - `npm run build` — Typecheck and build (`tsc -b && vite build`)
 - `npm run lint` — Run oxlint
-- `npm run check:links` — Run link validator script over `commands.ts`
+- `npm run check:links` — Run link validator script over the compiled `backend/data/commands.json`
 
 ## Design Tokens & Theme
 - **Terminal Theme (Dark Default):** Near-black backgrounds (`#0a0f0d`), terminal green accent (`#00ff9c`), amber warnings (`#ffb86c`), red/black accent for CTF (`#ff5555`).

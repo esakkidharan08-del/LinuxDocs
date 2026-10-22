@@ -1,0 +1,26 @@
+{
+  "slug": "whoami",
+  "name": "whoami",
+  "category": "users-and-groups",
+  "section": "linux",
+  "summary": "Print effective userid.",
+  "syntax": "whoami",
+  "description": "Print the user name associated with the current effective user ID.",
+  "options": [],
+  "examples": [
+    {
+      "title": "Print current username",
+      "command": "whoami",
+      "output": "root",
+      "explanation": "Returns current logged-in username."
+    }
+  ],
+  "useCases": [
+    "Verifying privilege level (e.g. root vs normal user)"
+  ],
+  "related": [],
+  "tags": [
+    "users",
+    "identity"
+  ]
+}

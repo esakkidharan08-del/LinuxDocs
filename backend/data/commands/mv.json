@@ -1,0 +1,50 @@
+{
+  "slug": "mv",
+  "name": "mv",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Move or rename files and directories.",
+  "syntax": "mv [OPTION]... SOURCE DEST",
+  "description": "Rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY.",
+  "options": [
+    {
+      "flag": "-i",
+      "description": "Prompt before overwrite.",
+      "example": "mv -i file1.txt file2.txt"
+    },
+    {
+      "flag": "-v",
+      "description": "Explain what is being done.",
+      "example": "mv -v *.txt docs/"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Rename a file",
+      "command": "mv old.txt new.txt",
+      "output": "",
+      "explanation": "Changes filename from old.txt to new.txt."
+    },
+    {
+      "title": "Move files to directory",
+      "command": "mv report.pdf /home/user/Documents/",
+      "output": "",
+      "explanation": "Moves report.pdf into the Documents folder."
+    }
+  ],
+  "useCases": [
+    "Renaming files and directories",
+    "Reorganizing directory layouts"
+  ],
+  "related": [
+    "cp",
+    "rm",
+    "mkdir"
+  ],
+  "tags": [
+    "files",
+    "move",
+    "rename"
+  ],
+  "warnings": "mv overwrites an existing destination without asking; check the target path before moving, especially between directories."
+}

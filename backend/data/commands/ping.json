@@ -1,0 +1,40 @@
+{
+  "slug": "ping",
+  "name": "ping",
+  "category": "networking",
+  "section": "linux",
+  "summary": "Send ICMP ECHO_REQUEST to network hosts.",
+  "syntax": "ping [options] destination",
+  "description": "Test reachability of a host on an Internet Protocol (IP) network and measure round-trip time.",
+  "options": [
+    {
+      "flag": "-c",
+      "description": "Stop after sending count ECHO_REQUEST packets.",
+      "example": "ping -c 4 8.8.8.8"
+    },
+    {
+      "flag": "-i",
+      "description": "Wait interval seconds between sending each packet.",
+      "example": "ping -i 2 192.168.1.1"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Ping host 4 times",
+      "command": "ping -c 4 1.1.1.1",
+      "output": "PING 1.1.1.1 (1.1.1.1) 56(84) bytes of data.\n64 bytes from 1.1.1.1: icmp_seq=1 ttl=57 time=12.4 ms\n--- 1.1.1.1 ping statistics ---\n4 packets transmitted, 4 received, 0% packet loss",
+      "explanation": "Sends 4 ICMP pings and reports latency statistics."
+    }
+  ],
+  "useCases": [
+    "Testing network connectivity and packet loss"
+  ],
+  "related": [
+    "ip"
+  ],
+  "tags": [
+    "networking",
+    "icmp",
+    "test"
+  ]
+}

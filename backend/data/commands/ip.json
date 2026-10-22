@@ -1,0 +1,47 @@
+{
+  "slug": "ip",
+  "name": "ip",
+  "category": "networking",
+  "section": "linux",
+  "summary": "Routing, network devices, interfaces and tunnels management.",
+  "syntax": "ip [OPTIONS] OBJECT {COMMAND | help}",
+  "description": "Modern replacement for ifconfig and route to show and manipulate routing, network devices, and tunnels.",
+  "options": [
+    {
+      "flag": "addr show",
+      "description": "Display IP addresses and interface details.",
+      "example": "ip addr show"
+    },
+    {
+      "flag": "route show",
+      "description": "Display routing table.",
+      "example": "ip route show"
+    },
+    {
+      "flag": "link set",
+      "description": "Change state of device (up/down).",
+      "example": "ip link set eth0 up"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Show network interfaces",
+      "command": "ip a",
+      "output": "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536...\n2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 inet 192.168.1.50/24",
+      "explanation": "Lists all network interfaces and assigned IP addresses."
+    }
+  ],
+  "useCases": [
+    "Checking local IP configuration",
+    "Troubleshooting network interface status"
+  ],
+  "related": [
+    "ss",
+    "ping"
+  ],
+  "tags": [
+    "networking",
+    "ip",
+    "interfaces"
+  ]
+}

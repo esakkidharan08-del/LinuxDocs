@@ -1,0 +1,45 @@
+{
+  "slug": "dpkg",
+  "name": "dpkg",
+  "category": "package-management",
+  "section": "linux",
+  "summary": "Medium for package management for Debian.",
+  "syntax": "dpkg [options] [action]",
+  "description": "Low-level tool to install, build, remove and manage Debian packages (.deb files).",
+  "options": [
+    {
+      "flag": "-i",
+      "description": "Install package from .deb file.",
+      "example": "sudo dpkg -i package.deb"
+    },
+    {
+      "flag": "-l",
+      "description": "List installed packages matching pattern.",
+      "example": "dpkg -l | grep nginx"
+    },
+    {
+      "flag": "-r",
+      "description": "Remove package.",
+      "example": "sudo dpkg -r package_name"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Install local deb package",
+      "command": "sudo dpkg -i discord.deb",
+      "output": "Selecting previously unselected package discord...",
+      "explanation": "Installs downloaded Debian package file."
+    }
+  ],
+  "useCases": [
+    "Installing downloaded .deb packages directly"
+  ],
+  "related": [
+    "apt"
+  ],
+  "tags": [
+    "package",
+    "debian"
+  ],
+  "warnings": "dpkg modifies the system package database directly and usually requires root; interrupted or conflicting operations can leave packages unconfigured."
+}

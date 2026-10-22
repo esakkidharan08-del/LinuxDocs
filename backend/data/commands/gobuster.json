@@ -1,0 +1,47 @@
+{
+  "slug": "gobuster",
+  "name": "gobuster",
+  "category": "recon",
+  "section": "ctf",
+  "summary": "Directory/file & DNS busting tool written in Go.",
+  "syntax": "gobuster <mode> [options]",
+  "description": "Gobuster is used to brute-force URIs (directories and files) in web sites and DNS subdomains.",
+  "options": [
+    {
+      "flag": "dir",
+      "description": "Use directory / file brute-forcing mode.",
+      "example": "gobuster dir -u http://target.htb -w /usr/share/wordlists/dirb/common.txt"
+    },
+    {
+      "flag": "dns",
+      "description": "Use DNS subdomain brute-forcing mode.",
+      "example": "gobuster dns -d target.com -w subdomains.txt"
+    },
+    {
+      "flag": "-t",
+      "description": "Number of concurrent threads.",
+      "example": "gobuster dir -u http://target.htb -w wordlist.txt -t 50"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Bust directories on web target",
+      "command": "gobuster dir -u http://10.10.10.15/ -w /usr/share/wordlists/seclists/Discovery/Web-Content/common.txt",
+      "output": "/admin                (Status: 301)\n/index.php            (Status: 200)\n/robots.txt           (Status: 200)",
+      "explanation": "Discovers hidden directories and endpoints on a web server."
+    }
+  ],
+  "useCases": [
+    "Finding hidden administrative panels during CTF web challenges"
+  ],
+  "related": [
+    "ffuf",
+    "sqlmap"
+  ],
+  "tags": [
+    "ctf",
+    "web",
+    "recon",
+    "bruteforce"
+  ]
+}

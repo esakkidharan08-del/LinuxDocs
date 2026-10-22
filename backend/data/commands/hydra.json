@@ -1,0 +1,43 @@
+{
+  "slug": "hydra",
+  "name": "hydra",
+  "category": "pwn",
+  "section": "ctf",
+  "summary": "Parallelized login cracker.",
+  "syntax": "hydra [OPTIONS] target protocol",
+  "description": "Hydra is a parallelized login cracker which supports numerous protocols.",
+  "options": [
+    {
+      "flag": "-l",
+      "description": "Login with LOGIN name."
+    },
+    {
+      "flag": "-P",
+      "description": "Load several passwords from FILE."
+    },
+    {
+      "flag": "-t",
+      "description": "Number of threads."
+    }
+  ],
+  "examples": [
+    {
+      "title": "SSH brute force",
+      "command": "hydra -l admin -P passwords.txt ssh://192.168.1.100",
+      "output": "[22][ssh] host: 192.168.1.100   login: admin   password: password123",
+      "explanation": "Brute force SSH login."
+    }
+  ],
+  "useCases": [
+    "Password cracking",
+    "Auth testing"
+  ],
+  "related": [
+    "ssh"
+  ],
+  "tags": [
+    "brute-force",
+    "auth",
+    "cracking"
+  ]
+}

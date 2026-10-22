@@ -1,12 +1,38 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getCTFDomain, COMMANDS, getPathForCommand } from '../data/commands';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { getPathForLight, useCatalog } from '../context/CatalogContext';
 import { Shield, ExternalLink, ArrowRight, Wrench } from 'lucide-react';
 
 export const CTFDomainPage: React.FC = () => {
   const { domainId } = useParams<{ domainId: string }>();
-  const domain = getCTFDomain(domainId || '');
+  const { lights, domainMap, loading: catalogLoading, error: catalogError, clearError } = useCatalog();
+  const domain = domainId ? domainMap.get(domainId) || null : null;
+
+  if (catalogLoading && !domain) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-24 text-center">
+        <p className="font-mono text-sm text-[var(--text-muted)]">
+          loading domain<span className="blinking">_</span>
+        </p>
+      </div>
+    );
+  }
+
+  if (catalogError && !domain) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-24 text-center">
+        <p className="font-mono text-sm text-[var(--ctf-red)]">{catalogError}</p>
+        <button
+          type="button"
+          onClick={clearError}
+          className="mt-4 inline-block rounded-lg border border-[var(--border)] px-5 py-2.5 font-mono text-sm text-[var(--text)] hover:border-[var(--ctf-red)]/50"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   if (!domain) {
     return (
@@ -28,7 +54,7 @@ export const CTFDomainPage: React.FC = () => {
     );
   }
 
-  const toolsInDomain = COMMANDS.filter((c) => c.section === 'ctf' && c.category === domain.id);
+  const toolsInDomain = lights.filter((c) => c.section === 'ctf' && c.category === domain.id);
 
   return (
     <div className="mx-auto max-w-5xl space-y-10 px-4 py-10 sm:px-6 lg:px-8">
@@ -63,7 +89,7 @@ export const CTFDomainPage: React.FC = () => {
             {toolsInDomain.map((cmd, index) => (
               <Link
                 key={cmd.slug}
-                to={getPathForCommand(cmd)}
+                to={getPathForLight(cmd)}
                 className="group flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 hover:-translate-y-0.5 hover:border-[var(--ctf-red)]/50"
               >
                 <div className="flex items-start justify-between gap-3">

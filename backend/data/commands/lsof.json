@@ -1,0 +1,43 @@
+{
+  "slug": "lsof",
+  "name": "lsof",
+  "category": "networking",
+  "section": "linux",
+  "summary": "List open files.",
+  "syntax": "lsof [options] [names]",
+  "description": "lsof lists information about files opened by processes.",
+  "options": [
+    {
+      "flag": "-i",
+      "description": "Select IPv[46] files"
+    },
+    {
+      "flag": "-p",
+      "description": "Exclude or select process IDs"
+    },
+    {
+      "flag": "+D",
+      "description": "Search in directory tree"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Show open network connections",
+      "command": "lsof -i",
+      "output": "COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME",
+      "explanation": "List network sockets."
+    }
+  ],
+  "useCases": [
+    "Debugging",
+    "Network inspection"
+  ],
+  "related": [
+    "netstat",
+    "ss"
+  ],
+  "tags": [
+    "files",
+    "network"
+  ]
+}

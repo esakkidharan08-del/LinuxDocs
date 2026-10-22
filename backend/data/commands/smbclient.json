@@ -1,0 +1,47 @@
+{
+  "slug": "smbclient",
+  "name": "smbclient",
+  "category": "recon",
+  "section": "ctf",
+  "summary": "SMB/CIFS client for share access.",
+  "syntax": "smbclient -L //<host> -N",
+  "description": "smbclient talks to Windows/Samba SMB servers: list shares, browse files, and upload/download using credentials - core for Windows CTF boxes.",
+  "options": [
+    {
+      "flag": "-L",
+      "description": "List available shares on the server"
+    },
+    {
+      "flag": "-N",
+      "description": "Authenticate with no password (anonymous)"
+    },
+    {
+      "flag": "-U",
+      "description": "User%password credentials"
+    },
+    {
+      "flag": "-m",
+      "description": "Force SMB protocol version"
+    }
+  ],
+  "examples": [
+    {
+      "title": "List shares anonymously",
+      "command": "smbclient -L //10.0.0.5 -N",
+      "output": "Sharename       Type      Comment\nprint$          Disk",
+      "explanation": "Null session reveals exposed shares - then connect with smbclient //<host>/<share>."
+    }
+  ],
+  "useCases": [
+    "share enumeration",
+    "file transfer"
+  ],
+  "related": [
+    "nmap"
+  ],
+  "tags": [
+    "smb",
+    "windows",
+    "recon"
+  ]
+}

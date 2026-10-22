@@ -1,0 +1,48 @@
+{
+  "slug": "nikto",
+  "name": "nikto",
+  "category": "web",
+  "section": "ctf",
+  "summary": "Web server vulnerability scanner.",
+  "syntax": "nikto -h <host>",
+  "description": "Nikto is an open-source web server scanner that performs comprehensive tests against web servers.",
+  "options": [
+    {
+      "flag": "-h",
+      "description": "Target host or IP"
+    },
+    {
+      "flag": "-p",
+      "description": "Custom port to scan"
+    },
+    {
+      "flag": "-ssl",
+      "description": "Force SSL/HTTPS mode"
+    },
+    {
+      "flag": "-o",
+      "description": "Write scan output to a file"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Scan a web server",
+      "command": "nikto -h http://10.0.0.5",
+      "output": "+ Server: Apache/2.4.41\n+ Allowed HTTP Methods: GET, HEAD, POST, OPTIONS",
+      "explanation": "Identifies software versions and risky configurations."
+    }
+  ],
+  "useCases": [
+    "web scanning",
+    "misconfiguration checks"
+  ],
+  "related": [
+    "nmap",
+    "wpscan"
+  ],
+  "tags": [
+    "web",
+    "scanner",
+    "vuln"
+  ]
+}

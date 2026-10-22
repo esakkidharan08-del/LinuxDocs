@@ -1,0 +1,36 @@
+{
+  "slug": "gdb",
+  "name": "gdb",
+  "category": "reverse-engineering",
+  "section": "ctf",
+  "summary": "The GNU Debugger.",
+  "syntax": "gdb [options] [binary [core|pid]]",
+  "description": "Allows you to inspect what is happening \"inside\" another program while it executes, inspect registers, memory, and set breakpoints.",
+  "options": [
+    {
+      "flag": "-q",
+      "description": "Quiet mode (suppress introductory copyright banner).",
+      "example": "gdb -q ./binary"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Start GDB and run binary",
+      "command": "gdb -q ./pwn_chall",
+      "output": "(gdb) run\nStarting program: /home/user/pwn_chall\nProgram received signal SIGSEGV, Segmentation fault.",
+      "explanation": "Debugging binary execution flow and inspecting crashes."
+    }
+  ],
+  "useCases": [
+    "Debugging buffer overflows and examining registers in pwn challenges"
+  ],
+  "related": [
+    "objdump"
+  ],
+  "tags": [
+    "ctf",
+    "debugging",
+    "pwn",
+    "reversing"
+  ]
+}

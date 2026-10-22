@@ -1,0 +1,62 @@
+{
+  "slug": "wc",
+  "name": "wc",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Count lines, words, and bytes.",
+  "syntax": "wc [OPTION]... [FILE]...",
+  "description": "Prints newline, word, character, or byte counts for each input file.",
+  "options": [
+    {
+      "flag": "-l",
+      "description": "Print newline counts.",
+      "example": "wc -l access.log"
+    },
+    {
+      "flag": "-w",
+      "description": "Print word counts.",
+      "example": "wc -w README.md"
+    },
+    {
+      "flag": "-c",
+      "description": "Print byte counts.",
+      "example": "wc -c image.bin"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Count source lines",
+      "command": "wc -l src/main.ts",
+      "output": "84 src/main.ts",
+      "explanation": "Reports the number of newline characters."
+    },
+    {
+      "title": "Count words in documentation",
+      "command": "wc -w README.md",
+      "output": "412 README.md",
+      "explanation": "Counts whitespace-delimited words."
+    },
+    {
+      "title": "Count bytes in a file",
+      "command": "wc -c payload.bin",
+      "output": "4096 payload.bin",
+      "explanation": "Reports the exact byte length."
+    }
+  ],
+  "useCases": [
+    "Measuring files",
+    "Counting log records",
+    "Checking generated output sizes"
+  ],
+  "related": [
+    "sort",
+    "uniq",
+    "cut",
+    "du"
+  ],
+  "tags": [
+    "count",
+    "lines",
+    "files"
+  ]
+}

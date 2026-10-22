@@ -1,0 +1,41 @@
+{
+  "slug": "head",
+  "name": "head",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Output the first part of files.",
+  "syntax": "head [OPTION]... [FILE]...",
+  "description": "Print the first 10 lines of each FILE to standard output. With more than one file, precede each with a header.",
+  "options": [
+    {
+      "flag": "-n",
+      "description": "Print first NUM lines instead of first 10.",
+      "example": "head -n 20 config.conf"
+    },
+    {
+      "flag": "-c",
+      "description": "Print first NUM bytes of each file.",
+      "example": "head -c 100 data.bin"
+    }
+  ],
+  "examples": [
+    {
+      "title": "View first 5 lines",
+      "command": "head -n 5 /etc/passwd",
+      "output": "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin",
+      "explanation": "Outputs the top 5 lines of /etc/passwd."
+    }
+  ],
+  "useCases": [
+    "Inspecting file headers or schema definitions"
+  ],
+  "related": [
+    "tail",
+    "cat",
+    "less"
+  ],
+  "tags": [
+    "text",
+    "filter"
+  ]
+}

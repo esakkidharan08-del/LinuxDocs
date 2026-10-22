@@ -1,0 +1,57 @@
+{
+  "slug": "csplit",
+  "name": "csplit",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Split a file at context-defined boundaries.",
+  "syntax": "csplit [OPTION]... FILE PATTERN...",
+  "description": "Splits a file into sections at lines matching supplied patterns or line numbers.",
+  "options": [
+    {
+      "flag": "-f PREFIX",
+      "description": "Use PREFIX for output file names.",
+      "example": "csplit -f section- manual.txt '/^## /' '{*}'"
+    },
+    {
+      "flag": "-n DIGITS",
+      "description": "Use DIGITS digits in output suffixes.",
+      "example": "csplit -n 3 -f part- data.txt 20 40"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Split Markdown sections",
+      "command": "csplit -f section- manual.md '/^## /' '{*}'",
+      "output": "112\n245\n98",
+      "explanation": "Creates one file for each second-level heading boundary."
+    },
+    {
+      "title": "Split at line numbers",
+      "command": "csplit -f chunk- data.txt 20 40",
+      "output": "420\n515\n193",
+      "explanation": "Splits before the specified line numbers."
+    },
+    {
+      "title": "Discard output details",
+      "command": "csplit -s -f part- report.txt '/^END$/' '{*}'",
+      "output": "",
+      "explanation": "Silences byte-count output while splitting at END markers."
+    }
+  ],
+  "useCases": [
+    "Splitting structured reports",
+    "Separating document sections",
+    "Processing marker-delimited data"
+  ],
+  "related": [
+    "split",
+    "sed",
+    "awk",
+    "grep"
+  ],
+  "tags": [
+    "split",
+    "patterns",
+    "text"
+  ]
+}

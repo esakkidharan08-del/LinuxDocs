@@ -1,0 +1,54 @@
+{
+  "slug": "kill",
+  "name": "kill",
+  "category": "process-management",
+  "section": "linux",
+  "summary": "Send a signal to a process.",
+  "syntax": "kill [options] <PID>",
+  "description": "Send a termination or custom signal to one or more processes specified by PID.",
+  "options": [
+    {
+      "flag": "-9, -SIGKILL",
+      "description": "Force immediate kill (un-catchable termination signal).",
+      "example": "kill -9 1234"
+    },
+    {
+      "flag": "-15, -SIGTERM",
+      "description": "Graceful termination request (default signal).",
+      "example": "kill 1234"
+    },
+    {
+      "flag": "-l",
+      "description": "List available signal names.",
+      "example": "kill -l"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Gracefully terminate process",
+      "command": "kill 4521",
+      "output": "",
+      "explanation": "Sends SIGTERM allowing process to save state and exit."
+    },
+    {
+      "title": "Force kill unresponsive process",
+      "command": "kill -9 4521",
+      "output": "",
+      "explanation": "Forcefully terminates PID 4521 immediately."
+    }
+  ],
+  "useCases": [
+    "Stopping hung server processes",
+    "Restarting stuck daemons"
+  ],
+  "related": [
+    "ps",
+    "top"
+  ],
+  "tags": [
+    "process",
+    "signal",
+    "stop"
+  ],
+  "warnings": "kill delivers signals immediately; the wrong PID can terminate a session or a system process you did not intend to stop."
+}

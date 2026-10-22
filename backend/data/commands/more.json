@@ -1,0 +1,57 @@
+{
+  "slug": "more",
+  "name": "more",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Page through text one screen at a time.",
+  "syntax": "more [options] file...",
+  "description": "Displays text files a screen at a time and pauses when the terminal is full.",
+  "options": [
+    {
+      "flag": "-d",
+      "description": "Prompt with helpful navigation text.",
+      "example": "more -d README.md"
+    },
+    {
+      "flag": "-s",
+      "description": "Squeeze multiple blank lines into one.",
+      "example": "more -s notes.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Read a manual page file",
+      "command": "more README.md",
+      "output": "--More--(12%)",
+      "explanation": "Opens README.md in a simple terminal pager."
+    },
+    {
+      "title": "Squeeze blank lines",
+      "command": "more -s notes.txt",
+      "output": "Project notes\n\nNext task: review permissions",
+      "explanation": "Reduces runs of blank lines while paging."
+    },
+    {
+      "title": "Use helpful prompts",
+      "command": "more -d CHANGELOG",
+      "output": "--More--(34%) [Press space to continue, q to quit.]",
+      "explanation": "Shows navigation guidance while viewing the changelog."
+    }
+  ],
+  "useCases": [
+    "Reading files without opening an editor",
+    "Reviewing long command output",
+    "Paging logs over a remote shell"
+  ],
+  "related": [
+    "less",
+    "cat",
+    "head",
+    "tail"
+  ],
+  "tags": [
+    "pager",
+    "text",
+    "terminal"
+  ]
+}

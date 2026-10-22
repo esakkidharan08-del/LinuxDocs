@@ -1,0 +1,35 @@
+{
+  "slug": "pwd",
+  "name": "pwd",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Print name of current/working directory.",
+  "syntax": "pwd [OPTION]",
+  "description": "Print the full filename of the current working directory.",
+  "options": [
+    {
+      "flag": "-P",
+      "description": "Avoid all symbolical links; print the physical directory path.",
+      "example": "pwd -P"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Print current directory",
+      "command": "pwd",
+      "output": "/home/user/Documents",
+      "explanation": "Outputs the absolute pathname of the current working directory."
+    }
+  ],
+  "useCases": [
+    "Confirming current working location in scripts and terminal sessions"
+  ],
+  "related": [
+    "cd",
+    "ls"
+  ],
+  "tags": [
+    "directory",
+    "path"
+  ]
+}

@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+
+/** Only same-app paths may round-trip through ?next= (no protocol tricks). */
+const safeNext = (raw: string | null): string => {
+  if (raw && raw.startsWith('/') && !raw.startsWith('//') && !raw.includes('\\')) return raw;
+  return '';
+};
 
 export const SignInPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { login, user, loading: authLoading } = useAuth();
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from = safeNext(searchParams.get('next')) || (location.state as any)?.from?.pathname || '/';
 
   // Already signed in? No need to see the sign-in form.
   useEffect(() => {

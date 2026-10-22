@@ -1,0 +1,53 @@
+{
+  "slug": "cp",
+  "name": "cp",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Copy files and directories.",
+  "syntax": "cp [OPTION]... SOURCE DEST",
+  "description": "Copy SOURCE to DEST, or multiple SOURCE(s) to DIRECTORY.",
+  "options": [
+    {
+      "flag": "-r, -R",
+      "description": "Copy directories recursively.",
+      "example": "cp -r dir1/ dir2/"
+    },
+    {
+      "flag": "-i",
+      "description": "Prompt before overwrite.",
+      "example": "cp -i file.txt backup.txt"
+    },
+    {
+      "flag": "-v",
+      "description": "Explain what is being done.",
+      "example": "cp -v file.txt dest/"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Copy a single file",
+      "command": "cp config.yaml config.yaml.bak",
+      "output": "",
+      "explanation": "Creates an exact duplicate file named config.yaml.bak."
+    },
+    {
+      "title": "Copy directory recursively",
+      "command": "cp -r /etc/nginx /backup/nginx",
+      "output": "",
+      "explanation": "Copies the entire directory tree recursively."
+    }
+  ],
+  "useCases": [
+    "Backing up files",
+    "Duplicating directory structures"
+  ],
+  "related": [
+    "mv",
+    "rm",
+    "mkdir"
+  ],
+  "tags": [
+    "files",
+    "copy"
+  ]
+}

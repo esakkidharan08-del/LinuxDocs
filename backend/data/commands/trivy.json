@@ -1,0 +1,40 @@
+{
+  "slug": "trivy",
+  "name": "trivy",
+  "category": "containers",
+  "section": "ctf",
+  "summary": "Comprehensive vulnerability scanner for container images, filesystems, and Git repos.",
+  "syntax": "trivy [options] <target>",
+  "description": "Finds security vulnerabilities, misconfigurations, secrets, and software licenses in container images and filesystems.",
+  "options": [
+    {
+      "flag": "image",
+      "description": "Scan container image.",
+      "example": "trivy image python:3.9"
+    },
+    {
+      "flag": "fs",
+      "description": "Scan local filesystem for vulnerabilities/secrets.",
+      "example": "trivy fs ."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Scan Docker image for vulnerabilities",
+      "command": "trivy image nginx:latest",
+      "output": "nginx:latest (debian 11.6)\n=========================\nTotal: 15 (UNKNOWN: 0, LOW: 10, MEDIUM: 3, HIGH: 2, CRITICAL: 0)",
+      "explanation": "Reports known CVE vulnerabilities in container packages."
+    }
+  ],
+  "useCases": [
+    "Auditing container image security in cloud & container CTF challenges"
+  ],
+  "related": [],
+  "tags": [
+    "ctf",
+    "containers",
+    "security",
+    "docker",
+    "scanner"
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "slug": "adb",
+  "name": "adb",
+  "category": "mobile",
+  "section": "ctf",
+  "summary": "Android Debug Bridge client.",
+  "syntax": "adb [options] command",
+  "description": "Versatile command-line tool that lets you communicate with an Android device emulator or connected phone.",
+  "options": [
+    {
+      "flag": "devices",
+      "description": "List all connected device instances.",
+      "example": "adb devices"
+    },
+    {
+      "flag": "shell",
+      "description": "Open remote interactive shell on device.",
+      "example": "adb shell"
+    },
+    {
+      "flag": "install",
+      "description": "Push and install an APK package.",
+      "example": "adb install app.apk"
+    },
+    {
+      "flag": "pull",
+      "description": "Copy file/dir from device.",
+      "example": "adb pull /sdcard/data.db ."
+    }
+  ],
+  "examples": [
+    {
+      "title": "List connected Android devices",
+      "command": "adb devices",
+      "output": "List of devices attached\nemulator-5554   device",
+      "explanation": "Confirms ADB connection to emulator or device."
+    }
+  ],
+  "useCases": [
+    "Inspecting Android application file structures and databases during mobile CTFs"
+  ],
+  "related": [
+    "apktool"
+  ],
+  "tags": [
+    "ctf",
+    "mobile",
+    "android",
+    "adb"
+  ]
+}

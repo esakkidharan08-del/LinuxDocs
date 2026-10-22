@@ -1,0 +1,57 @@
+{
+  "slug": "stat",
+  "name": "stat",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Display file or filesystem status.",
+  "syntax": "stat [OPTION]... FILE...",
+  "description": "Reports metadata such as permissions, ownership, size, timestamps, and inode information.",
+  "options": [
+    {
+      "flag": "-c FORMAT",
+      "description": "Use a custom output format.",
+      "example": "stat -c '%n %s bytes %a' report.txt"
+    },
+    {
+      "flag": "-f",
+      "description": "Report filesystem status instead of file status.",
+      "example": "stat -f /var/log"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Inspect file metadata",
+      "command": "stat report.txt",
+      "output": "  File: report.txt\n  Size: 128\tBlocks: 8\tIO Block: 4096 regular file\nAccess: (0644/-rw-r--r--)  Uid: (1000/alice)",
+      "explanation": "Shows standard metadata in a readable report."
+    },
+    {
+      "title": "Print selected fields",
+      "command": "stat -c '%n %s %a' report.txt",
+      "output": "report.txt 128 644",
+      "explanation": "Formats the name, size, and mode for scripts."
+    },
+    {
+      "title": "Inspect filesystem status",
+      "command": "stat -f /var/log",
+      "output": "  File: /var/log\n    ID: 7b4c... Namelen: 255 Type: ext2/ext3",
+      "explanation": "Reports filesystem-level information."
+    }
+  ],
+  "useCases": [
+    "Auditing timestamps and modes",
+    "Writing metadata checks",
+    "Inspecting filesystem capacity details"
+  ],
+  "related": [
+    "ls",
+    "file",
+    "chmod",
+    "chown"
+  ],
+  "tags": [
+    "metadata",
+    "inode",
+    "filesystem"
+  ]
+}

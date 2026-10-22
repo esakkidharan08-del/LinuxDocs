@@ -1,0 +1,59 @@
+{
+  "slug": "nmap",
+  "name": "nmap",
+  "category": "recon",
+  "section": "ctf",
+  "summary": "Network exploration tool and security / port scanner.",
+  "syntax": "nmap [Scan Type(s)] [Options] {target specification}",
+  "description": "Nmap (\"Network Mapper\") is used for network discovery and vulnerability scanning. It inspects live hosts, open ports, running services, and OS versions.",
+  "options": [
+    {
+      "flag": "-sS",
+      "description": "TCP SYN scan (default stealth scan, requires root).",
+      "example": "sudo nmap -sS 10.10.10.5"
+    },
+    {
+      "flag": "-sV",
+      "description": "Probe open ports to determine service/version info.",
+      "example": "nmap -sV 10.10.10.5"
+    },
+    {
+      "flag": "-A",
+      "description": "Enable OS detection, version detection, script scanning, and traceroute.",
+      "example": "nmap -A 10.10.10.5"
+    },
+    {
+      "flag": "-p-",
+      "description": "Scan all 65535 ports.",
+      "example": "nmap -p- 10.10.10.5"
+    },
+    {
+      "flag": "--script",
+      "description": "Run Nmap Scripting Engine (NSE) scripts.",
+      "example": "nmap --script vuln 10.10.10.5"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Comprehensive version scan on target IP",
+      "command": "nmap -sC -sV -T4 10.10.11.120",
+      "output": "Starting Nmap 7.94 ( https://nmap.org )\nPORT   STATE SERVICE VERSION\n22/tcp open  ssh     OpenSSH 8.9p1\n80/tcp open  http    nginx 1.18.0",
+      "explanation": "Runs default scripts (-sC), version detection (-sV), and aggressive timing (-T4)."
+    }
+  ],
+  "useCases": [
+    "CTF initial recon and enumeration",
+    "Discovering open ports and outdated vulnerable software services"
+  ],
+  "warnings": "Scanning networks without explicit authorization is illegal and unethical.",
+  "related": [
+    "gobuster",
+    "ffuf"
+  ],
+  "tags": [
+    "ctf",
+    "recon",
+    "scanning",
+    "network"
+  ]
+}

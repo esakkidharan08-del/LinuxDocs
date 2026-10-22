@@ -2,18 +2,41 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Flame, GraduationCap, RotateCcw, Target, Trophy, Zap, ArrowRight } from 'lucide-react';
-import { COMMANDS } from '../data/commands';
+import { useAllCommands } from '../context/CatalogContext';
+import type { Command } from '../types';
 
 /* ============================================================
-   Speed Drill - a 60 second rapid quiz generated from the dataset.
-   No hand-written content: every round invents fresh questions from
-   the summary, flags and descriptions of the 132 real commands.
+   Speed Drill - a 60 second rapid quiz generated from the
+   authed catalog (Part 1). No hand-written content: every round
+   invents fresh questions from the summary, flags and
+   descriptions of the real commands. The full docs for the whole
+   dataset are fetched once on demand and stay in memory after.
    ============================================================ */
 
 type Drill = { prompt: string; tag: string; options: string[]; answer: number };
 type DrillStore = { best: number; plays: number };
 const STORE_KEY = 'linuxdocs.speeddrill';
 const ROUND_SECONDS = 60;
+
+/* Question pools, derived once per loaded-docs revision (a ref keeps a
+   round mid-flight stable even if the catalog refetches underneath). */
+type DrillPools = {
+  commands: Command[];
+  withOptions: Command[];
+  allNames: string[];
+  allSummaries: string[];
+  allFlagDescriptions: string[];
+};
+
+function buildPools(commands: Command[]): DrillPools {
+  return {
+    commands,
+    withOptions: commands.filter((c) => c.options.length >= 2),
+    allNames: commands.map((c) => c.name),
+    allSummaries: Array.from(new Set(commands.map((c) => c.summary))),
+    allFlagDescriptions: Array.from(new Set(commands.flatMap((c) => c.options.map((o) => o.description)))),
+  };
+}
 
 function loadStore(): DrillStore {
   try {
@@ -40,11 +63,6 @@ function randItem<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-const WITH_OPTIONS = COMMANDS.filter((c) => c.options.length >= 2);
-const ALL_NAMES = COMMANDS.map((c) => c.name);
-const ALL_SUMMARIES = Array.from(new Set(COMMANDS.map((c) => c.summary)));
-const ALL_FLAG_DESCRIPTIONS = Array.from(new Set(COMMANDS.flatMap((c) => c.options.map((o) => o.description))));
-
 /** Build distinct distractors from a pool, excluding the answer text itself. */
 function distractors(pool: string[], answer: string, count: number): string[] {
   const picked = new Set<string>();
@@ -63,14 +81,14 @@ function finalize(prompt: string, tag: string, correctFirst: string[]): Drill {
   return { prompt, tag, options: shuffled, answer: shuffled.indexOf(correct) };
 }
 
-function buildQuestion(): Drill {
+function buildQuestion(pools: DrillPools): Drill {
   const kind = randItem(['flag-purpose', 'command-summary', 'summary-command', 'flag-name']);
 
-  if (kind === 'flag-purpose' && WITH_OPTIONS.length > 0) {
-    const command = randItem(WITH_OPTIONS);
+  if (kind === 'flag-purpose' && pools.withOptions.length > 0) {
+    const command = randItem(pools.withOptions);
     const option = randItem(command.options);
     const distractorsFound = distractors(
-      ALL_FLAG_DESCRIPTIONS.filter((d) => d !== option.description),
+      pools.allFlagDescriptions.filter((d) => d !== option.description),
       option.description,
       3,
     );
@@ -79,12 +97,12 @@ function buildQuestion(): Drill {
     }
   }
 
-  if (kind === 'flag-name' && WITH_OPTIONS.length > 0) {
-    const command = randItem(WITH_OPTIONS);
+  if (kind === 'flag-name' && pools.withOptions.length > 0) {
+    const command = randItem(pools.withOptions);
     const option = randItem(command.options);
     const wrongFlags = command.options.filter((o) => o.flag !== option.flag).map((o) => o.flag);
     const otherFlags = distractors(
-      WITH_OPTIONS.flatMap((c) => c.options.map((o) => o.flag)).filter((f) => !wrongFlags.includes(f)),
+      pools.withOptions.flatMap((c) => c.options.map((o) => o.flag)).filter((f) => !wrongFlags.includes(f)),
       option.flag,
       3,
     );
@@ -94,9 +112,9 @@ function buildQuestion(): Drill {
   }
 
   if (kind === 'summary-command') {
-    const command = randItem(COMMANDS);
+    const command = randItem(pools.commands);
     const others = distractors(
-      ALL_NAMES.filter((n) => n !== command.name),
+      pools.allNames.filter((n) => n !== command.name),
       command.name,
       3,
     );
@@ -106,14 +124,14 @@ function buildQuestion(): Drill {
   }
 
   /* fallback + 'command-summary' path */
-  const command = randItem(COMMANDS);
+  const command = randItem(pools.commands);
   const others = distractors(
-    ALL_SUMMARIES.filter((s) => s !== command.summary),
+    pools.allSummaries.filter((s) => s !== command.summary),
     command.summary,
     3,
   );
   if (others.length < 3) {
-    /* guaranteed-valid shape for a 132-command dataset */
+    /* guaranteed-valid shape for the full dataset */
     return finalize(`What does ${command.name} do?`, 'command · summary', [
       command.summary,
       'Reboots the system without confirmation.',
@@ -136,6 +154,15 @@ export function SpeedDrillPage() {
   const [bestCombo, setBestCombo] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(ROUND_SECONDS);
   const [prevBest, setPrevBest] = useState(0);
+
+  // The question generator draws from the full docs, loaded on demand
+  // (first visit pays one fetch wave; after that it is all in memory).
+  const { commands, loading: docsLoading, error: docsError } = useAllCommands();
+  const ready = commands.length > 0;
+  const poolsRef = useRef<DrillPools | null>(null);
+  if (commands.length) {
+    poolsRef.current = buildPools(commands);
+  }
 
   const answeredRef = useRef(false);
   const advanceTimer = useRef<number | undefined>(undefined);
@@ -195,7 +222,7 @@ export function SpeedDrillPage() {
         () => {
           setPicked(null);
           answeredRef.current = false;
-          setQuestion(buildQuestion());
+          setQuestion(poolsRef.current ? buildQuestion(poolsRef.current) : null);
         },
         isCorrect ? 320 : 900,
       );
@@ -215,6 +242,7 @@ export function SpeedDrillPage() {
   }, [phase, answerWith]);
 
   const start = () => {
+    if (!poolsRef.current) return;
     savedRef.current = false;
     setScore(0);
     setAsked(0);
@@ -224,7 +252,7 @@ export function SpeedDrillPage() {
     setSecondsLeft(ROUND_SECONDS);
     setPicked(null);
     answeredRef.current = false;
-    setQuestion(buildQuestion());
+    setQuestion(buildQuestion(poolsRef.current));
     setPhase('playing');
   };
 
@@ -245,7 +273,12 @@ export function SpeedDrillPage() {
           </p>
         </header>
 
-        {phase === 'idle' && (
+        {docsError ? (
+          <div className="rounded-2xl border border-rose-400/40 bg-[var(--surface)] p-6 sm:p-10 text-center">
+            <p className="font-mono text-sm text-rose-400">{docsError}</p>
+            <p className="mt-2 text-xs text-[var(--text-muted)]">The question banks could not be loaded — check your session.</p>
+          </div>
+        ) : phase === 'idle' && (
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-10">
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-2 rounded-full bg-[var(--terminal-green)]/10 px-3 py-1 font-mono text-xs text-[var(--terminal-green)]">
@@ -260,12 +293,19 @@ export function SpeedDrillPage() {
               <li>• Wrong answers cost nothing except time: a short red pause, then the drill moves on.</li>
               <li>• Combo rule: 3 hits in a row +1 bonus point, 6 in a row +2, and so on.</li>
             </ul>
-            <button
-              onClick={start}
-              className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--terminal-green)] px-6 py-3.5 text-base font-bold text-black transition-opacity hover:opacity-90 sm:w-auto"
-            >
-              <Zap className="h-5 w-5" /> Start 60-second drill
-            </button>
+            {docsLoading && !ready ? (
+              <p className="mt-8 rounded-xl border border-dashed border-[var(--border)] px-6 py-3.5 text-center font-mono text-sm text-[var(--text-muted)]">
+                loading question banks<span className="blinking">_</span>
+              </p>
+            ) : (
+              <button
+                onClick={start}
+                disabled={!ready}
+                className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--terminal-green)] px-6 py-3.5 text-base font-bold text-black transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              >
+                <Zap className="h-5 w-5" /> Start 60-second drill
+              </button>
+            )}
           </div>
         )}
 

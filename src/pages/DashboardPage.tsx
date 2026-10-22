@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Bookmark, FileText, History, Clock, Trash2, ExternalLink, GraduationCap, Layers, Target, Flame, Trophy, ArrowRight, Star, Award, Shield, BookOpen, Zap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getCommand, getPathForCommand } from '../data/commands';
+import { getPathForLight, useCatalog } from '../context/CatalogContext';
+import type { CommandLight } from '../types';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { LEARNING_PATHS } from './LearningPage';
 import { TOTAL_MISSIONS } from './PracticeTerminalPage';
@@ -243,15 +244,22 @@ const SyncChip = () => {
 
 const DashboardContent = () => {
   const { bookmarks, notes, history, refreshUserData, deleteNote, toggleBookmark } = useAuth();
+  // Dashboard rows only need name/summary/route — the authed light index (Part 1)
+  // covers that with zero extra doc fetches.
+  const { lights, loading: catalogLoading } = useCatalog();
+  const lightBySlug = useMemo(() => new Map(lights.map((light) => [light.slug, light])), [lights]);
   const [activeTab, setActiveTab] = useState<'bookmarks' | 'notes' | 'history'>('bookmarks');
   const [confirmingNote, setConfirmingNote] = useState<string | null>(null);
   useEffect(() => {
     refreshUserData();
   }, [refreshUserData]);
 
-  const bookmarkedCommands = Array.from(bookmarks).map((slug) => getCommand(slug)).filter(Boolean);
-  const notedCommands = Array.from(notes.entries()).map(([slug, text]) => ({ slug, text, command: getCommand(slug) })).filter((n) => n.command);
-  const historyCommands = history.map((slug) => getCommand(slug)).filter(Boolean);
+  const toLight = (slug: string): CommandLight | undefined => lightBySlug.get(slug);
+  const bookmarkedCommands = Array.from(bookmarks).map(toLight).filter((light): light is CommandLight => !!light);
+  const notedCommands = Array.from(notes.entries())
+    .map(([slug, text]) => ({ slug, text, command: lightBySlug.get(slug) }))
+    .filter((n): n is { slug: string; text: string; command: CommandLight } => !!n.command);
+  const historyCommands = history.map(toLight).filter((light): light is CommandLight => !!light);
 
   const handleRemoveBookmark = async (slug: string) => {
     await toggleBookmark(slug);
@@ -313,6 +321,12 @@ const DashboardContent = () => {
           </div>
 
           <div className="p-6">
+            {catalogLoading && lights.length === 0 ? (
+              <div className="py-12 text-center font-mono text-sm text-[var(--text-muted)]">
+                loading command index<span className="blinking">_</span>
+              </div>
+            ) : (
+              <>
             {activeTab === 'bookmarks' && (
               <div className="space-y-3">
                 {bookmarkedCommands.length === 0 ? (
@@ -328,7 +342,7 @@ const DashboardContent = () => {
                 ) : (
                   bookmarkedCommands.map((cmd) => (
                     <div key={cmd!.slug} className="flex items-center justify-between p-4 bg-[var(--bg-surface-elevated)] border border-[var(--border)] rounded-lg hover:border-[var(--border-subtle)] transition-colors group">
-                      <Link to={getPathForCommand(cmd!)} className="flex-1 min-w-0">
+                      <Link to={getPathForLight(cmd!)} className="flex-1 min-w-0">
                         <div className="flex items-center gap-3">
                           <code className="font-mono text-[var(--terminal-green)] bg-[var(--terminal-green-bg)] px-2 py-1 rounded text-sm">{cmd!.name}</code>
                           <span className="text-[var(--text-muted)] text-sm hidden sm:block truncate">{cmd!.summary}</span>
@@ -359,7 +373,7 @@ const DashboardContent = () => {
                   notedCommands.map(({ slug, text, command }) => (
                     <div key={slug} className="bg-[var(--bg-surface-elevated)] border border-[var(--border)] rounded-lg overflow-hidden">
                       <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-                        <Link to={getPathForCommand(command!)} className="flex items-center gap-3">
+                        <Link to={getPathForLight(command!)} className="flex items-center gap-3">
                           <code className="font-mono text-[var(--terminal-green)] bg-[var(--terminal-green-bg)] px-2 py-1 rounded text-sm">{command!.name}</code>
                         </Link>
                         {confirmingNote === slug ? (
@@ -407,7 +421,7 @@ const DashboardContent = () => {
                 ) : (
                   historyCommands.map((cmd, index) => (
                     <div key={cmd!.slug} className="flex items-center justify-between p-4 bg-[var(--bg-surface-elevated)] border border-[var(--border)] rounded-lg hover:border-[var(--border-subtle)] transition-colors group">
-                      <Link to={getPathForCommand(cmd!)} className="flex items-center gap-3 flex-1 min-w-0">
+                      <Link to={getPathForLight(cmd!)} className="flex items-center gap-3 flex-1 min-w-0">
                         <span className="text-[var(--text-muted)] font-mono text-sm w-8 text-right">{index + 1}.</span>
                         <code className="font-mono text-[var(--terminal-green)] bg-[var(--terminal-green-bg)] px-2 py-1 rounded text-sm">{cmd!.name}</code>
                         <span className="text-[var(--text-muted)] text-sm hidden sm:block truncate">{cmd!.summary}</span>
@@ -417,6 +431,8 @@ const DashboardContent = () => {
                   ))
                 )}
               </div>
+            )}
+              </>
             )}
           </div>
         </div>

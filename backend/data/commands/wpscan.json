@@ -1,0 +1,37 @@
+{
+  "slug": "wpscan",
+  "name": "wpscan",
+  "category": "web",
+  "section": "ctf",
+  "summary": "WordPress Security Scanner.",
+  "syntax": "wpscan --url URL [options]",
+  "description": "WPScan is a black box WordPress vulnerability scanner.",
+  "options": [
+    {
+      "flag": "--url",
+      "description": "Target WordPress URL"
+    },
+    {
+      "flag": "--enumerate",
+      "description": "Enumeration options"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Scan WordPress site",
+      "command": "wpscan --url http://example.com",
+      "output": "[+] WordPress version 5.8 identified",
+      "explanation": "Enumerate WordPress."
+    }
+  ],
+  "useCases": [
+    "WordPress testing"
+  ],
+  "related": [
+    "nikto"
+  ],
+  "tags": [
+    "wordpress",
+    "web"
+  ]
+}

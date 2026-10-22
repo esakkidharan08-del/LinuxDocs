@@ -1,0 +1,57 @@
+{
+  "slug": "umask",
+  "name": "umask",
+  "category": "permissions-and-ownership",
+  "section": "linux",
+  "summary": "Set the default file creation permission mask.",
+  "syntax": "umask [-p] [-S] [mode]",
+  "description": "Set or display the file mode creation mask used by the shell for newly created files and directories.",
+  "options": [
+    {
+      "flag": "-S",
+      "description": "Print the mask in symbolic form.",
+      "example": "umask -S"
+    },
+    {
+      "flag": "-p",
+      "description": "Print the mask in a reusable shell command form.",
+      "example": "umask -p"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Display the current mask",
+      "command": "umask",
+      "output": "0022",
+      "explanation": "Shows the octal mask applied to new files and directories."
+    },
+    {
+      "title": "Use a private default",
+      "command": "umask 077",
+      "output": "",
+      "explanation": "Makes newly created files private to the current user by default."
+    },
+    {
+      "title": "Inspect symbolic permissions",
+      "command": "umask -S",
+      "output": "u=rwx,g=rx,o=rx",
+      "explanation": "Displays the effective default permission mask symbolically."
+    }
+  ],
+  "useCases": [
+    "Setting secure shell defaults",
+    "Protecting newly created credentials",
+    "Configuring login profiles"
+  ],
+  "related": [
+    "chmod",
+    "touch",
+    "mkdir",
+    "stat"
+  ],
+  "tags": [
+    "permissions",
+    "defaults",
+    "shell"
+  ]
+}

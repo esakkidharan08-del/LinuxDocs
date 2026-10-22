@@ -20,11 +20,24 @@
    merely that a command line matched a pattern.
    ============================================================ */
 
-import { getCommand } from '../data/commands';
-
 export type Line = { input?: string; output: string; tone?: 'error' | 'muted' | 'success' | 'hint' };
 export type Mission = { id: string; title: string; hint: string };
 export type MissionLevel = { level: number; title: string; subtitle: string; missions: Mission[]; chips: string[] };
+
+/** Manual-page metadata the sandbox needs: exactly the light-index fields
+ *  (name, summary, category, section) — never the full doc. The practice
+ *  page installs this lookup from the authed catalog (Part 1). */
+export type ManualEntry = { name: string; summary: string; category: string; section: 'linux' | 'ctf' };
+export type ManualLookup = (name: string) => ManualEntry | null;
+
+let manualLookup: ManualLookup | null = null;
+
+/** Called by the practice-terminal page once the catalog is ready. */
+export const setManualLookup = (lookup: ManualLookup | null) => {
+  manualLookup = lookup;
+};
+
+const lookupManual = (name: string): ManualEntry | null => (manualLookup ? manualLookup(name) : null);
 
 export const MISSION_LEVELS: MissionLevel[] = [
   {
@@ -503,7 +516,7 @@ export function executeCommand(input: string, cwd: string, setCwd: (dir: string)
     case 'man': {
       const name = (args[0] ?? '').toLowerCase();
       if (!name) return err('What manual page do you want? e.g. man ls');
-      const data = getCommand(name);
+      const data = lookupManual(name);
       if (data) {
         const meta = [`${data.name.toUpperCase()}(1)`, '', `NAME  ${data.name} - ${data.summary}`];
         if (data.category) meta.push(`SECTION  ${data.category} (${data.section})`);
@@ -613,6 +626,7 @@ if (import.meta.env.DEV) {
   (window as unknown as Record<string, unknown>).__linuxdocsTerminal = {
     executeCommand,
     evaluateMissions,
+    setManualLookup,
     FILES,
     HOME,
     SUBDIRS,

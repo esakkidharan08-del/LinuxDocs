@@ -1,0 +1,55 @@
+{
+  "slug": "diff",
+  "name": "diff",
+  "category": "text-processing",
+  "section": "linux",
+  "summary": "Compare files line by line.",
+  "syntax": "diff [OPTION]... FILES",
+  "description": "Compares two files and reports changes needed to transform the first into the second.",
+  "options": [
+    {
+      "flag": "-u",
+      "description": "Output unified context format.",
+      "example": "diff -u old.conf new.conf"
+    },
+    {
+      "flag": "-r",
+      "description": "Recursively compare directories.",
+      "example": "diff -ru release-1 release-2"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Compare configuration versions",
+      "command": "diff -u old.conf new.conf",
+      "output": "--- old.conf\n+++ new.conf\n@@ -1 +1 @@\n-port=80\n+port=8080",
+      "explanation": "Shows a compact patch-style difference."
+    },
+    {
+      "title": "Compare directories",
+      "command": "diff -ru src-old src-new",
+      "output": "Only in src-new: parser.ts",
+      "explanation": "Reports changed and newly added files recursively."
+    },
+    {
+      "title": "Check identical files",
+      "command": "diff -q a.txt b.txt",
+      "output": "Files a.txt and b.txt differ",
+      "explanation": "Prints only whether files differ."
+    }
+  ],
+  "useCases": [
+    "Reviewing configuration changes",
+    "Generating patches",
+    "Comparing release trees"
+  ],
+  "related": [
+    "cmp",
+    "comm"
+  ],
+  "tags": [
+    "compare",
+    "diff",
+    "review"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "slug": "jadx",
+  "name": "jadx",
+  "category": "mobile",
+  "section": "ctf",
+  "summary": "Android APK / bytecode decompiler.",
+  "syntax": "jadx [options] <apk-file>",
+  "description": "jadx decompiles Android APKs into readable Java source, revealing flags baked into apps or logic in obfuscated code.",
+  "options": [
+    {
+      "flag": "-g",
+      "description": "Show bytecode (smali) graph view"
+    },
+    {
+      "flag": "-d",
+      "description": "Output directory"
+    },
+    {
+      "flag": "--no-res",
+      "description": "Skip resource decompiling for speed"
+    },
+    {
+      "flag": "-e",
+      "description": "Export as a gradle project"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Decompile an APK",
+      "command": "jadx -d out/ app.apk",
+      "output": "INFO - loading...\nINFO - out/sources/com/ctf/MainActivity.java",
+      "explanation": "Browse out/sources for hardcoded flags and API keys."
+    }
+  ],
+  "useCases": [
+    "android reversing"
+  ],
+  "related": [
+    "apktool",
+    "strings"
+  ],
+  "tags": [
+    "mobile",
+    "android",
+    "re"
+  ]
+}

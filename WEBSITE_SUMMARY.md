@@ -2,7 +2,7 @@
 
 **LinuxDocs** is a professional, MDN-style reference and learning platform for **Linux commands and CTF security tools** — precise syntax, real flags, copy-ready examples — combined with a full interactive learning system: guided paths, quizzes, a sandboxed practice terminal, flashcards, a speed-drill arena, achievements, and streaks.
 
-> Status: ✅ production build green · lint zero findings · **109 backend tests passing** · browser QA **24/24** (zero React update-depth console hits) · API smoke **14/14** · sync probe **14/14** · terminal probe **60/60** · reset probe **8/8** · dataset docs-accuracy audit **PASSED** (132 entries re-validated, 19 warnings, pipeline re-synced) · entry chunk **135.30 kB gzip** · deployment scaffold inspected · all work committed (`92b8371` Task 4, `37120d8` Task 5, `cfedee7` Task 6 docs).
+> Status: ✅ production build green · lint zero findings · **117 backend tests passing** (incl. the catalog-API suite) · browser QA **34/34** (zero React update-depth console hits) · API smoke **19/19** (unauth 401 gates on every dataset endpoint) · sync probe **15/15** (legacy guest migration) · terminal probe **62/62** · reset probe **8/8** · dataset docs-accuracy audit **PASSED** (132 entries re-validated from `backend/data`, 19 warnings, 82 thin pending review) · bundle carries **zero command prose** (`qa/dist_probe.py` DIST CLEAN — docs chunk deleted, entry chunk **134.41 kB gzip**) · **Part 1 of the improvement plan (sign-in first + dataset behind the authed API) committed on `improve/main-plan`** · earlier rounds: Task 4 `92b8371`, Task 5 `37120d8`, Task 6 `cfedee7`, Part 0 = one-shot QA runner + baseline (`docs/baseline.md`).
 
 ---
 
@@ -23,7 +23,7 @@
 
 ## 2. Content at a Glance
 
-- **132 fully documented commands** — 95 Linux + 37 CTF tools (both entries carry: summary, syntax, options with descriptions, examples with output, use cases, related commands, tags, warnings). Frontend (`src/data/commands.ts`) is the pipeline's **source of truth**; `backend/data/commands.json` is regenerated from it (`node backend/scripts/build_commands.mjs`) and the two are kept identical by `qa/dataset_audit.py` — 132 = 132 re-verified, plus a docs-accuracy rule set (flag/operand tokens, warning coverage for destructive/root commands, cross-reference integrity) and 19 curated warnings. Thin entries (82) are flagged with a "docs pending review" chip on their pages.
+- **132 fully documented commands** — 95 Linux + 37 CTF tools (each entry carries: summary, syntax, options with descriptions, examples with output, use cases, related commands, tags, warnings). Since improvement-plan **Part 1** the corpus's **single source of truth lives in `backend/data`** (one per-slug JSON per command + `commands-order.json` + `categories.json`/`domains.json`), compiled by `node backend/scripts/build_commands.mjs` into `commands.json` (aggregate) + `commands-index.json` (light) and re-validated by `qa/dataset_audit.py`. The SPA no longer bundles any of it: after login the app fetches the light index from `GET /api/catalog/index` and every command doc on demand from `GET /api/commands/<slug>` (both JWT-protected, ETag/304, `Cache-Control: private`) into an in-memory cache cleared on logout — the shipped bundle carries zero command prose. Thin entries (82) are flagged with a "docs pending review" chip on their pages.
 - **13 Linux categories** — File & Directory, Permissions & Ownership, Text Processing, Process Management, Networking, Package Management, Disk & Storage, Archiving & Compression, Users & Groups, Shell & Scripting, System Info & Monitoring, Search & Find, Services & Logs.
 - **10 CTF domains** — Reconnaissance, Web Hacking, Cryptography, Reverse Engineering, Forensics, Pwn (Binary Exploitation), OSINT, Mobile Security, Container Security, Cloud Security.
 
@@ -49,11 +49,11 @@
 | `/dashboard` 🔒 | DashboardPage | Learning summary, 12 achievements, bookmarks, notes, history |
 | `/settings` 🔒 | SettingsPage | Theme, profile, shortcuts |
 | `/export-import` | ExportImportPage | One-file backup/restore of all progress (section 9) |
-| `/sign-in` · `/sign-up` · `/password-reset` | Auth pages | Sign-up/sign-in drop you straight into the app (dashboard); `/password-reset` emails the account holder a **single-use link** and shows an identical neutral confirmation whether or not the address is registered |
+| `/sign-in` · `/sign-up` · `/password-reset` | Auth pages | Sign-up/sign-in drop you straight into the app (dashboard); `/password-reset` emails the account holder a **single-use link** and shows an identical neutral confirmation whether or not the address is registered. **Sign-in first (Part 1):** these pages, the legal pages and 404 are the *only* public routes — every other deep link hits `ProtectedRoute` and bounces to `/sign-in?next=<where>`, and login returns you exactly where you started |
 | `/privacy` · `/terms` | LegalPage | Legal docs |
 | `*` | NotFoundPage | `/dev/void` easter-egg terminal with one hidden flag 🏴 |
 
-🔒 = requires sign-in (ProtectedRoute). Invalid categories/domains/commands all render proper "not found" states — no dead ends.
+Since Part 1 *every* route marked 🔒 — and indeed **all content routes** — sit behind `ProtectedRoute`; the 🔒 markers are kept as historical decoration. Gate behavior: a signed-out visit lands on `/sign-in?next=<path>`, and after logging in the app resumes at that path. Invalid categories/domains/commands all render proper "not found" states — no dead ends.
 
 ---
 
@@ -103,9 +103,9 @@ All progress is local-first (works signed-out) and included in Export/Import:
 | `linuxdocs.flashcards` | Last deck, per-deck session completes |
 | `linuxdocs.speeddrill` | Personal best, rounds played |
 | `linuxdocs.streak` | Current streak, best streak, last-visit date |
-| bookmarks / notes / history | Synced to the account via the Flask API when signed in; guests keep a device-local guest store, and sign-in **merges it** into the account (guest records win for the records the guest touched, unseen server records survive); offline edits queue as idempotent end-state ops and replay with exponential backoff |
+| bookmarks / notes / history | Synced to the account via the Flask API when signed in; **guest mode no longer exists** since Part 1 — a pre-existing legacy device store is instead migrated once into the account at first sign-in (guest records win for the records the guest touched, unseen server records survive); offline edits queue as idempotent end-state ops and replay with exponential backoff |
 | `linuxdocs.sync-queue-v1` | Persisted per-user sync queue (idempotent end-state ops, same-key collapse) |
-| `linuxdocs.guest-data-v1` | Device-local guest bookmarks/history, absorbed into the account at sign-in |
+| `linuxdocs.guest-data-v1` | Legacy artifact from the guest-mode era — the app no longer writes it; at sign-in it is absorbed into the queue as queued ops and the key is deleted |
 
 Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrades. Signed-in users also get server-side bookmarks/notes/history sync.
 
@@ -137,12 +137,13 @@ Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrad
 |---|---|
 | `npm run build` (tsc strict + vite) | ✅ passes, no warnings (entry ≈ 420 kB min / 135 kB gzip after the Task-5 split; full docs now a 134 kB async chunk) |
 | `npm run lint` (oxlint) | ✅ zero findings |
-| `qa/dataset_audit.py` docs-accuracy audit | ✅ **AUDIT PASSED** — 132 entries validated: structure, flags/aliases, warnings (19), TS↔JSON pipeline sync, index/counts cross-check, thin-docs queue |
-| Backend tests (`backend\venv\Scripts\pytest`) | ✅ **109 passed** (32 auth + 30 hardening + 17 security + 14 mailer + 9 user-data + 7 dataset) |
-| `qa/browser_check.py` real-Chrome suite | ✅ **24/24 PASS** — docs-pending chip checks added, phone viewport included — **and zero React update-depth console hits** (the pre-existing render-loop was fixed in the Task-5 perf round) |
-| `qa/smoke_api.py` endpoint checklist | ✅ **14/14 PASS** |
-| `qa/sync_probe.py` sync-hardening suite | ✅ **14/14 PASS** — guest merge, offline queue, auto-drain, account isolation, import validation |
-| `qa/terminal_probe.py` terminal-hardening suite | ✅ **60/60 PASS** — all command families + flags, resource limits, prototype-chain negatives, semantic mission validation, 13/13 UI playthrough to "Mastered" |
+| `qa/dataset_audit.py` docs-accuracy audit | ✅ **AUDIT PASSED** — 132 entries validated from `backend/data` (per-slug JSON): structure, flags/aliases, warnings (19), aggregate/index sync, index/counts cross-check, thin-docs queue |
+| `qa/dist_probe.py` bundle-leak scan | ✅ **DIST CLEAN** — 5 distinctive dataset sentences (from `ls`, `cd`, `touch`, `less`, `find`) grep'd across all 49 built `dist/` artifacts: zero hits; the lazy docs-data chunk is gone from the build |
+| Backend tests (`backend\venv\Scripts\pytest`) | ✅ **117 passed** (32 auth + 30 hardening + 17 security + 14 mailer + 9 user-data + 7 dataset + 8 catalog-API) |
+| `qa/browser_check.py` real-Chrome suite | ✅ **34/34 PASS** — the auth-gated world: logged-out deep links bounce to `/sign-in?next=…`, sign-up redirect, hard-reload session, 8 sampled command pages, docs-pending chip (thin shows / complete hides), Ctrl+K palette, sign-in honors `?next` and returns to the command page, logout + browser-back shows no command content, 404 void terminal, phone viewport — **and zero React update-depth console hits** |
+| `qa/smoke_api.py` endpoint checklist | ✅ **19/19 PASS** — with a token the light index serves only `name/summary/tags/slug/category` and the detail endpoint serves the full doc; without one every dataset endpoint is a hard 401; the legacy full-doc list route `GET /commands` is gone (404) |
+| `qa/sync_probe.py` sync-hardening suite | ✅ **15/15 PASS** — legacy guest-store migration (bookmarks + note land server-confirmed, key deleted), offline queue honesty ("Saved locally" never claims synced), auto-drain, account isolation, import validation |
+| `qa/terminal_probe.py` terminal-hardening suite | ✅ **62/62 PASS** — all command families + flags, `man` over the authed light index via the manual-lookup provider, resource limits, prototype-chain negatives, semantic mission validation, 13/13 UI playthrough to "Mastered" |
 | `qa/reset_probe.py` real-browser reset-security suite | ✅ **8/8 PASS** — byte-identical generic responses, token only in the dev mailbox (never in responses/DOM/filenames), full token→reset→login loop |
 | Dataset sync FE ↔ BE | ✅ 132 = 132, 95 Linux + 37 CTF, 0 mismatches |
 | Landing tools-band audit (`qa/grid_shots.py`) | ✅ border matrix 6/6 in dark+light × 360/768/1280, focus & hover probed |
@@ -158,8 +159,8 @@ npm run dev:backend    # Flask only
 npm run build          # type-check + production build → dist/
 npm run preview        # serve the production build
 npm run lint           # oxlint
-cd backend; .\venv\Scripts\pytest    # 109 backend tests
-node backend/scripts/build_commands.mjs   # regenerate commands.json from src/data/commands.ts
+cd backend; .\venv\Scripts\pytest    # 117 backend tests
+node backend/scripts/build_commands.mjs   # compile the per-slug files in backend/data/commands/ into aggregate + light index
 python qa/dataset_audit.py                # docs-accuracy audit over all 132 entries
 ```
 
@@ -169,20 +170,20 @@ Full Windows-PowerShell walkthrough lives in `RUN.md`; the ongoing work log live
 
 ```
 src/
-├─ App.tsx                     routes + lazy loading + shell (streak, palette, shortcuts)
+├─ App.tsx                     routes + lazy loading + shell (streak, palette, shortcuts, ProtectedRoute)
 ├─ pages/ LearningPage · PracticeTerminalPage · FlashcardsPage · SpeedDrillPage
 │         DashboardPage · CommandDetailPage · ToolsPages (compare/day/export) …
-├─ components/ Header · Sidebar (reads commandsIndex counts) · Footer · CommandPalette
+├─ components/ Header · Sidebar (counts from catalog lights) · Footer · CommandPalette
 │              CommandBuilder · CodeBlock · Breadcrumbs · ThemeContext · IntroScene …
-├─ lib/ streak.ts · syncState.ts (phases/queue/guest-merge core) · terminal.ts (sandbox + missions)
-├─ context/ AuthContext.tsx (stable callbacks + sync chip) · CatalogContext.tsx
-├─ data/ commands.ts           132 full command docs (source of truth; async chunk)
-│        commandsIndex.ts      shell-safe metadata: categories, domains, light index, counts
+├─ lib/ streak.ts · syncState.ts (phases/queue + legacy guest migration) · terminal.ts (sandbox + missions + manual provider)
+├─ context/ AuthContext.tsx (stable callbacks + sync chip) · CatalogContext.tsx (light index + per-slug docs, in-memory, cleared on logout)
+├─ data/commandBuilders.ts     interactive builder specs (UI tool; command docs live behind the API)
 ├─ types.ts                     Command · CategoryInfo · CTFDomainInfo contracts
 backend/
-├─ app/ auth.py · commands.py · user.py · security.py · sessions.py · persistence.py · models.py · mailer.py
-├─ data/ commands.json         generated from src/data/commands.ts (build_commands.mjs)
-├─ scripts/ build_commands.mjs the dataset pipeline (regenerates commands.json + needsHumanReview)
+├─ app/ auth.py · commands.py (catalog/detail API) · user.py · security.py · sessions.py · persistence.py · models.py · mailer.py
+├─ data/ commands/*.json        132 per-slug docs + commands-order/categories/domains manifests (source of truth);
+│                               generated commands.json (aggregate) + commands-index.json (light) by the pipeline
+├─ scripts/ build_commands.mjs  the dataset pipeline (per-slug JSON → aggregate + light index; fails on violations)
 └─ tests/ test_auth.py · test_hardening.py · test_security.py · test_mailer.py
-           test_user_data.py · test_dataset.py  (109 cases)
+           test_user_data.py · test_dataset.py · test_catalog.py  (117 cases)
 ```

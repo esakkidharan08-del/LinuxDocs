@@ -3,10 +3,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { authApi, userApi } from '../services/api';
 import type { User } from '../services/api';
 import {
-  INITIAL_SYNC_STATE, backoffDelayMs, enqueueOp, isGuestStore, isQueueFile,
+  INITIAL_SYNC_STATE, QUEUE_VERSION, backoffDelayMs, enqueueOp, isGuestStore, isQueueFile,
   markFailed, markIdle, markSavedLocal, markSaving, markSynced,
   safeParseJson, emptyGuestStore,
-  GUEST_STORE_VERSION, QUEUE_VERSION,
 } from '../lib/syncState';
 import type { GuestStore, SyncOp, SyncState } from '../lib/syncState';
 
@@ -113,12 +112,6 @@ const saveQueue = (ops: SyncOp[]) => {
 
 const loadGuestStore = (): GuestStore => safeParseJson(readLS(GUEST_KEY), isGuestStore) ?? emptyGuestStore();
 
-const saveGuestStore = (store: GuestStore) => {
-  const any = store.bookmarks.length || store.notes.length || store.history.length;
-  if (any) writeLS(GUEST_KEY, JSON.stringify({ ...store, version: GUEST_STORE_VERSION }));
-  else removeLS(GUEST_KEY);
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -148,12 +141,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   /* ------------------------------------------------------------------ guest */
 
-  const hydrateFromGuestStore = useCallback(() => {
-    const store = loadGuestStore();
-    setBookmarks(new Set(store.bookmarks.map((b) => b.slug)));
-    setNotes(new Map(store.notes.map((n) => [n.command_slug, n.text])));
-    setHistory(store.history.map((h) => h.command_slug));
-  }, []);
+  /* Guest mode was removed (Part 1): there is no signed-out data store any
+   * more. The only guest remnant kept is the one-time migration — at sign-in
+   * absorbGuestStore() converts any pre-existing linuxdocs.guest-data-v1 into
+   * queued ops for the account and deletes the key. */
 
   /* ------------------------------------------------------------------- pull */
 
@@ -361,7 +352,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         unmarkSession();
         setUser(null);
-        hydrateFromGuestStore();
         setSync(markIdle());
       }
     } catch {
@@ -370,14 +360,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchUser, refreshUserData, hydrateFromGuestStore, absorbGuestStore]);
+  }, [fetchUser, refreshUserData, absorbGuestStore]);
 
   useEffect(() => {
     if (hasSessionHint()) {
       refreshAuth();
     } else {
       setLoading(false); // never signed in on this device — skip the refresh call entirely
-      hydrateFromGuestStore();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -429,30 +418,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setNotes(new Map());
     setHistory([]);
     setSync(markIdle());
-    hydrateFromGuestStore(); // guest mode continues with its own (device) data
-  }, [hydrateFromGuestStore]);
+    // No guest store hydration: signed-out visitors see no data (Part 1).
+  }, []);
 
   /* -------------------------------------------------------------- mutations */
 
   const toggleBookmark = useCallback(async (slug: string) => {
     const u = userRef.current;
-    if (!u) {
-      // Guests keep a device-local store; signing in later converts it to ops.
-      const store = loadGuestStore();
-      const has = store.bookmarks.some((b) => b.slug === slug);
-      store.bookmarks = has
-        ? store.bookmarks.filter((b) => b.slug !== slug)
-        : [...store.bookmarks, { slug, saved_at: new Date().toISOString() }];
-      saveGuestStore(store);
-      setBookmarks((prev) => {
-        const next = new Set(prev);
-        if (has) next.delete(slug);
-        else next.add(slug);
-        return next;
-      });
-      setSync(markSavedLocal());
-      return;
-    }
+    if (!u) return; // signed-out visitors keep no local data (Part 1)
     const wanted = !bookmarksRef.current.has(slug);
     // Optimistic flip; the queue op carries the desired END STATE, so offline
     // replays always deliver exactly what the user last chose.
@@ -467,35 +440,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const saveNote = useCallback(async (slug: string, text: string) => {
     const u = userRef.current;
-    if (!u) {
-      const store = loadGuestStore();
-      store.notes = [
-        ...store.notes.filter((n) => n.command_slug !== slug),
-        { command_slug: slug, text: text.trim(), saved_at: new Date().toISOString() },
-      ];
-      saveGuestStore(store);
-      setNotes((prev) => new Map(prev).set(slug, text.trim()));
-      setSync(markSavedLocal());
-      return;
-    }
+    if (!u) return; // signed-out visitors keep no local data (Part 1)
     setNotes((prev) => new Map(prev).set(slug, text.trim()));
     submitOp({ kind: 'note-set', slug, text: text.trim(), userId: u.id });
   }, [submitOp]);
 
   const deleteNote = useCallback(async (slug: string) => {
     const u = userRef.current;
-    if (!u) {
-      const store = loadGuestStore();
-      store.notes = store.notes.filter((n) => n.command_slug !== slug);
-      saveGuestStore(store);
-      setNotes((prev) => {
-        const next = new Map(prev);
-        next.delete(slug);
-        return next;
-      });
-      setSync(markIdle());
-      return;
-    }
+    if (!u) return; // signed-out visitors keep no local data (Part 1)
     setNotes((prev) => {
       const next = new Map(prev);
       next.delete(slug);
@@ -506,16 +458,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addHistory = useCallback(async (slug: string) => {
     const u = userRef.current;
-    if (!u) {
-      const store = loadGuestStore();
-      store.history = [
-        { command_slug: slug, viewed_at: new Date().toISOString() },
-        ...store.history.filter((h) => h.command_slug !== slug),
-      ].slice(0, 15);
-      saveGuestStore(store);
-      setHistory((prev) => [slug, ...prev.filter((s) => s !== slug)].slice(0, 15));
-      return;
-    }
+    if (!u) return; // signed-out visitors keep no local data (Part 1)
     setHistory((prev) => [slug, ...prev.filter((s) => s !== slug)].slice(0, 15));
     submitOp({ kind: 'history', slug, userId: u.id });
   }, [submitOp]);

@@ -1,0 +1,57 @@
+{
+  "slug": "basename",
+  "name": "basename",
+  "category": "file-and-directory",
+  "section": "linux",
+  "summary": "Strip directory and suffix components from a path.",
+  "syntax": "basename NAME [SUFFIX]",
+  "description": "Prints the final component of a pathname, optionally removing a matching suffix.",
+  "options": [
+    {
+      "flag": "-a",
+      "description": "Support multiple names.",
+      "example": "basename -a /tmp/a.txt /tmp/b.txt"
+    },
+    {
+      "flag": "-s SUFFIX",
+      "description": "Remove a trailing SUFFIX from each name.",
+      "example": "basename -s .log app.log db.log"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Get a filename",
+      "command": "basename /var/log/nginx/access.log",
+      "output": "access.log",
+      "explanation": "Extracts the final path component."
+    },
+    {
+      "title": "Remove a suffix",
+      "command": "basename /tmp/report.csv .csv",
+      "output": "report",
+      "explanation": "Removes the specified suffix from the result."
+    },
+    {
+      "title": "Process several paths",
+      "command": "basename -a /tmp/a.txt /tmp/b.txt",
+      "output": "a.txt\nb.txt",
+      "explanation": "Prints one basename per input name."
+    }
+  ],
+  "useCases": [
+    "Naming output files in scripts",
+    "Extracting extensions safely",
+    "Building command-line messages"
+  ],
+  "related": [
+    "dirname",
+    "realpath",
+    "readlink",
+    "split"
+  ],
+  "tags": [
+    "path",
+    "filename",
+    "shell"
+  ]
+}

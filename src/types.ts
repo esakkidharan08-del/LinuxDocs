@@ -45,3 +45,14 @@ export interface CTFDomainInfo {
   tools: string[];
   recommendedExternalTools: { name: string; url: string; description: string }[];
 }
+
+/** Navigation/search metadata served by GET /api/catalog/index — no docs content
+ * (no syntax/options/examples). Full docs load per slug via /api/commands/<slug>. */
+export interface CommandLight {
+  slug: string;
+  name: string;
+  summary: string;
+  tags: string[];
+  category: string;
+  section: Section;
+}

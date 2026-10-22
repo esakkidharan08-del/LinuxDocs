@@ -1,0 +1,47 @@
+{
+  "slug": "objdump",
+  "name": "objdump",
+  "category": "reverse-engineering",
+  "section": "ctf",
+  "summary": "Display information about object files.",
+  "syntax": "objdump [option(s)] [file(s)]",
+  "description": "Disassembles executable files to inspect machine code instructions and section headers.",
+  "options": [
+    {
+      "flag": "-d",
+      "description": "Disassemble executable sections into assembly.",
+      "example": "objdump -d binary"
+    },
+    {
+      "flag": "-M",
+      "description": "Pass specific disassembler options (e.g. intel syntax).",
+      "example": "objdump -M intel -d binary"
+    },
+    {
+      "flag": "-t",
+      "description": "Print symbol table entries.",
+      "example": "objdump -t binary"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Disassemble binary in Intel syntax",
+      "command": "objdump -M intel -d pwn1 | grep -A 20 \"<main>:\"",
+      "output": "<main>:\n  push   rbp\n  mov    rbp,rsp\n  sub    rsp,0x30",
+      "explanation": "Disassembles main function instructions."
+    }
+  ],
+  "useCases": [
+    "Analyzing compiled binary instructions and function symbols in CTF pwn/reversing"
+  ],
+  "related": [
+    "gdb",
+    "strings",
+    "checksec"
+  ],
+  "tags": [
+    "ctf",
+    "reversing",
+    "disassemble"
+  ]
+}

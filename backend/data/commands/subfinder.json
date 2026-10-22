@@ -1,0 +1,48 @@
+{
+  "slug": "subfinder",
+  "name": "subfinder",
+  "category": "osint",
+  "section": "ctf",
+  "summary": "Passive subdomain discovery tool.",
+  "syntax": "subfinder -d <domain>",
+  "description": "subfinder finds subdomains using passive online sources (certificate transparency logs, search engines, public APIs) without touching the target directly.",
+  "options": [
+    {
+      "flag": "-d",
+      "description": "Target domain"
+    },
+    {
+      "flag": "-all",
+      "description": "Use all sources for maximum coverage"
+    },
+    {
+      "flag": "-o",
+      "description": "Output file"
+    },
+    {
+      "flag": "-silent",
+      "description": "Print only the subdomains"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Enumerate subdomains",
+      "command": "subfinder -d example.com -silent",
+      "output": "mail.example.com\ndev.example.com",
+      "explanation": "Quiet, passive recon — a safe first step."
+    }
+  ],
+  "useCases": [
+    "subdomain enumeration",
+    "osint"
+  ],
+  "related": [
+    "whois",
+    "nmap"
+  ],
+  "tags": [
+    "osint",
+    "dns",
+    "subdomains"
+  ]
+}

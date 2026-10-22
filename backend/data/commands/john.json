@@ -1,0 +1,46 @@
+{
+  "slug": "john",
+  "name": "john",
+  "category": "crypto",
+  "section": "ctf",
+  "summary": "John the Ripper password cracker.",
+  "syntax": "john [options] [FILE]",
+  "description": "Fast password cracker designed to detect weak Unix and application passwords from password hashes.",
+  "options": [
+    {
+      "flag": "--wordlist",
+      "description": "Specify wordlist file to use.",
+      "example": "john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt"
+    },
+    {
+      "flag": "--format",
+      "description": "Force specific hash format (e.g. raw-md5, bcrypt).",
+      "example": "john --format=raw-sha256 hash.txt"
+    },
+    {
+      "flag": "--show",
+      "description": "Show cracked passwords for hash file.",
+      "example": "john --show hash.txt"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Crack password hashes with rockyou wordlist",
+      "command": "john --wordlist=rockyou.txt passwd.hash",
+      "output": "Loaded 1 password hash (sha512crypt [sha512 32/64 XOP])\npassword123      (user1)\n1 password cracked, 0 left",
+      "explanation": "Cracks Unix password hash using dictionary attack."
+    }
+  ],
+  "useCases": [
+    "Cracking captured password hashes in CTF challenges"
+  ],
+  "related": [
+    "hashcat"
+  ],
+  "tags": [
+    "ctf",
+    "crypto",
+    "passwords",
+    "cracker"
+  ]
+}
