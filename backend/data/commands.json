@@ -96,23 +96,7 @@
         "whois",
         "dnsrecon"
       ],
-      "recommendedExternalTools": [
-        {
-          "name": "Censys",
-          "url": "https://censys.io/",
-          "description": "Search engine for internet-connected devices and certificates."
-        },
-        {
-          "name": "Shodan",
-          "url": "https://www.shodan.io/",
-          "description": "Search engine for connected devices and open ports."
-        },
-        {
-          "name": "DNS Dumpster",
-          "url": "https://dnsdumpster.com/",
-          "description": "Domain research tool to discover hosts related to a domain."
-        }
-      ]
+      "recommendedExternalTools": []
     },
     {
       "id": "web",
@@ -126,23 +110,7 @@
         "ffuf",
         "wfuzz"
       ],
-      "recommendedExternalTools": [
-        {
-          "name": "PortSwigger Academy",
-          "url": "https://portswigger.net/web-security",
-          "description": "Free online web security training labs."
-        },
-        {
-          "name": "Regex101",
-          "url": "https://regex101.com/",
-          "description": "Online regex tester and debugger."
-        },
-        {
-          "name": "HackTricks",
-          "url": "https://book.hacktricks.xyz/",
-          "description": "Comprehensive pentesting and CTF reference guide."
-        }
-      ]
+      "recommendedExternalTools": []
     },
     {
       "id": "crypto",
@@ -156,23 +124,7 @@
         "gpg",
         "age"
       ],
-      "recommendedExternalTools": [
-        {
-          "name": "CyberChef",
-          "url": "https://gchq.github.io/CyberChef/",
-          "description": "The Cyber Swiss Army knife for encryption, encoding, compression, and data analysis."
-        },
-        {
-          "name": "CrackStation",
-          "url": "https://crackstation.net/",
-          "description": "Free rainbow table password hash cracker."
-        },
-        {
-          "name": "dCode.fr",
-          "url": "https://www.dcode.fr/",
-          "description": "Cipher and crypto decoding tools suite."
-        }
-      ]
+      "recommendedExternalTools": []
     },
     {
       "id": "reverse-engineering",
@@ -189,23 +141,7 @@
         "checksec",
         "ROPgadget"
       ],
-      "recommendedExternalTools": [
-        {
-          "name": "Ghidra",
-          "url": "https://ghidra-sre.org/",
-          "description": "NSA open-source reverse engineering software suite."
-        },
-        {
-          "name": "Compiler Explorer",
-          "url": "https://godbolt.org/",
-          "description": "Interactive online compiler explorer showing assembly output."
-        },
-        {
-          "name": "Assembly to Machine Code",
-          "url": "https://shell-storm.org/online-assembler/",
-          "description": "Online assembler/disassembler."
-        }
-      ]
+      "recommendedExternalTools": []
     },
     {
       "id": "forensics",
@@ -218,23 +154,7 @@
         "foremost",
         "volatility"
       ],
-      "recommendedExternalTools": [
-        {
-          "name": "Aperi'Solve",
-          "url": "https://aperisolve.com/",
-          "description": "Online platform for steganography and image analysis."
-        },
-        {
-          "name": "DFIR Training",
-          "url": "https://www.dfir.training/",
-          "description": "Digital forensics and incident response resources."
-        },
-        {
-          "name": "HexEd.it",
-          "url": "https://hexed.it/",
-          "description": "Browser-based hexadecimal editor."
-        }
-      ]
+      "recommendedExternalTools": []
     },
     {
       "id": "pwn",
@@ -246,23 +166,7 @@
         "gdb",
         "pwntools-snippets"
       ],
-      "recommendedExternalTools": [
-        {
-          "name": "Exploit-DB",
-          "url": "https://www.exploit-db.com/",
-          "description": "Archive of public exploits and vulnerable software."
-        },
-        {
-          "name": "ROP Emporium",
-          "url": "https://ropemporium.com/",
-          "description": "Binary exploitation learning site focusing on ROP."
-        },
-        {
-          "name": "RevShells",
-          "url": "https://www.revshells.com/",
-          "description": "Generate reverse and bind shells instantly."
-        }
-      ]
+      "recommendedExternalTools": []
     },
     {
       "id": "osint",
@@ -274,23 +178,7 @@
         "dnsrecon",
         "nmap"
       ],
-      "recommendedExternalTools": [
-        {
-          "name": "OSINT Framework",
-          "url": "https://osintframework.com/",
-          "description": "Collection of OSINT tools and resources."
-        },
-        {
-          "name": "Wayback Machine",
-          "url": "https://archive.org/web/",
-          "description": "Digital archive of web pages across time."
-        },
-        {
-          "name": "PwnedOrNot",
-          "url": "https://haveibeenpwned.com/",
-          "description": "Check if email addresses or passwords have been leaked in data breaches."
-        }
-      ]
+      "recommendedExternalTools": []
     },
     {
       "id": "mobile",
@@ -301,23 +189,16 @@
         "apktool",
         "jadx"
       ],
-      "recommendedExternalTools": [
-        {
-          "name": "MobSF",
-          "url": "https://mobsf.github.io/Mobile-Security-Framework-MobSF/",
-          "description": "Automated mobile application security assessment framework."
-        },
-        {
-          "name": "OWASP MASTG",
-          "url": "https://mas.owasp.org/",
-          "description": "Comprehensive mobile security testing guide."
-        },
-        {
-          "name": "jadx online",
-          "url": "https://www.decompiler.com/",
-          "description": "Online DEX/APK decompiler."
-        }
-      ]
+      "recommendedExternalTools": []
+    },
+    {
+      "id": "containers",
+      "name": "Container Security",
+      "description": "Docker inspection, container escape vulnerability scanning, and image analysis.",
+      "tools": [
+        "trivy"
+      ],
+      "recommendedExternalTools": []
     },
     {
       "id": "cloud",
@@ -327,49 +208,7 @@
         "aws-cli-enumeration",
         "trivy"
       ],
-      "recommendedExternalTools": [
-        {
-          "name": "CloudGoat",
-          "url": "https://github.com/RhinoSecurityLabs/cloudgoat",
-          "description": "Vulnerable cloud infrastructure generator by Rhino Security Labs."
-        },
-        {
-          "name": "Pacu",
-          "url": "https://github.com/RhinoSecurityLabs/pacu",
-          "description": "Open-source AWS exploitation framework."
-        },
-        {
-          "name": "AWS IAM Policy Simulator",
-          "url": "https://policysim.aws.amazon.com/",
-          "description": "Test and troubleshoot AWS IAM policies."
-        }
-      ]
-    },
-    {
-      "id": "containers",
-      "name": "Container Security",
-      "description": "Docker inspection, container escape vulnerability scanning, and image analysis.",
-      "tools": [
-        "docker-inspect",
-        "trivy"
-      ],
-      "recommendedExternalTools": [
-        {
-          "name": "Trivy Docs",
-          "url": "https://aquasecurity.github.io/trivy/",
-          "description": "Comprehensive security scanner for containers and dependencies."
-        },
-        {
-          "name": "Docker Bench for Security",
-          "url": "https://github.com/docker/docker-bench-security",
-          "description": "Script to check for best-practices in deploying Docker containers."
-        },
-        {
-          "name": "K8s Hardening Guide",
-          "url": "https://www.nsa.gov/Press-Room/News-Highlights/Article/Article/2716980/",
-          "description": "NSA & CISA Kubernetes hardening guidance."
-        }
-      ]
+      "recommendedExternalTools": []
     }
   ],
   "commands": [
@@ -641,7 +480,8 @@
         "files",
         "move",
         "rename"
-      ]
+      ],
+      "warnings": "mv overwrites an existing destination without asking; check the target path before moving, especially between directories."
     },
     {
       "slug": "rm",
@@ -1402,7 +1242,8 @@
         "process",
         "signal",
         "stop"
-      ]
+      ],
+      "warnings": "kill delivers signals immediately; the wrong PID can terminate a session or a system process you did not intend to stop."
     },
     {
       "slug": "ip",
@@ -1709,7 +1550,8 @@
         "package",
         "debian",
         "ubuntu"
-      ]
+      ],
+      "warnings": "apt installs packages with root privileges, and package maintainer scripts run arbitrary code; install only from trusted repositories."
     },
     {
       "slug": "dpkg",
@@ -1753,7 +1595,8 @@
       "tags": [
         "package",
         "debian"
-      ]
+      ],
+      "warnings": "dpkg modifies the system package database directly and usually requires root; interrupted or conflicting operations can leave packages unconfigured."
     },
     {
       "slug": "df",
@@ -1986,7 +1829,8 @@
         "users",
         "admin",
         "accounts"
-      ]
+      ],
+      "warnings": "useradd typically requires root; new accounts immediately gain login and file-access rights on the system."
     },
     {
       "slug": "passwd",
@@ -2027,7 +1871,8 @@
         "users",
         "password",
         "security"
-      ]
+      ],
+      "warnings": "changing another user password requires root; password changes are written straight to the system authentication database."
     },
     {
       "slug": "history",
@@ -2065,7 +1910,8 @@
       "tags": [
         "shell",
         "history"
-      ]
+      ],
+      "warnings": "shell history records every command in a plaintext file, including arguments typed after sudo; avoid putting secrets on a command line you keep."
     },
     {
       "slug": "uname",
@@ -2142,7 +1988,7 @@
       "category": "services-and-logs",
       "section": "linux",
       "summary": "Control the systemd system and service manager.",
-      "syntax": "systemctl [OPTIONS] COMMAND [NAME...",
+      "syntax": "systemctl [OPTIONS] COMMAND [NAME...]",
       "description": "Query or control the systemd system and service manager state and services.",
       "options": [
         {
@@ -2191,7 +2037,8 @@
         "services",
         "systemd",
         "daemon"
-      ]
+      ],
+      "warnings": "systemctl changes the state of system services; enabling or stopping the wrong unit (especially as root) can affect boot or connectivity."
     },
     {
       "slug": "journalctl",
@@ -3140,7 +2987,8 @@
         "permissions",
         "mode",
         "security"
-      ]
+      ],
+      "warnings": "permission changes take effect immediately; recursive modes (chmod -R) applied to the wrong path can expose or lock system files."
     },
     {
       "slug": "chown",
@@ -3197,7 +3045,8 @@
         "ownership",
         "users",
         "groups"
-      ]
+      ],
+      "warnings": "changing ownership on system paths usually requires root; recursive changes (chown -R) are hard to revert once service accounts are reassigned."
     },
     {
       "slug": "chgrp",
@@ -3254,7 +3103,8 @@
         "groups",
         "ownership",
         "sharing"
-      ]
+      ],
+      "warnings": "recursive group changes (chgrp -R) propagate to every file in the target tree, and system directories usually require root."
     },
     {
       "slug": "umask",
@@ -3491,7 +3341,8 @@
         "filesystem",
         "attributes",
         "immutable"
-      ]
+      ],
+      "warnings": "the immutable attribute (+i) blocks writes, deletes, and even root edits until it is cleared, which can confuse backups and update tools."
     },
     {
       "slug": "lsattr",
@@ -4402,7 +4253,8 @@
         "raw",
         "copy",
         "disk"
-      ]
+      ],
+      "warnings": "dd writes raw bytes with no prompt and no undo; pointing of= at the wrong target (for example a disk device) overwrites the data that is there."
     },
     {
       "slug": "split",
@@ -4438,10 +4290,10 @@
           "explanation": "Creates files containing at most 1000 lines each."
         },
         {
-          "title": "Reassemble pieces",
+          "title": "Reassemble split pieces",
           "command": "cat archive.part-* > archive.restored.tar",
           "output": "",
-          "explanation": "Concatenates pieces in lexical order to restore the original stream."
+          "explanation": "Concatenates the split pieces in lexical order to restore the original stream."
         }
       ],
       "useCases": [
@@ -4578,7 +4430,8 @@
         "secure-delete",
         "files",
         "privacy"
-      ]
+      ],
+      "warnings": "shred destroys file contents permanently; journaling, copy-on-write, and SSD wear-leveling can still leave copies that shred cannot reach."
     },
     {
       "slug": "truncate",
@@ -4635,7 +4488,8 @@
         "files",
         "size",
         "sparse"
-      ]
+      ],
+      "warnings": "truncate resizes files in place; with -s 0 the entire content is discarded immediately and cannot be recovered from the file."
     },
     {
       "slug": "cut",
@@ -5535,10 +5389,10 @@
           "explanation": "Replaces the leading tab with spaces."
         },
         {
-          "title": "Preserve indentation semantics",
-          "command": "expand -i Makefile",
-          "output": "target: deps\n\tcommand",
-          "explanation": "Leaves tabs after non-blank characters unchanged."
+          "title": "Preserve tabs that follow text",
+          "command": "printf 'code\\t# note\\n' | expand -i",
+          "output": "code\t# note",
+          "explanation": "With -i only leading tabs become spaces; tabs after a word stay in place."
         }
       ],
       "useCases": [
@@ -5922,8 +5776,7 @@
         "Remote access"
       ],
       "related": [
-        "scp",
-        "sftp"
+        "scp"
       ],
       "tags": [
         "ssh",
@@ -6004,7 +5857,7 @@
         "Auth testing"
       ],
       "related": [
-        "ncrack"
+        "ssh"
       ],
       "tags": [
         "brute-force",
@@ -6075,13 +5928,13 @@
         "Process management"
       ],
       "related": [
-        "kill",
-        "killall"
+        "kill"
       ],
       "tags": [
         "process",
         "signals"
-      ]
+      ],
+      "warnings": "pkill signals matching processes by name and can hit more than the process you had in mind; confirm matches with pgrep first."
     },
     {
       "slug": "netstat",
@@ -6634,7 +6487,6 @@
         "file transfer"
       ],
       "related": [
-        "enum4linux",
         "nmap"
       ],
       "tags": [
@@ -6793,8 +6645,8 @@
       "description": "hashid analyses a hash string and lists the most probable hash algorithms (MD5, SHA-1, bcrypt, etc.), telling you what to feed into a cracker.",
       "options": [
         {
-          "flag": "  none",
-          "description": "Pass the candidate hash as positional argument"
+          "flag": "HASH",
+          "description": "Pass the candidate hash as a positional argument"
         },
         {
           "flag": "-m",
@@ -7030,6 +6882,31 @@
     "adb",
     "apktool",
     "trivy",
-    "rev"
+    "rev",
+    "ssh",
+    "scp",
+    "hydra",
+    "searchsploit",
+    "pkill",
+    "netstat",
+    "locate",
+    "ncat",
+    "nc",
+    "wpscan",
+    "rsync",
+    "lsof",
+    "nikto",
+    "wfuzz",
+    "feroxbuster",
+    "rustscan",
+    "masscan",
+    "smbclient",
+    "subfinder",
+    "volatility",
+    "foremost",
+    "hashid",
+    "openssl",
+    "radare2",
+    "jadx"
   ]
 }

@@ -4,7 +4,7 @@ import { getCommand, getPathForCommand, getCategory, getCTFDomain } from '../dat
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { TableOfContents } from '../components/TableOfContents';
 import { CodeBlock } from '../components/CodeBlock';
-import { Terminal, Shield, AlertTriangle, Tag, Bookmark, BookmarkCheck, Save, FileText } from 'lucide-react';
+import { Terminal, Shield, AlertTriangle, Tag, Bookmark, BookmarkCheck, Save, FileText, FileQuestion } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { commandBuilderSpecs } from '../data/commandBuilders';
 import { CommandBuilder } from '../components/CommandBuilder';
@@ -22,6 +22,14 @@ export const CommandDetailPage = () => {
   const isBookmarked = slug ? bookmarks.has(slug) : false;
   const savedNote = slug ? notes.get(slug) || '' : '';
   const isCTF = command?.section === 'ctf';
+  // Mirrors the dataset pipeline's pending-review rule: entries with thin docs
+  // (fewer than three examples, or missing options/useCases/tags) are flagged.
+  const docsPendingReview =
+    !!command &&
+    (command.examples.length < 3 ||
+      command.options.length === 0 ||
+      command.useCases.length === 0 ||
+      command.tags.length === 0);
   const parentName = isCTF
     ? getCTFDomain(command?.category || '')?.name || command?.category || ''
     : getCategory(command?.category || '')?.name || command?.category || '';
@@ -146,6 +154,16 @@ export const CommandDetailPage = () => {
                 {isCTF ? 'CTF tool' : 'Linux utility'}
               </span>
               <span className="font-mono text-[11px] text-[var(--text-muted)]">{parentName}</span>
+              {docsPendingReview && (
+                <span
+                  className="inline-flex items-center gap-1.5 rounded border border-dashed border-[var(--border)] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--text-muted)]"
+                  title="This entry's documentation is thin and queued for review. If something looks off, use the correction link below."
+                  data-docs-pending-review
+                >
+                  <FileQuestion className="h-3.5 w-3.5" />
+                  Docs pending review
+                </span>
+              )}
             </div>
 
             <div className="flex flex-wrap items-baseline justify-between gap-4">

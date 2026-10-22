@@ -156,7 +156,24 @@ const text = JSON.parse(fs.readFileSync(path.join(root, 'backend', 'data', 'batc
 
 const categories = sandbox.result.categories;
 const domains = sandbox.result.domains;
-const commands = [...sandbox.result.commands.filter((command) => command.section === 'linux' || command.section === 'ctf'), ...permissions, ...files, ...text];
+// Permission entries now live in src/data/commands.ts as well; keep the inline
+// literal only as a fallback source so slugs are never duplicated.
+const permissionEntries = permissions.filter((command) => !existingSlugs.has(command.slug));
+const commands = [...sandbox.result.commands.filter((command) => command.section === 'linux' || command.section === 'ctf'), ...permissionEntries, ...files, ...text];
+
+// Guard against duplicate slugs reaching the generated dataset.
+{
+  const seen = new Set();
+  const dupes = [];
+  for (const command of commands) {
+    if (seen.has(command.slug)) dupes.push(command.slug);
+    seen.add(command.slug);
+  }
+  if (dupes.length > 0) {
+    throw new Error(`build_commands produced duplicate slugs: ${[...new Set(dupes)].join(', ')}`);
+  }
+}
+
 const knownSlugs = new Set(commands.map((command) => command.slug));
 const needsHumanReview = [];
 for (const command of commands) {

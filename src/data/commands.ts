@@ -298,7 +298,8 @@ export const COMMANDS: Command[] = [
       "files",
       "move",
       "rename"
-    ]
+    ],
+    "warnings": "mv overwrites an existing destination without asking; check the target path before moving, especially between directories."
   },
   {
     "slug": "rm",
@@ -1059,7 +1060,8 @@ export const COMMANDS: Command[] = [
       "process",
       "signal",
       "stop"
-    ]
+    ],
+    "warnings": "kill delivers signals immediately; the wrong PID can terminate a session or a system process you did not intend to stop."
   },
   {
     "slug": "ip",
@@ -1366,7 +1368,8 @@ export const COMMANDS: Command[] = [
       "package",
       "debian",
       "ubuntu"
-    ]
+    ],
+    "warnings": "apt installs packages with root privileges, and package maintainer scripts run arbitrary code; install only from trusted repositories."
   },
   {
     "slug": "dpkg",
@@ -1410,7 +1413,8 @@ export const COMMANDS: Command[] = [
     "tags": [
       "package",
       "debian"
-    ]
+    ],
+    "warnings": "dpkg modifies the system package database directly and usually requires root; interrupted or conflicting operations can leave packages unconfigured."
   },
   {
     "slug": "df",
@@ -1643,7 +1647,8 @@ export const COMMANDS: Command[] = [
       "users",
       "admin",
       "accounts"
-    ]
+    ],
+    "warnings": "useradd typically requires root; new accounts immediately gain login and file-access rights on the system."
   },
   {
     "slug": "passwd",
@@ -1684,7 +1689,8 @@ export const COMMANDS: Command[] = [
       "users",
       "password",
       "security"
-    ]
+    ],
+    "warnings": "changing another user password requires root; password changes are written straight to the system authentication database."
   },
   {
     "slug": "history",
@@ -1722,7 +1728,8 @@ export const COMMANDS: Command[] = [
     "tags": [
       "shell",
       "history"
-    ]
+    ],
+    "warnings": "shell history records every command in a plaintext file, including arguments typed after sudo; avoid putting secrets on a command line you keep."
   },
   {
     "slug": "uname",
@@ -1848,7 +1855,8 @@ export const COMMANDS: Command[] = [
       "services",
       "systemd",
       "daemon"
-    ]
+    ],
+    "warnings": "systemctl changes the state of system services; enabling or stopping the wrong unit (especially as root) can affect boot or connectivity."
   },
   {
     "slug": "journalctl",
@@ -2797,7 +2805,8 @@ export const COMMANDS: Command[] = [
       "permissions",
       "mode",
       "security"
-    ]
+    ],
+    "warnings": "permission changes take effect immediately; recursive modes (chmod -R) applied to the wrong path can expose or lock system files."
   },
   {
     "slug": "chown",
@@ -2854,7 +2863,8 @@ export const COMMANDS: Command[] = [
       "ownership",
       "users",
       "groups"
-    ]
+    ],
+    "warnings": "changing ownership on system paths usually requires root; recursive changes (chown -R) are hard to revert once service accounts are reassigned."
   },
   {
     "slug": "chgrp",
@@ -2911,7 +2921,8 @@ export const COMMANDS: Command[] = [
       "groups",
       "ownership",
       "sharing"
-    ]
+    ],
+    "warnings": "recursive group changes (chgrp -R) propagate to every file in the target tree, and system directories usually require root."
   },
   {
     "slug": "umask",
@@ -3148,7 +3159,8 @@ export const COMMANDS: Command[] = [
       "filesystem",
       "attributes",
       "immutable"
-    ]
+    ],
+    "warnings": "the immutable attribute (+i) blocks writes, deletes, and even root edits until it is cleared, which can confuse backups and update tools."
   },
   {
     "slug": "lsattr",
@@ -4059,7 +4071,8 @@ export const COMMANDS: Command[] = [
       "raw",
       "copy",
       "disk"
-    ]
+    ],
+    "warnings": "dd writes raw bytes with no prompt and no undo; pointing of= at the wrong target (for example a disk device) overwrites the data that is there."
   },
   {
     "slug": "split",
@@ -4095,10 +4108,10 @@ export const COMMANDS: Command[] = [
         "explanation": "Creates files containing at most 1000 lines each."
       },
       {
-        "title": "Reassemble pieces",
+        "title": "Reassemble split pieces",
         "command": "cat archive.part-* > archive.restored.tar",
         "output": "",
-        "explanation": "Concatenates pieces in lexical order to restore the original stream."
+        "explanation": "Concatenates the split pieces in lexical order to restore the original stream."
       }
     ],
     "useCases": [
@@ -4235,7 +4248,8 @@ export const COMMANDS: Command[] = [
       "secure-delete",
       "files",
       "privacy"
-    ]
+    ],
+    "warnings": "shred destroys file contents permanently; journaling, copy-on-write, and SSD wear-leveling can still leave copies that shred cannot reach."
   },
   {
     "slug": "truncate",
@@ -4292,7 +4306,8 @@ export const COMMANDS: Command[] = [
       "files",
       "size",
       "sparse"
-    ]
+    ],
+    "warnings": "truncate resizes files in place; with -s 0 the entire content is discarded immediately and cannot be recovered from the file."
   },
   {
     "slug": "cut",
@@ -5579,8 +5594,7 @@ export const COMMANDS: Command[] = [
       "Remote access"
     ],
     "related": [
-      "scp",
-      "sftp"
+      "scp"
     ],
     "tags": [
       "ssh",
@@ -5661,7 +5675,7 @@ export const COMMANDS: Command[] = [
       "Auth testing"
     ],
     "related": [
-      "ncrack"
+      "ssh"
     ],
     "tags": [
       "brute-force",
@@ -5732,13 +5746,13 @@ export const COMMANDS: Command[] = [
       "Process management"
     ],
     "related": [
-      "kill",
-      "killall"
+      "kill"
     ],
     "tags": [
       "process",
       "signals"
-    ]
+    ],
+    "warnings": "pkill signals matching processes by name and can hit more than the process you had in mind; confirm matches with pgrep first."
   },
   {
     "slug": "netstat",
@@ -6291,7 +6305,6 @@ export const COMMANDS: Command[] = [
       "file transfer"
     ],
     "related": [
-      "enum4linux",
       "nmap"
     ],
     "tags": [
@@ -6450,8 +6463,8 @@ export const COMMANDS: Command[] = [
     "description": "hashid analyses a hash string and lists the most probable hash algorithms (MD5, SHA-1, bcrypt, etc.), telling you what to feed into a cracker.",
     "options": [
       {
-        "flag": "  none",
-        "description": "Pass the candidate hash as positional argument"
+        "flag": "HASH",
+        "description": "Pass the candidate hash as a positional argument"
       },
       {
         "flag": "-m",
