@@ -125,6 +125,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState<Map<string, string>>(new Map());
   const [history, setHistory] = useState<string[]>([]);
+  // Current-state mirrors for useCallback'd mutators (identity-stable fns that
+  // still read fresh data; the mirror updates before any user click can land).
+  const bookmarksRef = useRef(bookmarks);
+  useEffect(() => {
+    bookmarksRef.current = bookmarks;
+  }, [bookmarks]);
   const [sync, setSync] = useState<SyncState>(INITIAL_SYNC_STATE);
 
   /** Stale-response guards: every pull and per-record op is tagged & checked. */
@@ -378,7 +384,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   /* ------------------------------------------------------------------- auth */
 
-  const login = async (email: string, password: string, remember = true) => {
+  const login = useCallback(async (email: string, password: string, remember = true) => {
     try {
       const response = await authApi.login({ email, password, remember });
       markSession();
@@ -392,9 +398,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       return { errors: err.errors || { general: err.message } };
     }
-  };
+  }, [absorbGuestStore, refreshUserData]);
 
-  const register = async (data: { username: string; email: string; password: string; confirm_password: string }) => {
+  const register = useCallback(async (data: { username: string; email: string; password: string; confirm_password: string }) => {
     try {
       const response = await authApi.register(data);
       markSession();
@@ -408,9 +414,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       return { errors: err.errors || { general: err.message } };
     }
-  };
+  }, [absorbGuestStore, refreshUserData]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await authApi.logout();
     } catch {
@@ -424,11 +430,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setHistory([]);
     setSync(markIdle());
     hydrateFromGuestStore(); // guest mode continues with its own (device) data
-  };
+  }, [hydrateFromGuestStore]);
 
   /* -------------------------------------------------------------- mutations */
 
-  const toggleBookmark = async (slug: string) => {
+  const toggleBookmark = useCallback(async (slug: string) => {
     const u = userRef.current;
     if (!u) {
       // Guests keep a device-local store; signing in later converts it to ops.
@@ -447,7 +453,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSync(markSavedLocal());
       return;
     }
-    const wanted = !bookmarks.has(slug);
+    const wanted = !bookmarksRef.current.has(slug);
     // Optimistic flip; the queue op carries the desired END STATE, so offline
     // replays always deliver exactly what the user last chose.
     setBookmarks((prev) => {
@@ -457,9 +463,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return next;
     });
     submitOp({ kind: 'bookmark', slug, wanted, userId: u.id });
-  };
+  }, [submitOp]);
 
-  const saveNote = async (slug: string, text: string) => {
+  const saveNote = useCallback(async (slug: string, text: string) => {
     const u = userRef.current;
     if (!u) {
       const store = loadGuestStore();
@@ -474,9 +480,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setNotes((prev) => new Map(prev).set(slug, text.trim()));
     submitOp({ kind: 'note-set', slug, text: text.trim(), userId: u.id });
-  };
+  }, [submitOp]);
 
-  const deleteNote = async (slug: string) => {
+  const deleteNote = useCallback(async (slug: string) => {
     const u = userRef.current;
     if (!u) {
       const store = loadGuestStore();
@@ -496,9 +502,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return next;
     });
     submitOp({ kind: 'note-del', slug, userId: u.id });
-  };
+  }, [submitOp]);
 
-  const addHistory = async (slug: string) => {
+  const addHistory = useCallback(async (slug: string) => {
     const u = userRef.current;
     if (!u) {
       const store = loadGuestStore();
@@ -512,29 +518,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setHistory((prev) => [slug, ...prev.filter((s) => s !== slug)].slice(0, 15));
     submitOp({ kind: 'history', slug, userId: u.id });
-  };
+  }, [submitOp]);
 
-  const importData = async (data: { bookmarks: string[]; notes: { command_slug: string; text: string }[] }) => {
+  const importData = useCallback(async (data: { bookmarks: string[]; notes: { command_slug: string; text: string }[] }) => {
     if (!userRef.current) return;
     await userApi.importData(data);
     await refreshUserData();
-  };
+  }, [refreshUserData]);
 
   const retrySync = useCallback(() => {
     void drainQueueRef.current?.();
     if (userRef.current) void refreshUserData();
   }, [refreshUserData]);
 
-  const changePassword = async (data: { current_password: string; new_password: string; confirm_password: string }) => {
+  const changePassword = useCallback(async (data: { current_password: string; new_password: string; confirm_password: string }) => {
     try {
       await userApi.changePassword(data);
       return {};
     } catch (err: any) {
       return { errors: err.errors || { general: err.message } };
     }
-  };
+  }, []);
 
-  const deleteAccount = async (confirm: string) => {
+  const deleteAccount = useCallback(async (confirm: string) => {
     try {
       await userApi.deleteAccount(confirm);
       await logout();
@@ -542,7 +548,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       return { errors: err.errors || { general: err.message } };
     }
-  };
+  }, [logout]);
 
   return (
     <AuthContext.Provider

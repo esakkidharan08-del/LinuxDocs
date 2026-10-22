@@ -5,10 +5,12 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
-    // All routes are React.lazy-split (largest page chunk ≈ 77 kB). The entry
-    // chunk legitimately stays ~545 kB minified (≈172 kB gzipped) because the
-    // shell renders the sidebar with the full 132-command dataset, which every
-    // route needs anyway. 700 kB silences the generic advisory for that.
+    // All routes are React.lazy-split. The entry chunk is ~420 kB minified
+    // (~135 kB gzipped): app shell + the lightweight dataset index only
+    // (src/data/commandsIndex.ts). The full 132-entry docs module
+    // (src/data/commands.ts) ships as its own async chunk (~134 kB / ~40 kB
+    // gzip) loaded by the lazy routes that need it. 700 kB silences the
+    // generic advisory for the shell.
     chunkSizeWarningLimit: 700,
   },
   server: {

@@ -1,33 +1,7 @@
-import type { Command, CategoryInfo, CTFDomainInfo } from '../types';
+import type { Command } from '../types';
+import { LINUX_CATEGORIES, CTF_DOMAINS } from './commandsIndex';
 
-export const LINUX_CATEGORIES: CategoryInfo[] = [
-  { id: 'file-and-directory', name: 'File & Directory', section: 'linux', description: 'Create, navigate, copy, move, and remove files and directories.' },
-  { id: 'permissions-and-ownership', name: 'Permissions & Ownership', section: 'linux', description: 'Manage file permissions, ownership, and access control.' },
-  { id: 'text-processing', name: 'Text Processing', section: 'linux', description: 'Search, filter, transform, and format text streams and files.' },
-  { id: 'process-management', name: 'Process Management', section: 'linux', description: 'Monitor, signal, background, and control active system processes.' },
-  { id: 'networking', name: 'Networking', section: 'linux', description: 'Test connectivity, trace routes, inspect interfaces, and transfer files.' },
-  { id: 'package-management', name: 'Package Management', section: 'linux', description: 'Install, update, remove, and query software packages and repositories.' },
-  { id: 'disk-and-storage', name: 'Disk & Storage', section: 'linux', description: 'Inspect disk usage, mount filesystems, and manage partitions.' },
-  { id: 'archiving-and-compression', name: 'Archiving & Compression', section: 'linux', description: 'Bundle, compress, extract, and unpack archives.' },
-  { id: 'users-and-groups', name: 'Users & Groups', section: 'linux', description: 'Manage user accounts, passwords, groups, and privileges.' },
-  { id: 'shell-and-scripting', name: 'Shell & Scripting', section: 'linux', description: 'Shell environment, history, aliases, arithmetic, and cron automation.' },
-  { id: 'system-info-and-monitoring', name: 'System Info & Monitoring', section: 'linux', description: 'Hardware info, kernel version, uptime, calendar, and system statistics.' },
-  { id: 'search-and-find', name: 'Search & Find', section: 'linux', description: 'Locate files and search file contents across the filesystem.' },
-  { id: 'services-and-logs', name: 'Services & Logs', section: 'linux', description: 'Control systemd services, inspect journal logs, and view kernel ring buffer.' }
-];
-
-export const CTF_DOMAINS: CTFDomainInfo[] = [
-  { id: 'recon', name: 'Reconnaissance', description: 'Information gathering, port scanning, subdomain enumeration, and service fingerprinting.', tools: ['nmap', 'gobuster', 'ffuf', 'wfuzz', 'nikto', 'whatweb', 'subfinder', 'theHarvester', 'whois', 'dnsrecon'], recommendedExternalTools: [] },
-  { id: 'web', name: 'Web Hacking', description: 'HTTP parameter tampering, vulnerability scanning, SQL injection, and web application assessment.', tools: ['sqlmap', 'curl-for-web-testing', 'nikto', 'gobuster', 'ffuf', 'wfuzz'], recommendedExternalTools: [] },
-  { id: 'crypto', name: 'Cryptography', description: 'Symmetric/asymmetric encryption, hashing, decoding, and cryptographic protocol analysis.', tools: ['openssl', 'hashid', 'john', 'hashcat', 'gpg', 'age'], recommendedExternalTools: [] },
-  { id: 'reverse-engineering', name: 'Reverse Engineering', description: 'Decompiling, disassembling, patching, and analyzing compiled binaries and bytecode.', tools: ['strings', 'objdump', 'gdb', 'ltrace', 'strace', 'radare2', 'binwalk', 'checksec', 'ROPgadget'], recommendedExternalTools: [] },
-  { id: 'forensics', name: 'Digital Forensics', description: 'File carving, metadata extraction, memory dump analysis, and hidden data discovery.', tools: ['binwalk', 'exiftool', 'steghide', 'foremost', 'volatility'], recommendedExternalTools: [] },
-  { id: 'pwn', name: 'Binary Exploitation (Pwn)', description: 'Buffer overflows, format string vulnerabilities, shellcode crafting, and ROP chain development.', tools: ['checksec', 'ROPgadget', 'gdb', 'pwntools-snippets'], recommendedExternalTools: [] },
-  { id: 'osint', name: 'OSINT', description: 'Open-source intelligence gathering on people, organizations, domains, and infrastructure.', tools: ['theHarvester', 'whois', 'dnsrecon', 'nmap'], recommendedExternalTools: [] },
-  { id: 'mobile', name: 'Mobile Security', description: 'Android/iOS application analysis, decompilation, and dynamic instrumentation.', tools: ['adb', 'apktool', 'jadx'], recommendedExternalTools: [] },
-  { id: 'containers', name: 'Container Security', description: 'Docker inspection, container escape vulnerability scanning, and image analysis.', tools: ['trivy'], recommendedExternalTools: [] },
-  { id: 'cloud', name: 'Cloud Security', description: 'AWS/Azure/GCP permission auditing, misconfiguration detection, and credential enumeration.', tools: ['aws-cli-enumeration', 'trivy'], recommendedExternalTools: [] }
-];
+export { LINUX_CATEGORIES, CTF_DOMAINS };
 
 export const COMMANDS: Command[] = [
   {

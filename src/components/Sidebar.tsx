@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LINUX_CATEGORIES, CTF_DOMAINS, COMMANDS } from '../data/commands';
+import { LINUX_CATEGORIES, CTF_DOMAINS, CATEGORY_COUNTS } from '../data/commandsIndex';
 import { Terminal, Shield, X, ChevronDown, BookOpen, Layers, Command, FileText, CalendarDays, Zap } from 'lucide-react';
 
 interface SidebarProps {
@@ -122,7 +122,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             {linuxOpen && (
               <div className="space-y-0.5">
                 {LINUX_CATEGORIES.map((cat) => {
-                  const count = COMMANDS.filter((c) => c.section === 'linux' && c.category === cat.id).length;
+                  const count = CATEGORY_COUNTS[cat.id] ?? 0;
                   return (
                     <NavLink
                       key={cat.id}
@@ -158,7 +158,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             {ctfOpen && (
               <div className="space-y-0.5">
                 {CTF_DOMAINS.map((domain) => {
-                  const count = COMMANDS.filter((c) => c.section === 'ctf' && c.category === domain.id).length;
+                  const count = CATEGORY_COUNTS[domain.id] ?? 0;
                   return (
                     <NavLink
                       key={domain.id}
