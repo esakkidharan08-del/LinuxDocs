@@ -22,26 +22,23 @@ type Deck = { id: string; title: string; blurb: string; accent: 'linux' | 'ctf';
 type FlashcardStore = { lastDeck: string | null; completes: Record<string, number> };
 const STORE_KEY = 'linuxdocs.flashcards';
 
-function loadStore(): FlashcardStore {
+/** Device-local preference only (the synced part arrives via useProgress). */
+function readLastDeck(): string | null {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as FlashcardStore;
-      if (parsed && typeof parsed.completes === 'object') return { lastDeck: parsed.lastDeck ?? null, completes: parsed.completes ?? {} };
+      const parsed = JSON.parse(raw) as { lastDeck?: unknown };
+      return typeof parsed?.lastDeck === 'string' ? parsed.lastDeck : null;
     }
   } catch {
     /* corrupted storage - start fresh */
   }
-  return { lastDeck: null, completes: {} };
+  return null;
 }
 
-function saveStore(next: FlashcardStore) {
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(next));
-  } catch {
-    /* storage full or blocked */
-  }
-}
+import type { FlashcardsData } from '../lib/progress';
+import { mergeProgressData } from '../lib/progress';
+import { useProgress } from '../context/ProgressContext';
 
 function shuffled<T>(items: T[]): T[] {
   const copy = [...items];
@@ -55,8 +52,32 @@ function shuffled<T>(items: T[]): T[] {
 export function FlashcardsPage() {
   const { bookmarks } = useAuth();
   const { lights, categories, domains } = useCatalog();
-  const [storeState, setStoreState] = useState<FlashcardStore>(loadStore);
+  /* completes sync through the account (Part 2); the last deck is a device
+     preference and stays in the legacy local key. */
+  const { ready: progressReady, progress, updateProgress } = useProgress();
+  const syncedFC = (progress.flashcards as FlashcardsData | undefined) ?? undefined;
+  const [storeState, setStoreState] = useState<FlashcardStore>(() => ({
+    lastDeck: readLastDeck(),
+    completes: syncedFC?.completes ?? {},
+  }));
   const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
+
+  /* adopt server/device-merged completes when the provider delivers them */
+  const syncedCompletes = syncedFC?.completes;
+  useEffect(() => {
+    if (!progressReady || !syncedCompletes) return;
+    setStoreState((current) => {
+      const next = { ...current.completes };
+      let changed = false;
+      for (const [deckId, count] of Object.entries(syncedCompletes)) {
+        if ((next[deckId] ?? 0) < count) {
+          next[deckId] = count; // monotone max adopt
+          changed = true;
+        }
+      }
+      return changed ? { ...current, completes: next } : current;
+    });
+  }, [progressReady, syncedCompletes]);
 
   const decks = useMemo<Deck[]>(() => {
     const lightIn = (section: 'linux' | 'ctf', category?: string) =>
@@ -114,17 +135,23 @@ export function FlashcardsPage() {
   const activeDeck = activeDeckId ? decks.find((deck) => deck.id === activeDeckId) ?? null : null;
 
   const openDeck = (deckId: string) => {
-    const next: FlashcardStore = { ...storeState, lastDeck: deckId, completes: { ...storeState.completes } };
+    const next: FlashcardStore = { ...storeState, lastDeck: deckId };
     setStoreState(next);
-    saveStore(next);
     setActiveDeckId(deckId);
   };
 
   const recordComplete = (deckId: string) => {
-    const completes = { ...storeState.completes, [deckId]: (storeState.completes[deckId] ?? 0) + 1 };
-    const next: FlashcardStore = { ...storeState, completes };
-    setStoreState(next);
-    saveStore(next);
+    setStoreState((current) => {
+      const next: FlashcardStore = {
+        ...current,
+        completes: { ...current.completes, [deckId]: (current.completes[deckId] ?? 0) + 1 },
+      };
+      if (progressReady) {
+        // merge-shaped: fold this session into the provider's current value
+        updateProgress('flashcards', (prev) => mergeProgressData('flashcards', prev, next));
+      }
+      return next;
+    });
   };
 
   const lastDeck = storeState.lastDeck ? decks.find((deck) => deck.id === storeState.lastDeck) ?? null : null;

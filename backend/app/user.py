@@ -3,7 +3,11 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import re
 
 from . import db
-from .models import User, Bookmark, UserNote, RecentlyViewed, Session
+from .models import User, Bookmark, UserNote, RecentlyViewed, Session, UserProgress
+from .progress_merge import merge_progress_data
+from .progress_schemas import (
+    MAX_DATA_BYTES, PROGRESS_KEYS, data_json_bytes, server_today, validate_progress,
+)
 from .security import (
     rate_limit, require_trusted_origin, client_ip, _warn_security, env_int, sha256_hex,
 )
@@ -176,12 +180,41 @@ def add_history():
 def import_data():
     user_id = get_jwt_identity()
     data = request.get_json(silent=True) or {}
+    version = data.get('version', 1)
+    if not isinstance(version, int) or isinstance(version, bool) or version not in (1, 2):
+        return jsonify({'error': f"Import rejected: unknown schema version "
+                                 f"{version!r} (this build reads version 2)."}), 400
     bookmarks = data.get('bookmarks', [])
     notes = data.get('notes', [])
     if not isinstance(bookmarks, list) or not isinstance(notes, list):
         return jsonify({'error': 'bookmarks and notes must be arrays'}), 400
     if len(bookmarks) > MAX_IMPORT_ITEMS or len(notes) > MAX_IMPORT_ITEMS:
         return jsonify({'error': f'Import is limited to {MAX_IMPORT_ITEMS} items per collection'}), 400
+
+    # Schema v2 carries synced learning progress; every key is validated with
+    # the strict per-key schema BEFORE anything is written (all-or-nothing),
+    # then merged into the existing rows with the shared deterministic rules.
+    progress_in = data.get('progress', {}) if version == 2 else {}
+    if not isinstance(progress_in, dict):
+        return jsonify({'error': 'import rejected: progress must be an object keyed by progress key'}), 400
+    if progress_in:
+        for key, payload in progress_in.items():
+            if key not in PROGRESS_KEYS:
+                return jsonify({'error': f'Import rejected: unknown progress key {key!r} '
+                                         f'(valid: {", ".join(PROGRESS_KEYS)})'}), 400
+            error = validate_progress(key, payload, today=server_today())
+            if error:
+                return jsonify({'error': f'Import rejected: {error}'}), 400
+        for key, payload in progress_in.items():
+            row = UserProgress.query.filter_by(user_id=user_id, key=key).first()
+            merged = merge_progress_data(key, row.data if row else None, payload)
+            new_version = (row.version if row else 0) + 1
+            if row:
+                row.version = new_version
+                row.data = merged
+            else:
+                db.session.add(UserProgress(user_id=user_id, key=key, version=new_version, data=merged))
+
     for slug in bookmarks:
         if isinstance(slug, str) and slug.strip() and len(slug) <= MAX_SLUG_LEN \
                 and SLUG_PATTERN.fullmatch(slug.strip()):
@@ -204,6 +237,70 @@ def import_data():
             db.session.add(UserNote(user_id=user_id, command_slug=slug, text=text))
     db.session.commit()
     return jsonify({'message': 'Data imported'}), 200
+
+
+# --- LEARNING PROGRESS (Part 2) ---------------------------------------------
+# One strict-schema JSON blob per key (learning/terminal/flashcards/
+# speeddrill/streak) with an optimistic-version conflict protocol. The
+# deterministic merge rules live in progress_merge.py and are mirrored 1:1 by
+# the frontend (src/lib/progress.ts), pinned together by qa/merge_vectors.json.
+
+@user_bp.route('/progress', methods=['GET'])
+@jwt_required()
+def get_progress():
+    user_id = get_jwt_identity()
+    rows = UserProgress.query.filter_by(user_id=user_id).all()
+    progress = {row.key: {'version': row.version, 'data': row.data} for row in rows}
+    return jsonify({'progress': progress}), 200
+
+
+@user_bp.route('/progress/<key>', methods=['PUT'])
+@jwt_required()
+def put_progress(key):
+    user_id = get_jwt_identity()
+    if key not in PROGRESS_KEYS:
+        return jsonify({'error': f'unknown progress key {key!r} (valid: {", ".join(PROGRESS_KEYS)})'}), 400
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'body must be {baseVersion, data}'}), 400
+    body = data
+    base_version = body.get('baseVersion')
+    if not isinstance(base_version, int) or isinstance(base_version, bool) or base_version < 0:
+        return jsonify({'error': 'baseVersion must be a non-negative integer'}), 400
+    payload = body.get('data')
+    if data_json_bytes(payload) > MAX_DATA_BYTES:
+        return jsonify({'error': f'progress payload exceeds the {MAX_DATA_BYTES // 1024} KB cap'}), 413
+
+    error = validate_progress(key, payload, today=server_today())
+    if error:
+        return jsonify({'error': error}), 400
+
+    row = UserProgress.query.filter_by(user_id=user_id, key=key).first()
+    current_version = row.version if row else 0
+    if base_version != current_version:
+        # Conflict protocol: hand back the current truth; the client merges
+        # (shared deterministic rules) and retries with the fresh baseVersion.
+        return jsonify({
+            'error': 'version conflict — refresh and merge',
+            'key': key,
+            'version': current_version,
+            'data': row.data if row else None,
+        }), 409
+
+    try:
+        new_version = current_version + 1
+        if row:
+            row.version = new_version
+            row.data = payload
+        else:
+            db.session.add(UserProgress(user_id=user_id, key=key, version=new_version, data=payload))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+    row = UserProgress.query.filter_by(user_id=user_id, key=key).first()
+    return jsonify({'key': key, 'version': new_version, 'updatedAt': row.updated_at.isoformat() if row.updated_at else None}), 200
 
 
 # --- CHANGE PASSWORD ---

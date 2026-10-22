@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Flame, GraduationCap, RotateCcw, Target, Trophy, Zap, ArrowRight } from 'lucide-react';
 import { useAllCommands } from '../context/CatalogContext';
+import { useProgress } from '../context/ProgressContext';
+import { mergeProgressData } from '../lib/progress';
 import type { Command } from '../types';
 
 /* ============================================================
@@ -15,7 +17,6 @@ import type { Command } from '../types';
 
 type Drill = { prompt: string; tag: string; options: string[]; answer: number };
 type DrillStore = { best: number; plays: number };
-const STORE_KEY = 'linuxdocs.speeddrill';
 const ROUND_SECONDS = 60;
 
 /* Question pools, derived once per loaded-docs revision (a ref keeps a
@@ -38,26 +39,6 @@ function buildPools(commands: Command[]): DrillPools {
   };
 }
 
-function loadStore(): DrillStore {
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as DrillStore;
-      if (parsed && typeof parsed.best === 'number') return { best: parsed.best, plays: parsed.plays ?? 0 };
-    }
-  } catch {
-    /* corrupted storage - start fresh */
-  }
-  return { best: 0, plays: 0 };
-}
-
-function saveStore(next: DrillStore) {
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(next));
-  } catch {
-    /* storage full or blocked */
-  }
-}
 
 function randItem<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
@@ -143,7 +124,22 @@ function buildQuestion(pools: DrillPools): Drill {
 }
 
 export function SpeedDrillPage() {
-  const [store, setStore] = useState<DrillStore>(loadStore);
+  /* Personal best + rounds live in the synced account store (Part 2);
+     the question pools remain in-memory (they are documents, not progress). */
+  const { ready: progressReady, progress, updateProgress } = useProgress();
+  const syncedDrill = (progress.speeddrill as DrillStore | undefined) ?? undefined;
+
+  const [store, setStore] = useState<DrillStore>(() => ({ best: 0, plays: 0 }));
+
+  /* adopt the server/device-merged store when it delivers higher numbers */
+  const syncBest = syncedDrill?.best ?? 0;
+  const syncPlays = syncedDrill?.plays ?? 0;
+  useEffect(() => {
+    if (!progressReady) return;
+    setStore((current) => (syncBest > current.best || syncPlays > current.plays
+      ? { best: Math.max(current.best, syncBest), plays: Math.max(current.plays, syncPlays) }
+      : current));
+  }, [progressReady, syncBest, syncPlays]);
   const [phase, setPhase] = useState<'idle' | 'playing' | 'done'>('idle');
   const [question, setQuestion] = useState<Drill | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
@@ -195,7 +191,10 @@ export function SpeedDrillPage() {
     setPrevBest(store.best);
     const next: DrillStore = { best: Math.max(store.best, score), plays: store.plays + 1 };
     setStore(next);
-    saveStore(next);
+    if (progressReady) {
+      // merge-shaped: the round folds into the provider's current value
+      updateProgress('speeddrill', (prev) => mergeProgressData('speeddrill', prev, next));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 

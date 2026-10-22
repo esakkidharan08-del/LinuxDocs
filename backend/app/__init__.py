@@ -28,6 +28,19 @@ db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
 
+# Flask-Migrate (Part 2): versioned schema migrations for user_progress.
+# `migrations/` holds the hand-written chain (001_initial → 002_user_progress);
+# `create_all()` below still covers fresh dev/test databases, but is skipped
+# while an alembic CLI command runs (its argv contains "db") so it cannot
+# race the upgrade.
+from flask_migrate import Migrate  # noqa: E402
+
+migrate = Migrate()
+
+
+def _running_db_command() -> bool:
+    return any(arg == 'db' for arg in sys.argv)
+
 # ---- Tin-foil umbrella: backend-only logging of security events -------------
 
 def _setup_logging(app):
@@ -217,9 +230,17 @@ def create_app():
     with app.app_context():
         # Verify/repair the database BEFORE the first connection touches it,
         # then create anything missing, snapshot it, and start maintenance.
+        # Skipped when the schema belongs to alembic instead: while a
+        # `flask db …` command runs (argv contains "db") or tests opt out with
+        # SKIP_DB_CREATE_ALL=1, migrations own the table set.
         db_path = configure_persistence(app)
-        db.create_all()
-        prime_backup(db_path)
-        start_maintenance(app, db_path)
+        migrate.init_app(app, db, directory=os.path.join(os.path.dirname(__file__), '..', 'migrations'))
+        if _running_db_command() or os.getenv('SKIP_DB_CREATE_ALL') == '1':
+            db_path = None
+        else:
+            db.create_all()
+        if db_path:
+            prime_backup(db_path)
+            start_maintenance(app, db_path)
 
     return app

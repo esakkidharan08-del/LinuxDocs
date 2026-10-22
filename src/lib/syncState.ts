@@ -15,6 +15,8 @@
  * - 'idle' = nothing to deliver; everything the user did is on the server.
  */
 
+import { PROGRESS_KEYS } from './progress';
+
 export type SyncPhase = 'idle' | 'saving' | 'synced' | 'saved-local' | 'failed';
 
 export interface SyncState {
@@ -70,7 +72,11 @@ export type SyncOp =
   | { id: number; kind: 'bookmark'; slug: string; wanted: boolean; userId: number }
   | { id: number; kind: 'note-set'; slug: string; text: string; userId: number }
   | { id: number; kind: 'note-del'; slug: string; userId: number }
-  | { id: number; kind: 'history'; slug: string; userId: number };
+  | { id: number; kind: 'history'; slug: string; userId: number }
+  /** Part 2: full per-key progress payload end-state (slug = progress key).
+   *  One op per key collapses perfectly, and the server's deterministic merge
+   *  makes the delivered state order-independent even across devices. */
+  | { id: number; kind: 'progress'; slug: string; data: unknown; baseVersion: number; userId: number };
 
 export const QUEUE_VERSION = 1;
 export const MAX_QUEUE_ITEMS = 500;
@@ -168,6 +174,12 @@ export function isSyncOp(v: unknown): v is SyncOp {
     case 'note-del':
     case 'history':
       return true;
+    case 'progress': {
+      const p = o as { data?: unknown; baseVersion?: unknown };
+      return !!p.data && typeof p.data === 'object'
+        && typeof p.baseVersion === 'number' && Number.isInteger(p.baseVersion) && p.baseVersion >= 0
+        && (PROGRESS_KEYS as readonly string[]).includes(o.slug);
+    }
     default:
       return false;
   }

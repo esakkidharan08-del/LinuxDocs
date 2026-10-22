@@ -51,12 +51,16 @@ async function request<T>(endpoint: string, options: RequestInit = {}, retry = t
     } catch { setAccessToken(null); }
   }
   if (!res.ok) {
-    const error = new Error(data.error || 'Request failed') as Error & { 
-      status: number; 
-      errors?: Record<string, string> 
+    const error = new Error(data.error || 'Request failed') as Error & {
+      status: number;
+      errors?: Record<string, string>,
+      /** full parsed response body — the progress 409 protocol reads the
+       *  current {key, version, data} row back out of it for the merge */
+      body?: unknown,
     };
     error.status = res.status;
     error.errors = data.errors;
+    error.body = data;
     throw error;
   }
 
@@ -144,8 +148,19 @@ export const userApi = {
       body: JSON.stringify({ command_slug: commandSlug }),
     }),
 
-  importData: (data: { bookmarks: string[]; notes: { command_slug: string; text: string }[] }) =>
+  importData: (data: { version: number; bookmarks: string[]; notes: { command_slug: string; text: string }[]; progress?: Record<string, unknown> }) =>
     request<{ message: string }>('/user/data/import', { method: 'POST', body: JSON.stringify(data) }),
+
+  /* ---- synced learning progress (Part 2) ---- */
+
+  getProgress: () =>
+    request<{ progress: Record<string, { version: number; data: unknown }> }>('/user/progress'),
+
+  putProgress: (key: string, data: { baseVersion: number; data: unknown }) =>
+    request<{ key: string; version: number; updatedAt?: string | null }>(`/user/progress/${key}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
 
   changePassword: (data: { current_password: string; new_password: string; confirm_password: string }) =>
     request<{ message: string }>('/user/change-password', {

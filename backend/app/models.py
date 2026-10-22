@@ -67,6 +67,8 @@ class User(db.Model):
                                cascade='all, delete-orphan', passive_deletes=True)
     reset_tokens = db.relationship('PasswordResetToken', backref='user', lazy='dynamic',
                                    cascade='all, delete-orphan', passive_deletes=True)
+    progress = db.relationship('UserProgress', backref='user', lazy='dynamic',
+                               cascade='all, delete-orphan')
 
     def set_password(self, password: str):
         # Truncated to bcrypt's 72-byte block so a long passphrase can never
@@ -228,4 +230,39 @@ class RecentlyViewed(db.Model):
         return {
             'command_slug': self.command_slug,
             'viewed_at': self.viewed_at.isoformat() if self.viewed_at else None
+        }
+
+
+class UserProgress(db.Model):
+    """Per-user synced learning progress (Part 2) — one row per (user, key).
+
+    ``key`` names one of the shared progress namespaces (learning, terminal,
+    flashcards, speeddrill, streak). ``version`` is a monotonic per-row
+    counter that powers the conflict protocol: a client PUT carries the
+    ``baseVersion`` it last saw, and a mismatch answers 409 with the current
+    row so the client can apply the shared deterministic merge and retry.
+    ``data`` is a strict-schema JSON payload (≤64 KB, capped server-side)
+    whose merge rules are identical on both sides (`backend/app/
+    progress_merge.py` ⇄ `src/lib/progress.ts`, pinned by qa/merge_vectors.json).
+    """
+
+    __tablename__ = 'user_progress'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    key = db.Column(db.String(32), nullable=False, index=True)
+    version = db.Column(db.Integer, nullable=False, default=0)
+    data = db.Column(db.JSON, nullable=False)
+    updated_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False, onupdate=utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'key', name='uq_user_progress_user_key'),
+    )
+
+    def to_dict(self):
+        return {
+            'key': self.key,
+            'version': self.version,
+            'data': self.data,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }

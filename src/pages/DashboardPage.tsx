@@ -4,46 +4,37 @@ import { Bookmark, FileText, History, Clock, Trash2, ExternalLink, GraduationCap
 import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getPathForLight, useCatalog } from '../context/CatalogContext';
+import { useProgress } from '../context/ProgressContext';
 import type { CommandLight } from '../types';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { LEARNING_PATHS } from './LearningPage';
 import { TOTAL_MISSIONS } from './PracticeTerminalPage';
-import { readStreak } from '../lib/streak';
 import { syncLabel } from '../lib/syncState';
 import type { SyncState } from '../lib/syncState';
 
 type ProgressEntry = { completed?: boolean; bestScore?: number; bestTotal?: number; lessons?: string[] };
 
-function readJson<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) return JSON.parse(raw) as T;
-  } catch {
-    /* corrupted or missing - use fallback */
-  }
-  return fallback;
-}
-
 type Badge = { id: string; label: string; hint: string; earned: boolean; progress: number; icon: LucideIcon };
 
-/** Badges are derived from saved progress across every feature - nothing to track. */
+/** Badges are derived from synced progress across every feature - nothing to track. */
 const AchievementsPanel = () => {
+  const { progress: synced } = useProgress();
   const badges = useMemo<Badge[]>(() => {
-    const progress = readJson<Record<string, ProgressEntry>>('linuxdocs.learning-progress-v3', {});
-    const terminal = readJson<{ solved?: string[] }>('linuxdocs.practice-terminal', {});
-    const flash = readJson<{ completes?: Record<string, number> }>('linuxdocs.flashcards', {});
-    const drill = readJson<{ best?: number }>('linuxdocs.speeddrill', {});
-    const streak = readStreak();
+    const learning = (synced.learning as Record<string, ProgressEntry> | undefined) ?? {};
+    const terminal = (synced.terminal as { solved?: string[] } | undefined) ?? {};
+    const flash = (synced.flashcards as { completes?: Record<string, number> } | undefined) ?? {};
+    const drill = (synced.speeddrill as { best?: number } | undefined) ?? {};
+    const streak = (synced.streak as { best?: number } | undefined) ?? {};
 
-    const entries = LEARNING_PATHS.map((path) => progress[path.id]);
+    const entries = LEARNING_PATHS.map((path) => learning[path.id]);
     const pathsDone = entries.filter((entry) => entry?.completed).length;
-    const stage1Done = LEARNING_PATHS.slice(0, 4).filter((path) => progress[path.id]?.completed).length;
+    const stage1Done = LEARNING_PATHS.slice(0, 4).filter((path) => learning[path.id]?.completed).length;
     const hasQuiz = entries.some((entry) => (entry?.bestTotal ?? 0) > 0);
     const quizAce = entries.some((entry) => entry?.bestTotal && (entry.bestScore ?? 0) / entry.bestTotal >= 0.9);
     const missions = Array.isArray(terminal.solved) ? terminal.solved.length : 0;
     const deckSessions = Object.values(flash.completes ?? {}).reduce((sum, count) => sum + (count || 0), 0);
     const drillBest = drill.best ?? 0;
-    const streakBest = streak.best;
+    const streakBest = streak.best ?? 0;
 
     return [
       { id: 'first-quiz', label: 'Pop quiz', hint: 'Finish your first quiz', earned: hasQuiz, progress: hasQuiz ? 1 : 0, icon: GraduationCap },
@@ -59,7 +50,7 @@ const AchievementsPanel = () => {
       { id: 'streak-5', label: 'On a roll', hint: 'Reach a 5-day streak', earned: streakBest >= 5, progress: streakBest / 5, icon: Flame },
       { id: 'streak-30', label: 'Habit locked in', hint: 'Reach a 30-day streak', earned: streakBest >= 30, progress: streakBest / 30, icon: Flame },
     ];
-  }, []);
+  }, [synced]);
 
   const earnedCount = badges.filter((badge) => badge.earned).length;
 
@@ -105,26 +96,28 @@ const AchievementsPanel = () => {
 };
 
 /** Aggregate numbers from Learn, the practice terminal and the streak log. */
-const LearningSummary = () => {  const stats = useMemo(() => {
-    const progress = readJson<Record<string, ProgressEntry>>('linuxdocs.learning-progress-v3', {});
-    const pathsDone = LEARNING_PATHS.filter((path) => progress[path.id]?.completed).length;
+const LearningSummary = () => {
+  const { progress: synced } = useProgress();
+  const stats = useMemo(() => {
+    const learning = (synced.learning as Record<string, ProgressEntry> | undefined) ?? {};
+    const pathsDone = LEARNING_PATHS.filter((path) => learning[path.id]?.completed).length;
     const lessonsRead = LEARNING_PATHS.reduce((n, path) => {
-      const lessons = progress[path.id]?.lessons;
+      const lessons = learning[path.id]?.lessons;
       return n + (lessons?.length ?? 0);
     }, 0);
     const totalLessons = LEARNING_PATHS.reduce((n, path) => n + path.lessons.length, 0);
-    const quizPaths = LEARNING_PATHS.filter((path) => (progress[path.id]?.bestTotal ?? 0) > 0);
+    const quizPaths = LEARNING_PATHS.filter((path) => (learning[path.id]?.bestTotal ?? 0) > 0);
     const quizAvg = quizPaths.length
       ? Math.round(
           quizPaths.reduce((sum, path) => {
-            const entry = progress[path.id];
+            const entry = learning[path.id];
             return entry && entry.bestTotal ? sum + ((entry.bestScore ?? 0) / entry.bestTotal) * 100 : sum;
           }, 0) / quizPaths.length,
         )
       : null;
-    const terminal = readJson<{ solved?: string[] }>('linuxdocs.practice-terminal', {});
+    const terminal = (synced.terminal as { solved?: string[] } | undefined) ?? {};
     const missionsSolved = Array.isArray(terminal.solved) ? terminal.solved.length : 0;
-    const streak = readStreak();
+    const streak = (synced.streak as { current?: number; best?: number } | undefined) ?? {};
     return {
       pathsDone,
       totalPaths: LEARNING_PATHS.length,
@@ -135,7 +128,7 @@ const LearningSummary = () => {  const stats = useMemo(() => {
       missionsSolved,
       streak,
     };
-  }, []);
+  }, [synced]);
 
   const cards = [
     {
@@ -169,9 +162,9 @@ const LearningSummary = () => {  const stats = useMemo(() => {
     {
       icon: Flame,
       label: 'Learning streak',
-      value: stats.streak.current > 0 ? `${stats.streak.current}d` : '—',
-      bar: Math.min(1, stats.streak.current / 14),
-      sub: stats.streak.best > 0 ? `best ${stats.streak.best}d` : 'visit daily to build it',
+      value: (stats.streak.current ?? 0) > 0 ? `${stats.streak.current}d` : '—',
+      bar: Math.min(1, (stats.streak.current ?? 0) / 14),
+      sub: (stats.streak.best ?? 0) > 0 ? `best ${stats.streak.best}d` : 'visit daily to build it',
     },
   ];
 
@@ -179,7 +172,7 @@ const LearningSummary = () => {  const stats = useMemo(() => {
     <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-display text-lg font-semibold text-[var(--text-heading)]">Your learning progress</h2>
-        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">saved on this device</span>
+        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">synced to your account</span>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">

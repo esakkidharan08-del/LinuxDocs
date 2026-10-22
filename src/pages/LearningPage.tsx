@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useCatalog, getPathForLight } from '../context/CatalogContext';
-import { readStreak } from '../lib/streak';
+import { useProgress } from '../context/ProgressContext';
+import type { StreakDataSynced } from '../lib/progress';
 
 /* ============================================================
    Learning system: two stages, 8 paths.
@@ -38,7 +39,6 @@ type PathProgress = {
 };
 type Progress = Record<string, PathProgress>;
 
-const STORAGE_KEY = 'linuxdocs.learning-progress-v3';
 const MAX_QUESTIONS = 10; // strict cap for every quiz
 const PASS_THRESHOLD = 70;
 
@@ -614,27 +614,19 @@ export const LEARNING_PATHS = PATHS;
 type QuizChoice = number | null;
 
 export function LearningPage() {
-  /* ---- progress (loaded synchronously so nothing gets clobbered) ---- */
-  const [progress, setProgress] = useState<Progress>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Progress;
-        if (parsed && typeof parsed === 'object') return parsed;
-      }
-    } catch {
-      /* corrupted storage - start fresh */
-    }
-    return {};
-  });
+  /* ---- progress lives in the synced per-user store (Part 2) ----
+     Reads come hydrated from the server merge (memory-cached offline);
+     writes flow through the provider into the offline cache + sync queue. */
+  const { progress: synced, updateProgress } = useProgress();
+  const learning = (synced.learning as Progress | undefined) ?? {};
+  const progress = learning;
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-    } catch {
-      /* storage full or blocked - progress simply stays in memory */
-    }
-  }, [progress]);
+  const setProgress = (change: Progress | ((current: Progress) => Progress)) => {
+    updateProgress('learning', (prev) => {
+      const current = (prev as Progress | null) ?? {};
+      return typeof change === 'function' ? change(current) : change;
+    });
+  };
 
   /* ---- view / quiz state ---- */
   const [view, setView] = useState<'paths' | 'lessons' | 'setup' | 'quiz' | 'results'>('paths');
@@ -650,7 +642,7 @@ export function LearningPage() {
   const [choice, setChoice] = useState<QuizChoice>(null);
 
   const selected = useMemo(() => PATHS.find((p) => p.id === selectedId) ?? PATHS[0], [selectedId]);
-  const streak = useMemo(() => readStreak(), []);
+  const streak = synced.streak as StreakDataSynced | undefined;
 
   /* ---- derived global stats ---- */
   const pathsDone = PATH_ORDER.filter((id) => progress[id]?.completed).length;
@@ -797,7 +789,7 @@ export function LearningPage() {
               your progress is saved automatically.
             </p>
           </div>
-          {streak.current > 0 && (
+          {!!streak && streak.current > 0 && (
             <span
               className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-3.5 py-1.5 font-mono text-xs text-amber-400"
               title={streak.best > streak.current ? `Best streak: ${streak.best} days` : 'Keep visiting daily'}

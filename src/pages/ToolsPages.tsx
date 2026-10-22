@@ -3,6 +3,9 @@ import { Download, GitCompare, Shuffle, Upload, Info } from 'lucide-react';
 import { getPathForLight, useCatalog, useAllCommands, useCommandDocs } from '../context/CatalogContext';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useProgress } from '../context/ProgressContext';
+import { PROGRESS_KEYS, toSyncPayload } from '../lib/progress';
+import type { ProgressKey } from '../lib/progress';
 import type { Command, CommandLight } from '../types';
 
 /** Shared loading/error panel for the doc-backed tools pages. */
@@ -109,8 +112,28 @@ export const CommandOfDayPage = () => {
 
 export const ExportImportPage = () => {
   const { user, bookmarks, notes, importData } = useAuth();
+  const { progress, applyImported } = useProgress();
   const [message, setMessage] = useState('');
-  const exportData = () => { const data = { version: 1, exportedAt: new Date().toISOString(), bookmarks: [...bookmarks], notes: [...notes.entries()].map(([command_slug, text]) => ({ command_slug, text })), practiceTerminal: localStorage.getItem('linuxdocs.practice-terminal'), learningProgress: localStorage.getItem('linuxdocs.learning-progress-v3'), flashcards: localStorage.getItem('linuxdocs.flashcards'), speedDrill: localStorage.getItem('linuxdocs.speeddrill'), streak: localStorage.getItem('linuxdocs.streak') }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'linuxdocs-progress.json'; link.click(); URL.revokeObjectURL(url); setMessage('Progress, bookmarks, and notes exported.'); };
+  const exportData = () => {
+    const data = {
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      bookmarks: [...bookmarks],
+      notes: [...notes.entries()].map(([command_slug, text]) => ({ command_slug, text })),
+      progress: {
+        learning: progress.learning ?? {},
+        terminal: progress.terminal ?? { solved: [], commandsRun: 0 },
+        flashcards: progress.flashcards ?? { completes: {} },
+        speeddrill: progress.speeddrill ?? { best: 0, plays: 0 },
+        streak: progress.streak ?? { lastDay: '', current: 0, best: 0, totalDays: 0 },
+      },
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = 'linuxdocs-progress.json'; link.click(); URL.revokeObjectURL(url);
+    setMessage('Progress, bookmarks, and notes exported.');
+  };
   const handleImport = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -121,8 +144,9 @@ export const ExportImportPage = () => {
         // Schema validation — an unsupported version or malformed collection
         // rejects the whole import rather than silently half-applying it.
         const problems: string[] = [];
-        if (data?.version !== 1) {
-          setMessage(`Import rejected: unknown schema version ${String(data?.version)} (this build reads version 1).`);
+        const version = data?.version;
+        if (version !== 1 && version !== 2) {
+          setMessage(`Import rejected: unknown schema version ${String(version)} (this build reads version 2).`);
           return;
         }
         const slugOk = (s: unknown) => typeof s === 'string' && s.length > 0 && s.length <= 200 && /^[a-z0-9/-]+$/.test(s);
@@ -134,26 +158,70 @@ export const ExportImportPage = () => {
           setMessage(`Import rejected: malformed ${problems.join(' and ')} in the export file.`);
           return;
         }
-        // Device progress stores are swapped only when they parse to their
-        // documented shapes; a corrupt blob is skipped and reported, never crashes.
-        const storePlan: [string, string, (v: unknown) => boolean][] = [
-          ['practiceTerminal', 'linuxdocs.practice-terminal', (v) => v === null || (typeof v === 'object' && v !== null)],
-          ['learningProgress', 'linuxdocs.learning-progress-v3', (v) => v === null || (typeof v === 'object' && v !== null)],
-          ['flashcards', 'linuxdocs.flashcards', (v) => v === null || (typeof v === 'object' && v !== null)],
-          ['speedDrill', 'linuxdocs.speeddrill', (v) => v === null || (typeof v === 'object' && v !== null)],
-          ['streak', 'linuxdocs.streak', (v) => v === null || (typeof v === 'object' && v !== null)],
+
+        if (version === 2) {
+          // Schema v2: strictly-shaped per-key progress payloads; anything not
+          // matching the shared shapes rejects the whole file.
+          const progressIn = data.progress;
+          if (!progressIn || typeof progressIn !== 'object' || Array.isArray(progressIn)) {
+            setMessage('Import rejected: progress must be an object keyed by progress key.');
+            return;
+          }
+          for (const [key, payload] of Object.entries(progressIn as Record<string, unknown>)) {
+            if (!(PROGRESS_KEYS as readonly string[]).includes(key)) {
+              setMessage(`Import rejected: unknown progress key "${key}".`);
+              return;
+            }
+            if (!toSyncPayload(key as ProgressKey, payload)) {
+              setMessage(`Import rejected: malformed progress payload for "${key}".`);
+              return;
+            }
+          }
+          if (!user) {
+            setMessage('Sign in to import progress, bookmarks and notes.');
+            return;
+          }
+          await importData({ version: 2, bookmarks: bookmarksIn ?? [], notes: notesIn ?? [], progress: progressIn as Record<string, unknown> });
+          // Local state catches up immediately (monotone merge, never loses a side).
+          applyImported(progressIn as Record<string, unknown>);
+          setMessage('Progress, bookmarks, and notes imported (schema v2).');
+          return;
+        }
+
+        // Schema v1 (pre-Part-2 exports): raw device store blobs ride along;
+        // they are validated, applied to the synced store one-way (union/max)
+        // and written to the local keys for the device-local features.
+        const storePlan: [string, string][] = [
+          ['practiceTerminal', 'linuxdocs.practice-terminal'],
+          ['learningProgress', 'linuxdocs.learning-progress-v3'],
+          ['flashcards', 'linuxdocs.flashcards'],
+          ['speedDrill', 'linuxdocs.speeddrill'],
+          ['streak', 'linuxdocs.streak'],
         ];
         const skipped: string[] = [];
-        for (const [field, key, shapeOk] of storePlan) {
+        const parsedStores: Partial<Record<string, unknown>> = {};
+        for (const [field, key] of storePlan) {
           const raw = (data as Record<string, unknown>)[field];
-          if (typeof raw === 'string') {
-            let restores = false;
-            try { const parsed: unknown = JSON.parse(raw); if (shapeOk(parsed)) { restores = true; localStorage.setItem(key, raw); } } catch { restores = false; }
-            if (!restores) skipped.push(field as string);
+          if (typeof raw !== 'string') continue;
+          try {
+            const parsed: unknown = JSON.parse(raw);
+            if (parsed === null || typeof parsed !== 'object') throw new Error('shape');
+            parsedStores[key] = parsed;
+            localStorage.setItem(key, raw);
+          } catch {
+            skipped.push(field as string);
           }
         }
-        if (user && (bookmarksIn?.length || notesIn?.length)) await importData({ bookmarks: bookmarksIn ?? [], notes: notesIn ?? [] });
-        const noteBits = [`schema v1`];
+        const adopted: Partial<Record<ProgressKey, unknown>> = {};
+        for (const [key, blob] of Object.entries(parsedStores)) {
+          const payload = toSyncPayload(key as ProgressKey, blob);
+          if (payload) adopted[key as ProgressKey] = payload;
+        }
+        if (user) {
+          await importData({ version: 1, bookmarks: bookmarksIn ?? [], notes: notesIn ?? [] });
+          applyImported(adopted);
+        }
+        const noteBits = ['schema v1'];
         if (skipped.length) noteBits.push(`skipped corrupt store${skipped.length > 1 ? 's' : ''}: ${skipped.join(', ')}`);
         setMessage(user
           ? `Progress, bookmarks, and notes imported (${noteBits.join(' · ')}).`

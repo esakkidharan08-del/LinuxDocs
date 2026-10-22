@@ -4,12 +4,12 @@ import { ThemeProvider } from './components/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 import { CatalogProvider } from './context/CatalogContext';
+import { ProgressProvider, useProgress } from './context/ProgressContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Footer } from './components/Footer';
 import { ShortcutsDialog } from './components/ShortcutsDialog';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { recordVisit } from './lib/streak';
 
 /* Route-level code splitting: every page below is loaded on demand, so the
    first paint only carries the shell + the page actually being visited.
@@ -63,14 +63,16 @@ function introSeen() {
 function AppShell() {
   const location = useLocation();
   const { user } = useAuth();
+  const { recordVisit } = useProgress();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
-  /* daily streak: one record per app load */
+  /* daily streak: one record per app load, and once more when a session
+     lands (boot refresh / sign-in) — the provider no-ops signed-out loads */
   useEffect(() => {
     recordVisit();
-  }, []);
+  }, [user?.id, recordVisit]);
 
   const closeShortcuts = useCallback(() => setShortcutsOpen(false), []);
 
@@ -180,9 +182,13 @@ export function App() {
         {/* Catalog data (index + per-slug docs) rides on the auth session:
             loaded after sign-in, rebuilt on account switch, dropped on logout. */}
         <CatalogProvider>
-          <BrowserRouter>
-            <AppShell />
-          </BrowserRouter>
+          {/* Synced learning progress (Part 2): per-user hydration from
+              /api/user/progress + the deterministic offline merge. */}
+          <ProgressProvider>
+            <BrowserRouter>
+              <AppShell />
+            </BrowserRouter>
+          </ProgressProvider>
         </CatalogProvider>
       </AuthProvider>
     </ThemeProvider>

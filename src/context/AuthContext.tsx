@@ -8,6 +8,10 @@ import {
   safeParseJson, emptyGuestStore,
 } from '../lib/syncState';
 import type { GuestStore, SyncOp, SyncState } from '../lib/syncState';
+import {
+  canonJson, loadProgressCache, mergeProgressData, progressIntegration, saveProgressCache,
+} from '../lib/progress';
+import type { ProgressKey } from '../lib/progress';
 
 export { syncLabel } from '../lib/syncState';
 export type { SyncState, SyncPhase } from '../lib/syncState';
@@ -29,12 +33,13 @@ interface AuthContextType {
   /** Server-confirmed sync status for the Dashboard chip (see lib/syncState.ts). */
   sync: SyncState;
   retrySync: () => void;
+  submitOp: (op: OpInput<SyncOp>) => void;
   refreshUserData: () => Promise<void>;
   toggleBookmark: (slug: string) => Promise<void>;
   saveNote: (slug: string, text: string) => Promise<void>;
   deleteNote: (slug: string) => Promise<void>;
   addHistory: (slug: string) => Promise<void>;
-  importData: (data: { bookmarks: string[]; notes: { command_slug: string; text: string }[] }) => Promise<void>;
+  importData: (data: { version: number; bookmarks: string[]; notes: { command_slug: string; text: string }[]; progress?: Record<string, unknown> }) => Promise<void>;
   changePassword: (data: { current_password: string; new_password: string; confirm_password: string }) => Promise<{ errors?: Record<string, string> }>;
   deleteAccount: (confirm: string) => Promise<{ errors?: Record<string, string> }>;
 }
@@ -170,6 +175,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   /* ------------------------------------------------------------------ drain */
 
+  /**
+   * Part 2: one progress op per (user, key) — deliver the device end-state
+   * payload with the optimistic-version protocol. The freshest version ALWAYS
+   * comes from the per-user cache, never from the (possibly stale) op.
+   * On 409 the current server row arrives in the error body; the shared
+   * deterministic merge folds it with the device state and we re-PUT at the
+   * fresh baseVersion. The merge is a join-semilattice, so even concurrent
+   * multi-device conflict storms converge instead of ping-ponging.
+   */
+  const deliverProgressOp = useCallback(async (userId: number, progressKey: string): Promise<'ok' | 'retry' | 'fatal'> => {
+    const cache = loadProgressCache(userId);
+    const data = cache.data[progressKey as ProgressKey];
+    if (data === undefined || data === null) return 'ok'; // nothing (left) to deliver for this key
+    const baseVersion = cache.versions[progressKey as ProgressKey] ?? 0;
+    try {
+      const res = await userApi.putProgress(progressKey, { baseVersion, data });
+      cache.versions[progressKey as ProgressKey] = res.version;
+      saveProgressCache(userId, cache); // data unchanged; only the version advanced
+      return 'ok';
+    } catch (err: any) {
+      if (err?.status !== 409 || !err?.body || typeof err.body !== 'object') throw err;
+      const row = err.body as { key?: string; version?: number; data?: unknown };
+      if (typeof row.version !== 'number') throw err;
+      const merged = mergeProgressData(progressKey as ProgressKey, row.data, data);
+      const conflictData = row.data ?? null;
+      if (canonJson(merged) === canonJson(conflictData ?? null)) {
+        // The server row already contains everything our device has — adopt it.
+        cache.versions[progressKey as ProgressKey] = row.version;
+        cache.data[progressKey as ProgressKey] = merged;
+        saveProgressCache(userId, cache);
+        progressIntegration.onMerged?.(progressKey as ProgressKey, merged, row.version);
+        return 'ok';
+      }
+      try {
+        const res = await userApi.putProgress(progressKey, { baseVersion: row.version, data: merged });
+        cache.versions[progressKey as ProgressKey] = res.version;
+        cache.data[progressKey as ProgressKey] = merged;
+        saveProgressCache(userId, cache);
+        progressIntegration.onMerged?.(progressKey as ProgressKey, merged, res.version);
+        return 'ok';
+      } catch (retryErr: any) {
+        if (retryErr?.status === 409) return 'retry'; // another device moved again — merge next drain
+        throw retryErr;
+      }
+    }
+  }, []);
+
   const executeOp = useCallback(async (op: SyncOp): Promise<'ok' | 'retry' | 'fatal'> => {
     try {
       switch (op.kind) {
@@ -190,6 +242,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         case 'history':
           await userApi.addHistory(op.slug);
           return 'ok';
+        case 'progress':
+          return await deliverProgressOp(op.userId, op.slug);
       }
     } catch (err: any) {
       const status = err?.status as number | undefined;
@@ -197,7 +251,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return 'retry'; // offline, 5xx, or rate-limited — deliver later
     }
     return 'fatal';
-  }, []);
+  }, [deliverProgressOp]);
 
   const scheduleDrain = useCallback((delay?: number) => {
     if (drainTimerRef.current !== null) return;
@@ -463,7 +517,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     submitOp({ kind: 'history', slug, userId: u.id });
   }, [submitOp]);
 
-  const importData = useCallback(async (data: { bookmarks: string[]; notes: { command_slug: string; text: string }[] }) => {
+  const importData = useCallback(async (data: { version: number; bookmarks: string[]; notes: { command_slug: string; text: string }[]; progress?: Record<string, unknown> }) => {
     if (!userRef.current) return;
     await userApi.importData(data);
     await refreshUserData();
@@ -507,6 +561,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         history,
         sync,
         retrySync,
+        submitOp,
         refreshUserData,
         toggleBookmark,
         saveNote,

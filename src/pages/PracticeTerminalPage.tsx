@@ -12,6 +12,8 @@ import {
 } from '../lib/terminal';
 import type { Line, MissionLevel } from '../lib/terminal';
 import { useCatalog } from '../context/CatalogContext';
+import { useProgress } from '../context/ProgressContext';
+import { mergeProgressData } from '../lib/progress';
 
 export { ALL_LEVEL_IDS, TOTAL_MISSIONS } from '../lib/terminal';
 
@@ -20,11 +22,32 @@ const capScrollback = (current: Line[]): Line[] =>
   current.length > MAX_SCROLLBACK ? current.slice(-MAX_SCROLLBACK) : current;
 
 export function PracticeTerminalPage() {
-  /* ---- persisted state ---- */
+  /* ---- persisted state ----
+     The transcript + history are device-local by design (Part 2 keeps the
+     scrollback out of the synced payloads); solved missions and the
+     commandsRun counter live in the synced account store. */
   const [lines, setLines] = useState<Line[]>([]);
   const [history, setHistory] = useState<string[]>([]);
   const [solvedMissions, setSolvedMissions] = useState<string[]>([]);
   const [commandsRun, setCommandsRun] = useState(0);
+
+  const { ready: progressReady, progress, updateProgress } = useProgress();
+  const terminalSync = (progress.terminal as { solved?: string[]; commandsRun?: number } | undefined)
+    ?? undefined;
+
+  /* adopt the server/device-merged progress when the provider delivers it
+     (union of missions, max counter — the merge guarantees never un-solve) */
+  const syncSolved = terminalSync?.solved;
+  const syncRun = terminalSync?.commandsRun;
+  useEffect(() => {
+    if (!progressReady) return;
+    setSolvedMissions((current) => {
+      if (!syncSolved?.length) return current;
+      const next = Array.from(new Set([...current, ...syncSolved]));
+      return next.length === current.length ? current : next;
+    });
+    setCommandsRun((current) => Math.max(current, syncRun ?? 0));
+  }, [progressReady, syncSolved, syncRun]);
 
   // `man <tool>` reads the authed light index (name/summary/category/section
   // — exactly the metadata a man header shows; Part 1 keeps docs off the
@@ -71,6 +94,15 @@ export function PracticeTerminalPage() {
     }
   }, [lines, history, solvedMissions, commandsRun]);
 
+  /* report the device end-state of the synced fields to the account store
+     (gated on hydration — before that the server state is not known yet and
+     an empty report could bury other devices' progress). Merge-shaped: the
+     page state is folded into the provider value, never over it. */
+  useEffect(() => {
+    if (!progressReady) return;
+    const pagePayload = { solved: solvedMissions, commandsRun };
+    updateProgress('terminal', (prev) => mergeProgressData('terminal', prev, pagePayload));
+  }, [solvedMissions, commandsRun, progressReady, updateProgress]);
   /* ---- live view state ---- */
   const [input, setInput] = useState('');
   const [cwd, setCwd] = useState(HOME);
@@ -168,6 +200,10 @@ export function PracticeTerminalPage() {
 
   const resetAll = () => {
     if (!window.confirm('Reset terminal progress, transcript and mission levels?')) return;
+    if (progressReady) {
+      // deliberate user-driven override — replaces, not merges
+      updateProgress('terminal', () => ({ solved: [], commandsRun: 0 }));
+    }
     setLines([]);
     setHistory([]);
     setSolvedMissions([]);
