@@ -119,7 +119,7 @@ Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrad
 
 ## 11. Performance & UX System
 
-- **Route-level code splitting:** 21 lazy page chunks + lazy Command Palette (fuse.js loads on first Ctrl+K) + lazy intro. Entry chunk ≈ **544 kB min / 172 kB gzip** (down from 852 kB), largest page chunk ≈ 77 kB.
+- **Route-level code splitting:** 21 lazy page chunks + lazy Command Palette (fuse.js loads on first Ctrl+K) + lazy intro. Entry chunk ≈ **420 kB min / 135 kB gzip** (down from 552.7 kB after Task 5, which was itself down from 852 kB): the shell loads the lightweight dataset index only; the full 132-entry docs ship as a **134 kB async chunk** (~40 kB gzip) fetched by the lazy routes that need it. Largest page chunk ≈ 77 kB.
 - **Command Palette** (Ctrl+K / Ctrl+⌘K): fuzzy search across all 132 commands → jump-to-page.
 - **Shortcuts dialog** (`?`), theme toggle (dark/light, persisted), sidebar with "Study & Tools" group, skip-to-content link, ARIA labels, full mobile responsiveness, terminal-editorial design tokens.
 
@@ -127,11 +127,11 @@ Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrad
 
 | Check | Result |
 |---|---|
-| `npm run build` (tsc strict + vite) | ✅ passes, no warnings (entry ≈ 553 kB min / 175 kB gzip; +2 kB from the Task-4 dataset warnings — shrink candidates tracked for the perf pass) |
+| `npm run build` (tsc strict + vite) | ✅ passes, no warnings (entry ≈ 420 kB min / 135 kB gzip after the Task-5 split; full docs now a 134 kB async chunk) |
 | `npm run lint` (oxlint) | ✅ zero findings |
-| `qa/dataset_audit.py` docs-accuracy audit | ✅ **AUDIT PASSED** — 132 entries validated: structure, flags/aliases, warnings (19), TS↔JSON pipeline sync, thin-docs queue |
+| `qa/dataset_audit.py` docs-accuracy audit | ✅ **AUDIT PASSED** — 132 entries validated: structure, flags/aliases, warnings (19), TS↔JSON pipeline sync, index/counts cross-check, thin-docs queue |
 | Backend tests (`backend\venv\Scripts\pytest`) | ✅ **109 passed** (32 auth + 30 hardening + 17 security + 14 mailer + 9 user-data + 7 dataset) |
-| `qa/browser_check.py` real-Chrome suite | ✅ **24/24 PASS** — docs-pending chip checks added, phone viewport included (pre-existing React update-depth console warning on some heavy CTF pages tracked for the final pass) |
+| `qa/browser_check.py` real-Chrome suite | ✅ **24/24 PASS** — docs-pending chip checks added, phone viewport included — **and zero React update-depth console hits** (the pre-existing render-loop was fixed in the Task-5 perf round) |
 | `qa/smoke_api.py` endpoint checklist | ✅ **14/14 PASS** |
 | `qa/sync_probe.py` sync-hardening suite | ✅ **14/14 PASS** — guest merge, offline queue, auto-drain, account isolation, import validation |
 | `qa/terminal_probe.py` terminal-hardening suite | ✅ **60/60 PASS** — all command families + flags, resource limits, prototype-chain negatives, semantic mission validation, 13/13 UI playthrough to "Mastered" |
