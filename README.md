@@ -74,20 +74,26 @@ Mistyped a URL? The 404 page is itself a terminal — type `cat flag.hidden` and
 The repo ships its own test harnesses (in `qa/`, untracked):
 
 ```powershell
-# 102 pytest backend tests
-cd backend; .\venv\Scripts\pytest           # 102 passed
+# 109 pytest backend tests (incl. the 7-case dataset docs-accuracy suite)
+cd backend; .\venv\Scripts\pytest           # 109 passed
 
 # 14-step API smoke test (stdlib only): register → login →
 # refresh → logout → revoked-after-logout → 401/404 shape checks
 python qa/smoke_api.py                      # 14/14 PASS
 
+# Dataset docs-accuracy audit (stdlib only): re-validates all 132 entries —
+# slug/category integrity, flag & example rules, destructive/root warning
+# coverage, TS↔JSON pipeline sync — see qa/dataset_audit.py
+python qa/dataset_audit.py                  # AUDIT PASSED
+
 # Real-browser QA (Chrome DevTools Protocol, headless): drives the exact
 # 10-minute manual checklist — sign-up redirect, session surviving a hard
 # reload, sign out, protected-route gate, fake-URL 404, the void-terminal
-# flag, 8 random command pages, Ctrl+K palette, then a 390×844 phone
-# viewport running the practice terminal, a full quiz, and flashcards —
-# while logging every console message per page.
-python qa/browser_check.py                  # 22/22 PASS, zero red console errors
+# flag, 8 random command pages, docs-pending chip on thin vs. complete
+# entries, Ctrl+K palette, then a 390×844 phone viewport running the
+# practice terminal, a full quiz, and flashcards — while logging every
+# console message per page.
+python qa/browser_check.py                  # 24/24 PASS
 ```
 
 `qa/browser_check.py` types with real CDP input events (not synthetic ones), captures Network responses for the auth calls, and reports console errors per page — that last check is how a "signed-out visitor gets a 401 console line on every page" bug was found in the auth boot flow and fixed with a session-hint in `AuthContext`.
@@ -200,7 +206,7 @@ LinuxDocs/
 │   └── services/api.ts       #   Typede API client + single-flight refresh
 ├── backend/                  # Flask 3 API
 │   ├── app/                  #   factory, models, auth, user, security, sessions, persistence
-│   ├── tests/                #   102 pytest cases (incl. mailer + user-data suites)
+│   ├── tests/                #   109 pytest cases (incl. mailer, user-data, dataset suites)
 │   └── requirements.txt      #   pinned (incl. gunicorn + psycopg2 for Render)
 ├── docs/screenshots/          # README assets (captured by the QA run)
 ├── qa/                        # browser_check.py / smoke_api.py (gitignored)
