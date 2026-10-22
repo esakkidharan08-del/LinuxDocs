@@ -2,7 +2,7 @@
 
 **LinuxDocs** is a professional, MDN-style reference and learning platform for **Linux commands and CTF security tools** — precise syntax, real flags, copy-ready examples — combined with a full interactive learning system: guided paths, quizzes, a sandboxed practice terminal, flashcards, a speed-drill arena, achievements, and streaks.
 
-> Status: ✅ production build green · lint zero findings · **109 backend tests passing** · browser QA **24/24** · API smoke **14/14** · terminal probe **60/60** · dataset docs-accuracy audit **PASSED** (132 entries re-validated, 19 warnings, pipeline re-synced) · all progress committed to git (`4dd6997` + Task-4 commit).
+> Status: ✅ production build green · lint zero findings · **109 backend tests passing** · browser QA **24/24** (zero React update-depth console hits) · API smoke **14/14** · sync probe **14/14** · terminal probe **60/60** · reset probe **8/8** · dataset docs-accuracy audit **PASSED** (132 entries re-validated, 19 warnings, pipeline re-synced) · entry chunk **135.30 kB gzip** · deployment scaffold inspected · all work committed (`92b8371` Task 4, `37120d8` Task 5, `cfedee7` Task 6 docs).
 
 ---
 
@@ -14,8 +14,8 @@
 | Routing | React Router 7 (`BrowserRouter`) |
 | Search | Fuse.js fuzzy search (Command Palette) |
 | Icons / Motion | lucide-react · framer-motion · react-icons |
-| Backend | Flask (Python) — auth, bookmarks, notes, history, SQLite persistence, security hardening + tests |
-| Quality tools | `tsc -b` (build), `oxlint` (lint), link-check script, security test suite |
+| Backend | Flask (Python) — auth, bookmarks, notes, history, durable persistence (SQLite locally / Postgres in production), security hardening + tests |
+| Quality tools | `tsc -b` (build), `oxlint` (lint), `qa/dataset_audit.py` (docs-accuracy audit), per-feature browser/API probe suites |
 | Dev experience | `npm run dev:all` runs Vite (:5173) + Flask (:5000) together, with `/api` proxy and strict-port CSRF-safe setup |
 | Deployment | `render.yaml` (Flask API on Render, gunicorn) + `vercel.json` (Vercel SPA with `/api` proxy rewrites) |
 
@@ -77,7 +77,7 @@
 ## 6. Flashcards (`/flashcards`)
 
 - Decks generated straight from the dataset: **All Linux**, one per Linux category, **All CTF**, one per CTF domain, plus a bookmarks-only deck when bookmarks exist.
-- Front: command name + tags · Back: summary, syntax, notable flags, example, warnings, docs link.
+- Front: command name + tags · Back: summary, syntax, up to 5 flags (+count of more), the first example command, the warning note **when the entry has one**, and an in-app link to the command's full docs page.
 - Session controls: **Got it / Again**, segment strip, keyboard `Space`/`←`/`→`/`G`/`X`, end-of-session summary with retention % and revisit links.
 
 ## 7. Speed Drill (`/speed-drill`) — unique feature
@@ -103,19 +103,27 @@ All progress is local-first (works signed-out) and included in Export/Import:
 | `linuxdocs.flashcards` | Last deck, per-deck session completes |
 | `linuxdocs.speeddrill` | Personal best, rounds played |
 | `linuxdocs.streak` | Current streak, best streak, last-visit date |
-| bookmarks / notes / history | Synced to the account via the Flask API when signed in (plus guest mode) |
+| bookmarks / notes / history | Synced to the account via the Flask API when signed in; guests keep a device-local guest store, and sign-in **merges it** into the account (guest records win for the records the guest touched, unseen server records survive); offline edits queue as idempotent end-state ops and replay with exponential backoff |
+| `linuxdocs.sync-queue-v1` | Persisted per-user sync queue (idempotent end-state ops, same-key collapse) |
+| `linuxdocs.guest-data-v1` | Device-local guest bookmarks/history, absorbed into the account at sign-in |
 
 Mission IDs `m1`–`m13` are stable contracts — saved progress survives upgrades. Signed-in users also get server-side bookmarks/notes/history sync.
 
 ## 10. Backend & Security
 
-- Flask + SQLite under `backend/` with session cookies, CSRF origin checks, hardened auth, and session management (token rotation on refresh, session-cap eviction, single-use reset tokens).
+- Flask backend under `backend/` — SQLite locally, **PostgreSQL in production** via `DATABASE_URL` (render.yaml autowires it; the SQLite-only WAL/backup machinery detects non-SQLite URIs and disables itself) — with session cookies, CSRF origin checks, hardened auth, and session management (token rotation on refresh, session-cap eviction, single-use reset tokens).
 - **Offline-friendly data sync**: a dashboard chip shows the honest five-state truth ("All changes saved · Syncing… · Synced · Saved locally — syncs automatically · Sync failed"); "Synced" appears only after the server's 2xx. Changes made offline land in a persisted end-state op queue that retries with exponential backoff (online event, 30 s ticker, or chip click), guests can bookmark and build history on-device and the data merges deterministically into the account at sign-in (guest wins for touched records), and account switches never leak state (per-user queued ops + stale-response guards). Exports/imports carry a schema version with strict client+server validation.
 - **Practice terminal, hardened**: the sandbox is a pure interpreted module (no eval, no host execution) with explicit resource limits — command lines capped at 2000 chars (interpreter + `maxLength`), 400-line scrollback, prototype-safe file lookups (`cat __proto__` reads nothing), and trick-free `man` coverage (builtins **and** all 132 dataset tools). Unknown commands suggest the closest real command ("did you mean 'ls'?"), `grep`/`wc`/`find` parse real flags, and **missions complete only when the expected output was actually produced** — error-tone turns never count. Still 13 missions across 3 levels.
 - Modules: `auth.py` · `commands.py` · `user.py` · `models.py` · `security.py` · `sessions.py` · `persistence.py` (auto-backup of the DB on startup/manual/scheduled triggers + maintenance prune).
 - **Password reset by email** (`/password-reset`): the request endpoint answers a byte-identical generic response for registered/unknown addresses (no user enumeration, timing equalized with a dummy bcrypt round) and emails a branded message with a **single-use, 30-minute link** built from the trusted `FRONTEND_ORIGIN`. Tokens are stored only as SHA-256 hashes, expire in 30 minutes, are consumed **atomically** (concurrent claims: exactly one wins), and a successful reset **revokes every session** on the account. Tokens never appear in API responses, logs, DOM, or referrer data. Providers: Resend API or any SMTP server via env vars; local development uses a safe **dev outbox backend** that writes `.eml` mailbox files and logs nothing. Both reset endpoints are rate-limited (5 requests + 10 token attempts per hour/IP).
-- Five test suites — `test_auth.py` (32) + `test_hardening.py` (30) + `test_security.py` (17) + `test_mailer.py` (14) + `test_user_data.py` (9) + `test_dataset.py` (7, docs-accuracy rules over the 132-entry dataset) — **109 pytest cases**.
+- Six test suites — `test_auth.py` (32) + `test_hardening.py` (30) + `test_security.py` (17) + `test_mailer.py` (14) + `test_user_data.py` (9) + `test_dataset.py` (7, docs-accuracy rules over the 132-entry dataset) — **109 pytest cases**.
 - `.env.example` documents required secrets (`SECRET_KEY`, `JWT_SECRET_KEY`, `DATABASE_URL`, `FRONTEND_ORIGIN`); cookies/logs/instance DBs are git-ignored (never committed).
+- **Deployment scaffold, inspected line-by-line (Task 6)**:
+  - `render.yaml`: Postgres `DATABASE_URL` autowired from the blueprint database; `SECRET_KEY` / `JWT_SECRET_KEY` are **generated by Render at first boot** (never inside the repo); `TRUST_PROXY_HEADERS=1` so client-IP rate limits read the Vercel→Render proxy chain; gunicorn with an `/api/health` healthcheck. The two documented post-deploy edits are the Vercel URL (`FRONTEND_ORIGIN`) and the real service host (`ALLOWED_HOSTS`).
+  - `vercel.json`: `/api/:path*` proxy to the Render service + SPA fallback — the browser always talks **same-origin**, so SameSite=Strict refresh cookies and the `require_trusted_origin` CSRF guard hold with no extra origin configuration beyond `FRONTEND_ORIGIN`.
+  - **Cookies verified in code** (`sessions.py`): refresh cookie is HttpOnly ✓, Secure outside localhost ✓ (forced when SameSite=None), SameSite=Strict default ✓ (Lax/None opt-in via env).
+  - **Secret hygiene verified on the artifact**: the production bundle contains no `SECRET_KEY` / `JWT_SECRET` / `RESEND_API` / `SMTP_PASSWORD` material (the only matches are a curl *example string* in the docs data and the API client's memory-only access-token plumbing); the dev-only `"__linuxdocsTerminal"` hook is absent from `dist/`; git tracks only the templated `.env.example`.
+  - **Remaining step is user-side, not code**: create the Render + Vercel services, replace the two URL placeholders, set mail env vars if email delivery is wanted (README "Deploy your own" walks through it). A live deployment was not exercised here.
 
 ## 11. Performance & UX System
 
@@ -150,7 +158,9 @@ npm run dev:backend    # Flask only
 npm run build          # type-check + production build → dist/
 npm run preview        # serve the production build
 npm run lint           # oxlint
-cd backend; .\venv\Scripts\pytest    # 102 backend tests
+cd backend; .\venv\Scripts\pytest    # 109 backend tests
+node backend/scripts/build_commands.mjs   # regenerate commands.json from src/data/commands.ts
+python qa/dataset_audit.py                # docs-accuracy audit over all 132 entries
 ```
 
 Full Windows-PowerShell walkthrough lives in `RUN.md`; the ongoing work log lives in `PROJECT_PROGRESS.md`.
@@ -162,13 +172,17 @@ src/
 ├─ App.tsx                     routes + lazy loading + shell (streak, palette, shortcuts)
 ├─ pages/ LearningPage · PracticeTerminalPage · FlashcardsPage · SpeedDrillPage
 │         DashboardPage · CommandDetailPage · ToolsPages (compare/day/export) …
-├─ components/ Header · Sidebar · Footer · CommandPalette · ShortcutsDialog
+├─ components/ Header · Sidebar (reads commandsIndex counts) · Footer · CommandPalette
 │              CommandBuilder · CodeBlock · Breadcrumbs · ThemeContext · IntroScene …
-├─ lib/ streak.ts              daily-streak record/read helpers
-├─ context/ AuthContext.tsx · CatalogContext.tsx
-├─ data/ commands.ts           132 commands + categories + domains (single source of truth)
+├─ lib/ streak.ts · syncState.ts (phases/queue/guest-merge core) · terminal.ts (sandbox + missions)
+├─ context/ AuthContext.tsx (stable callbacks + sync chip) · CatalogContext.tsx
+├─ data/ commands.ts           132 full command docs (source of truth; async chunk)
+│        commandsIndex.ts      shell-safe metadata: categories, domains, light index, counts
+├─ types.ts                     Command · CategoryInfo · CTFDomainInfo contracts
 backend/
-├─ app/ auth.py · commands.py · security.py · sessions.py · persistence.py · user.py · models.py
-├─ data/ commands.json         mirrored dataset for the API
-└─ tests/ test_auth.py · test_hardening.py · test_security.py · test_mailer.py · test_user_data.py  (102 cases)
+├─ app/ auth.py · commands.py · user.py · security.py · sessions.py · persistence.py · models.py · mailer.py
+├─ data/ commands.json         generated from src/data/commands.ts (build_commands.mjs)
+├─ scripts/ build_commands.mjs the dataset pipeline (regenerates commands.json + needsHumanReview)
+└─ tests/ test_auth.py · test_hardening.py · test_security.py · test_mailer.py
+           test_user_data.py · test_dataset.py  (109 cases)
 ```
