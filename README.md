@@ -71,7 +71,18 @@ Mistyped a URL? The 404 page is itself a terminal — type `cat flag.hidden` and
 
 ## How it is verified
 
-The repo ships its own test harnesses (in `qa/`, untracked):
+The repo ships its own test harnesses (in `qa/`, untracked). One command runs
+the whole gate — production build, lint, the backend pytest suite, the dataset
+docs-accuracy audit, then every live browser/API probe in order — and prints a
+pass/fail table (full per-suite output is kept under `qa/last-qarun/`). It
+starts the dev servers itself if they are not already running and never waits
+on a missing environment:
+
+```powershell
+npm run qa                                   # the one-shot full gate
+```
+
+Individual suites:
 
 ```powershell
 # 109 pytest backend tests (incl. the 7-case dataset docs-accuracy suite)
