@@ -3,8 +3,11 @@ import sys
 import base64
 import hashlib
 import logging
+import time
 from pathlib import Path
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, g
+from sqlalchemy import text as sa_text
+from sqlalchemy.exc import OperationalError, DisconnectionError
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
@@ -214,6 +217,31 @@ def create_app():
     def health():
         return jsonify({'status': 'ok'})
 
+    @app.route('/api/ready')
+    def ready():
+        """Readiness probe: one real round-trip to the database.
+
+        Survives a paused or waking managed database (Supabase free projects
+        sleep after ~7 idle days): failure is a clear 503 with a request id
+        for correlation — never a stack trace, never credentials.
+        """
+        started = time.perf_counter()
+        try:
+            engine = app.extensions['sqlalchemy'].engines[None]
+            with engine.connect() as conn:
+                conn.execute(sa_text('SELECT 1'))
+        except Exception:                                     # noqa: BLE001
+            _warn_security('database_unreachable', path=request.path)
+            return jsonify({
+                'error': 'Database is not ready. It may be waking up — '
+                         'please retry shortly.',
+                'request_id': getattr(g, 'request_id', None),
+            }), 503
+        latency_ms = round((time.perf_counter() - started) * 1000)
+        return jsonify({'status': 'ok', 'database': 'ready',
+                        'latency_ms': latency_ms,
+                        'mode': app.config.get('DB_MODE', 'unknown')}), 200
+
     @app.errorhandler(404)
     def not_found(e):
         return jsonify({'error': 'Not found'}), 404
@@ -228,6 +256,21 @@ def create_app():
 
     @app.errorhandler(500)
     def server_error(e):
+        # A paused or unreachable managed database is an availability state,
+        # not an application crash: answer 503 with a clear, request-id'd
+        # message instead of a generic 500 (and never a stack trace).
+        # Flask hands the 500 handler an InternalServerError wrapper whose
+        # .original_exception carries the real raised exception.
+        from sqlalchemy.exc import DBAPIError
+        real = getattr(e, 'original_exception', None) or e
+        if isinstance(real, (OperationalError, DisconnectionError,
+                            DBAPIError, ConnectionError, OSError)):
+            _warn_security('database_unreachable', path=request.path)
+            return jsonify({
+                'error': 'Database is not ready. It may be waking up — '
+                         'please retry shortly.',
+                'request_id': getattr(g, 'request_id', None),
+            }), 503
         _warn_security('server_error', path=request.path)
         return jsonify({'error': 'Internal server error'}), 500
 
