@@ -115,3 +115,46 @@ def test_orm_map_matches_migrated_table(app):
     db.session.commit()
     row = db.session.query(UserProgress).filter_by(user_id=user.id, key='terminal').one()
     assert row.version == 3 and row.data['solved'] == ['m1']
+
+
+def test_upgrade_is_idempotent(app):
+    from flask_migrate import upgrade
+
+    upgrade()
+    upgrade()  # second run: already at head, must be a no-op
+    assert _version_num() == '002_user_progress'
+
+
+class TestCreateAllPolicy:
+    """create_all() only for the sqlite dev fallback; migrations own Postgres."""
+
+    def test_postgres_never_create_all(self, monkeypatch, tmp_path):
+        from app import create_app, db
+        monkeypatch.setenv('DATABASE_URL',
+                           'postgres://u:p@db.ref.supabase.co:5432/db')
+        monkeypatch.delenv('SKIP_DB_CREATE_ALL', raising=False)
+        seen = []
+        monkeypatch.setattr(db, 'create_all',
+                            lambda *a, **k: seen.append('called'))
+        create_app()
+        assert seen == []  # schema comes from `flask db upgrade` only
+
+    def test_sqlite_dev_still_create_all(self, monkeypatch, tmp_path):
+        from app import create_app, db
+        monkeypatch.setenv('DATABASE_URL', f'sqlite:///{tmp_path / "pol.sqlite3"}')
+        monkeypatch.delenv('SKIP_DB_CREATE_ALL', raising=False)
+        seen = []
+        monkeypatch.setattr(db, 'create_all',
+                            lambda *a, **k: seen.append('called'))
+        create_app()
+        assert seen == ['called']
+
+    def test_skip_flag_disables_sqlite_create_all(self, monkeypatch, tmp_path):
+        from app import create_app, db
+        monkeypatch.setenv('DATABASE_URL', f'sqlite:///{tmp_path / "pol2.sqlite3"}')
+        monkeypatch.setenv('SKIP_DB_CREATE_ALL', '1')
+        seen = []
+        monkeypatch.setattr(db, 'create_all',
+                            lambda *a, **k: seen.append('called'))
+        create_app()
+        assert seen == []

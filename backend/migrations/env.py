@@ -16,12 +16,10 @@ logger = logging.getLogger('alembic.env')
 
 
 def get_engine():
-    try:
-        # this works with Flask-SQLAlchemy<3 and Alchemical
-        return current_app.extensions['migrate'].db.get_engine()
-    except (TypeError, AttributeError):
-        # this works with Flask-SQLAlchemy>=3
-        return current_app.extensions['migrate'].db.engine
+    # Flask-SQLAlchemy >= 3 keeps engines in an extension-level dict; the
+    # default (and only) engine is keyed None. Avoids the deprecated
+    # migrate.db.get_engine()/db.engine indirection.
+    return current_app.extensions['sqlalchemy'].engines[None]
 
 
 def get_engine_url():

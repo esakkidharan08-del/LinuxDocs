@@ -246,13 +246,19 @@ def create_app():
     with app.app_context():
         # Verify/repair the database BEFORE the first connection touches it,
         # then create anything missing, snapshot it, and start maintenance.
-        # Skipped when the schema belongs to alembic instead: while a
+        # Sqlite (dev/tests) keeps the create_all() fallback; a managed
+        # Postgres like Supabase is owned by the alembic chain instead, so
+        # create_all must never shadow migrations there (schema drift risk:
+        # auto-created tables without alembic_version rows). While a
         # `flask db …` command runs (argv contains "db") or tests opt out with
-        # SKIP_DB_CREATE_ALL=1, migrations own the table set.
+        # SKIP_DB_CREATE_ALL=1, migrations own the table set too.
+        from .database import is_postgres
         db_path = configure_persistence(app)
         migrate.init_app(app, db, directory=os.path.join(os.path.dirname(__file__), '..', 'migrations'))
         if _running_db_command() or os.getenv('SKIP_DB_CREATE_ALL') == '1':
-            db_path = None
+            db_path = None  # migrations own the schema; nothing to snapshot
+        elif is_postgres(app.config['SQLALCHEMY_DATABASE_URI']):
+            db_path = None  # managed schema: `flask db upgrade`, never create_all
         else:
             db.create_all()
         if db_path:
