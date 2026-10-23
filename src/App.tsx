@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { PageTransition } from '@/components/animate-ui/components/page-transition';
 import { ThemeProvider } from './components/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
@@ -131,8 +132,13 @@ function AppShell() {
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <main id="main" className="min-w-0 flex-1">
-          <Suspense fallback={<RouteFallback />}>
-            <Routes>
+          {/* Page transitions (Animate UI view transitions): the shell above
+              stays put, the routed content swaps with the selected effect.
+              pageKey defaults to the pathname; reduced motion falls back to
+              the plain crossfade inside the component. */}
+          <PageTransition effect="bands" className="min-h-[60vh]">
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
             {/* Public surface (Part 1): auth pages, legal pages, the void 404.
                 Everything else demands a session; see ProtectedRoute. */}
             <Route path="/" element={<ProtectedRoute><LandingPage /></ProtectedRoute>} />
@@ -160,7 +166,8 @@ function AppShell() {
             <Route path="/ctf/:domainId/:slug" element={<ProtectedRoute><CommandDetailPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFoundPage />} />
             </Routes>
-          </Suspense>
+            </Suspense>
+          </PageTransition>
           <Footer />
         </main>
       </div>
