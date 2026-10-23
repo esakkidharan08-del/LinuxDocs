@@ -60,8 +60,8 @@ def test_existing_database_upgrade_and_downgrade(app):
     user_id = user.id
 
     # --- upgrade: adds user_progress, existing rows untouched ------------------
-    upgrade()  # head = 002_user_progress
-    assert _version_num() == '002_user_progress'
+    upgrade()  # head = 003_rls_lockdown (002_user_progress + RLS lockdown)
+    assert _version_num() == '003_rls_lockdown'
     assert 'user_progress' in _table_names()
     assert db.session.get(User, user_id) is not None
 
@@ -87,14 +87,14 @@ def test_existing_database_upgrade_and_downgrade(app):
 
     # and the chain can be replayed forward again
     upgrade()
-    assert 'user_progress' in _table_names() and _version_num() == '002_user_progress'
+    assert 'user_progress' in _table_names() and _version_num() == '003_rls_lockdown'
 
 
 def test_fresh_database_full_chain(app):
     from flask_migrate import upgrade
 
-    upgrade()  # empty file → both revisions in one go
-    assert _version_num() == '002_user_progress'
+    upgrade()  # empty file → all revisions in one go
+    assert _version_num() == '003_rls_lockdown'
     tables = _table_names()
     assert {'users', 'sessions', 'password_reset_tokens', 'bookmarks',
             'user_notes', 'recently_viewed', 'user_progress'} <= tables
@@ -122,7 +122,52 @@ def test_upgrade_is_idempotent(app):
 
     upgrade()
     upgrade()  # second run: already at head, must be a no-op
-    assert _version_num() == '002_user_progress'
+    assert _version_num() == '003_rls_lockdown'
+
+
+def test_downgrade_chain_to_base_and_replay(app):
+    """Downgrade all the way to base, then rebuild — the full round trip."""
+    from flask_migrate import downgrade, upgrade
+
+    upgrade()
+    downgrade(revision='base')
+    assert _version_num() is None
+    # only alembic's own version table survives; app tables are all dropped
+    assert _table_names() == {'alembic_version'}
+    upgrade()
+    assert _version_num() == '003_rls_lockdown'
+    assert {'users', 'user_progress'} <= _table_names()
+
+
+class TestRlsLockdown:
+    """The 003 migration guards the Supabase Data API surface."""
+
+    def test_app_table_list_matches_models(self):
+        """APP_TABLES must stay in lockstep with the ORM's tables."""
+        import importlib.util
+        from pathlib import Path
+        from app.models import db
+
+        path = Path(__file__).resolve().parents[1] / 'migrations' / 'versions' \
+            / '003_rls_lockdown.py'
+        spec = importlib.util.spec_from_file_location('rls_migration_003', path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        assert set(module.APP_TABLES) == set(db.metadata.tables.keys())
+
+    def test_rls_migration_is_a_noop_on_sqlite(self, app):
+        """SQLite has no RLS: the chain must complete and tables stay usable."""
+        from flask_migrate import upgrade
+        from app.models import User
+
+        upgrade()  # → 003_rls_lockdown on sqlite = metadata-only pass
+        assert _version_num() == '003_rls_lockdown'
+
+        user = User(username='rlsnoop', email='rlsnoop@example.com')
+        user.set_password('Password-rlsnoop9!')
+        db.session.add(user)
+        db.session.commit()
+        assert db.session.query(User).count() == 1
 
 
 class TestCreateAllPolicy:
