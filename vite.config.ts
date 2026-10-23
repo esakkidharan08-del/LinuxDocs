@@ -21,7 +21,9 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        // 127.0.0.1, not `localhost`: Node's DNS resolution for `localhost`
+        // can prefer IPv6 (::1), where nothing is listening.
+        target: 'http://127.0.0.1:5000',
         changeOrigin: true,
       },
     },
