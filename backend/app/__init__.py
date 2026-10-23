@@ -116,7 +116,22 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    # DATABASE_URL normalization + Supabase engine policy (docs in app/database.py).
+    # Malformed URLs abort startup with a fixed message that never echoes
+    # the URL itself (it contains the password).
+    from .database import (
+        normalize_database_url, is_postgres, postgres_engine_options,
+        connection_mode, log_line,
+    )
+    _uri = normalize_database_url(os.getenv('DATABASE_URL'))
+    app.config['SQLALCHEMY_DATABASE_URI'] = _uri
+    if is_postgres(_uri):
+        # Pool sizing + connect retry live in the engine options; sqlite
+        # keeps SQLAlchemy's own defaults so tests/dev behave exactly as before.
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = postgres_engine_options(_uri)
+        app.config['DB_MODE'] = connection_mode(_uri)
+    else:
+        app.config['DB_MODE'] = 'sqlite'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 900))
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES', 2592000))
@@ -168,6 +183,7 @@ def create_app():
         return response
 
     _setup_logging(app)
+    app.logger.info(log_line(app.config['SQLALCHEMY_DATABASE_URI']))
 
     db.init_app(app)
     bcrypt.init_app(app)
