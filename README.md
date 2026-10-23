@@ -118,7 +118,7 @@ python qa/dist_probe.py                     # DIST CLEAN
 ## Architecture
 
 ```
-Browser ──(one origin)──► Vercel  ──/api/* proxy──► Render (Flask API) ──► Render Postgres
+Browser ──(one origin)──► Vercel  ──/api/* proxy──► Render (Flask API) ──► Supabase Postgres
                           │                              ▲
                           └── static React SPA (Vite)     └── host-allowlist + rate limits + CORS
 ```
@@ -128,7 +128,7 @@ Browser ──(one origin)──► Vercel  ──/api/* proxy──► Render (
 - **Auth model** — JWT access token lives **in memory only** (15 min); the refresh credential is an **HttpOnly, SameSite=Strict cookie** (30 days) backed by opaque rotating session tokens with reuse (theft) detection. A single-flight refresh promise stops a tab full of failing requests from stampeding the auth endpoint.
 - **The same-origin trick** — `vercel.json` proxies `/api/*` to the Render API, so the browser only ever talks to one domain. That makes the refresh cookie first-party on the frontend origin — no `SameSite=None`, no third-party-cookie breakage, no CORS drama. In dev, `vite.config.ts` does the identical thing to `localhost:5000`.
 - **Backend** — Flask 3 + SQLAlchemy + Bcrypt + JWT-Extended. Env-driven config; request logging; per-endpoint **and** global rate limits; account lockout with attempt windows; CSRF origin checks; **Host-header allowlist**; payload clamps; hardened security headers (CSP/HSTS) in production.
-- **Data durability** — SQLite runs WAL + `synchronous=FULL` + automatic verified backups with self-healing restore on corruption. Point `DATABASE_URL` at Postgres (Render blueprint does exactly that) and the SQLite-only machinery disables itself cleanly — no forks, no code changes.
+- **Data durability** — SQLite runs WAL + `synchronous=FULL` + automatic verified backups with self-healing restore on corruption. Point `DATABASE_URL` at managed Postgres (Supabase — see the Supabase deploy doc above) and the SQLite-only machinery disables itself cleanly — no forks, no code changes. Schema lives behind Flask-Migrate/Alembic (`migrations/versions/`), so `flask db upgrade` is the only schema step on any backend.
 
 ## Quick start (local)
 
@@ -161,16 +161,20 @@ Required `.env` variables (in `backend/.env` — never commit it):
 
 ## Deploy your own
 
-**1. Create the backend on Render** — Push the repo, then in Render: **New + → Blueprint** and pick the repository. `render.yaml` provisions the `linuxdocs-api` web service (gunicorn) **and** the free partners Postgres, wiring `DATABASE_URL`, strong regenerated `SECRET_KEY`/`JWT_SECRET_KEY` automatically.
+> Full click-by-click version: **[docs/DEPLOY_SUPABASE.md](docs/DEPLOY_SUPABASE.md)** (Supabase project → Render blueprint → Vercel import, plus the keepalive and troubleshooting checklists).
 
-**2. Point it at your frontend** — After the first deploy, Render gives the service a URL like `https://linuxdocs-api.onrender.com`. Set its env vars:
+**1. Database — Supabase** — Create a project, then copy **Project Settings → Database → Connection string → Session pooler** (port 5432 on the `.pooler.supabase.com` host). It is only ever pasted into Render's `DATABASE_URL` — never committed. Turn the **Data API off** (Settings → API): the app never uses the anon/service-role keys, and migration `003_rls_lockdown` enables Row Level Security with zero permissive policies on every table as a second layer.
+
+**2. Create the backend on Render** — **New + → Blueprint** and pick the repository. `render.yaml` provisions the `linuxdocs-api` web service on the free plan (region singapore, Python 3.11.x, gunicorn with **1 worker + 4 threads**) and an `DATABASE_URL` slot you fill with the session-pooler URI. Every start runs the schema through alembic first, so it is **idempotent**: `flask db upgrade && gunicorn "app:create_app()" …`. Migrations (the Flask-Migrate chain `001_initial → 002_user_progress → 003_rls_lockdown`) run only via the **session** pooler — never the transaction pooler (:6543). Strong `SECRET_KEY`/`JWT_SECRET_KEY` regenerate automatically.
+
+**3. Point it at your frontend** — After the first deploy, Render gives the service a URL like `https://linuxdocs-api.onrender.com`. Set its env vars:
 
 | Variable | Set to |
 |---|---|
 | `FRONTEND_ORIGIN` | your Vercel site URL (`https://…vercel.app`) |
-| `ALLOWED_HOSTS` | the Render service host (`linuxdocs-api.onrender.com`) |
+| `ALLOWED_HOSTS` | the Render service host **and** the Vercel domain (`linuxdocs-api.onrender.com,<your-site>.vercel.app` — with `TRUST_PROXY_HEADERS=1` the Host check sees X-Forwarded-Host, which is the Vercel domain for browser traffic) |
 
-**3. Create the frontend on Vercel** — **New Project → Import repo**. Vercel auto-detects the `vercel.json`: builds with `npm run build`, serves `dist/`, and applies the two rewrites:
+**4. Create the frontend on Vercel** — **New Project → Import repo**. Vercel auto-detects the `vercel.json`: builds with `npm run build`, serves `dist/`, and applies the two rewrites:
 
 ```jsonc
 "rewrites": [
@@ -181,7 +185,7 @@ Required `.env` variables (in `backend/.env` — never commit it):
 
 Then update `FRONTEND_ORIGIN`/`ALLOWED_HOSTS` on Render with the final Vercel URL and redeploy once — accounts, refresh cookies, and rate limiting all work across the proxy exactly like they do locally.
 
-**4. Password-reset email delivery** — Set the mail provider on the `linuxdocs-api` service (Resend is simplest, no SMTP ports involved):
+**5. Password-reset email delivery** — Set the mail provider on the `linuxdocs-api` service (Resend is simplest, no SMTP ports involved):
 
 | Variable | Set to |
 |---|---|
