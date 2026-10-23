@@ -53,6 +53,9 @@ def _setup_logging(app):
         handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s [%(name)s] %(message)s'))
         app.logger.addHandler(handler)
+    # Flask's app.logger inherits WARNING from the root logger, which would
+    # swallow the credential-free startup line (INFO). Align it explicitly.
+    app.logger.setLevel(level)
     for name in ('linuxdocs.security',):  # noqa: C901
         logger = logging.getLogger(name)
         if not logger.handlers:
