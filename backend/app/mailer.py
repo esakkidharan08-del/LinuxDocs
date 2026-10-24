@@ -137,6 +137,17 @@ def _send_via_resend(msg: EmailMessage) -> tuple[str, str]:
             if resp.status < 300:
                 return 'sent', 'delivered via resend'
             return 'failed', f'resend api returned {resp.status}'
+    except urllib.error.HTTPError as exc:
+        try:
+            body = exc.read().decode('utf-8', errors='replace')
+            try:
+                detail = json.loads(body).get('message', body)
+            except (json.JSONDecodeError, AttributeError):
+                detail = body
+            detail = str(detail)[:300]
+        except Exception:
+            detail = 'Unable to read Resend error response'
+        return 'failed', f'resend HTTP {exc.code}: {detail}'
     except (URLError, TimeoutError, OSError) as exc:
         return 'failed', f'resend request failed: {type(exc).__name__}'
 
