@@ -10,6 +10,7 @@ __pycache__/
 qa/*
 !qa/run_all.py
 !qa/check-links.ts
+!qa/merge_vectors.json
 .claude/
 .DS_Store
 

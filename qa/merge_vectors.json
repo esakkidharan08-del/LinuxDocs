@@ -1,0 +1,133 @@
+{
+  "version": 2,
+  "contract": "Deterministic progress merge rules — one shared vector set for BOTH implementations (backend/app/progress_merge.py via pytest and src/lib/progress.ts via the Node-side test qa/merge_test.mjs). Every vector must satisfy merge(a, b) == merge(b, a) == expected AND merge(expected, x) == expected for x in {a, b, expected} (a join-semilattice: conflict retries and offline replays always converge, never oscillate). Payload shapes are pinned by backend/app/progress_schemas.py.",
+  "vectors": [
+    {
+      "name": "learning_union_and_max",
+      "key": "learning",
+      "a": {
+        "shell-basics": { "completed": false, "bestScore": 0, "bestTotal": 0, "lessons": ["0"] },
+        "file-ops": { "completed": true, "bestScore": 8, "bestTotal": 10, "lessons": ["0", "1"] }
+      },
+      "b": {
+        "shell-basics": { "completed": true, "bestScore": 7, "bestTotal": 10, "lessons": ["0", "2"] }
+      },
+      "expected": {
+        "shell-basics": { "completed": true, "bestScore": 7, "bestTotal": 10, "lessons": ["0", "2"] },
+        "file-ops": { "completed": true, "bestScore": 8, "bestTotal": 10, "lessons": ["0", "1"] }
+      },
+      "note": "lessons read = union (never un-complete), completed flags OR (never un-complete), quiz bestScore/bestTotal = max per field, fresh paths appear."
+    },
+    {
+      "name": "learning_empty_side_keeps_progress",
+      "key": "learning",
+      "a": {
+        "shell-basics": { "completed": true, "bestScore": 10, "bestTotal": 10, "lessons": ["0", "1"] }
+      },
+      "b": {},
+      "expected": {
+        "shell-basics": { "completed": true, "bestScore": 10, "bestTotal": 10, "lessons": ["0", "1"] }
+      },
+      "note": "A device that never touched a path must not erase it (union identity)."
+    },
+    {
+      "name": "terminal_solved_union_commandsrun_max",
+      "key": "terminal",
+      "a": { "solved": ["m1", "m3"], "commandsRun": 120 },
+      "b": { "solved": ["m2"], "commandsRun": 58 },
+      "expected": { "solved": ["m1", "m2", "m3"], "commandsRun": 120 },
+      "note": "solved missions = sorted union (never un-solve), commandsRun counter = max."
+    },
+    {
+      "name": "terminal_fresh_side_no_regression",
+      "key": "terminal",
+      "a": { "solved": ["m1"], "commandsRun": 7 },
+      "b": {},
+      "expected": { "solved": ["m1"], "commandsRun": 7 },
+      "note": "Union identity for missions; an empty side cannot zero counters."
+    },
+    {
+      "name": "flashcards_completes_max_per_deck",
+      "key": "flashcards",
+      "a": { "completes": { "basics": 3, "flags": 1 } },
+      "b": { "completes": { "basics": 2, "pipes": 4 } },
+      "expected": { "completes": { "basics": 3, "flags": 1, "pipes": 4 } },
+      "note": "Per-deck completed sessions are counts: merge = max per deck (loss-free and monotone)."
+    },
+    {
+      "name": "speeddrill_best_and_plays_max",
+      "key": "speeddrill",
+      "a": { "best": 120, "plays": 5 },
+      "b": { "best": 90, "plays": 12 },
+      "expected": { "best": 120, "plays": 12 },
+      "note": "Personal best and rounds played both merge as max."
+    },
+    {
+      "name": "streak_best_max_current_from_last_visit",
+      "key": "streak",
+      "a": { "lastDay": "2026-01-10", "current": 4, "best": 12, "totalDays": 40 },
+      "b": { "lastDay": "2026-01-12", "current": 1, "best": 10, "totalDays": 38 },
+      "expected": { "lastDay": "2026-01-12", "current": 1, "best": 12, "totalDays": 40 },
+      "note": "best and totalDays = max; lastDay = the later visit; the merged current is recomputed from that last-visit date (the newest device carries the live chain)."
+    },
+    {
+      "name": "streak_same_day_takes_longer_chain",
+      "key": "streak",
+      "a": { "lastDay": "2026-03-01", "current": 2, "best": 5, "totalDays": 9 },
+      "b": { "lastDay": "2026-03-01", "current": 6, "best": 6, "totalDays": 9 },
+      "expected": { "lastDay": "2026-03-01", "current": 6, "best": 6, "totalDays": 9 },
+      "note": "Both devices visited the same day: the longer current chain wins."
+    },
+    {
+      "name": "streak_empty_side_seeds",
+      "key": "streak",
+      "a": { "lastDay": "2026-01-12", "current": 3, "best": 3, "totalDays": 22 },
+      "b": {},
+      "expected": { "lastDay": "2026-01-12", "current": 3, "best": 3, "totalDays": 22 },
+      "note": "First merge against an empty account adopts the full streak."
+    },
+    {
+      "name": "terminal_speedrun_bests_max",
+      "key": "terminal",
+      "a": { "solved": ["m1"], "commandsRun": 10, "bestRunSeconds": 312, "runs": 2 },
+      "b": { "solved": ["m2"], "commandsRun": 40, "bestRunSeconds": 289, "runs": 5 },
+      "expected": { "solved": ["m1", "m2"], "commandsRun": 40, "bestRunSeconds": 289, "runs": 5 },
+      "note": "v2 speedrun fields: best full-run time and run count are counters — max wins, legacy payloads without them stay valid."
+    },
+    {
+      "name": "terminal_speedrun_optional_kept_when_present",
+      "key": "terminal",
+      "a": { "solved": ["m3"], "commandsRun": 1, "bestRunSeconds": 140, "runs": 1 },
+      "b": { "commandsRun": 0 },
+      "expected": { "solved": ["m3"], "commandsRun": 1, "bestRunSeconds": 140, "runs": 1 },
+      "note": "A fresh device keeps the speedrun history, and merge output only carries the fields that exist (omitted when unset)."
+    },
+    {
+      "name": "flashcards_srs_higher_bucket_wins",
+      "key": "flashcards",
+      "a": { "completes": { "linux:basics": 1 }, "srs": { "linux/basics/ls": { "bucket": 2, "due": "2026-03-01" } } },
+      "b": { "completes": {}, "srs": { "linux/basics/ls": { "bucket": 4, "due": "2026-03-20" } } },
+      "expected": {
+        "completes": { "linux:basics": 1 },
+        "srs": { "linux/basics/ls": { "bucket": 4, "due": "2026-03-20" } }
+      },
+      "note": "v2 SRS: the higher-bucket device carries the later review state; deck completes merge independently as max."
+    },
+    {
+      "name": "flashcards_srs_tie_bucket_later_due",
+      "key": "flashcards",
+      "a": { "srs": { "ctf/crypto/john": { "bucket": 3, "due": "2026-04-09" } } },
+      "b": { "srs": { "ctf/crypto/john": { "bucket": 3, "due": "2026-04-14" } } },
+      "expected": { "completes": {}, "srs": { "ctf/crypto/john": { "bucket": 3, "due": "2026-04-14" } } },
+      "note": "Equal buckets resolve to the later due day (deterministic, idempotent)."
+    },
+    {
+      "name": "streak_freezes_max",
+      "key": "streak",
+      "a": { "lastDay": "2026-01-12", "current": 3, "best": 9, "totalDays": 22, "freezes": 1 },
+      "b": { "lastDay": "2026-01-10", "current": 2, "best": 9, "totalDays": 21, "freezes": 3 },
+      "expected": { "lastDay": "2026-01-12", "current": 3, "best": 9, "totalDays": 22, "freezes": 3 },
+      "note": "v2 freeze tokens are a currency accumulated per device — max wins; merge output omits the field when both sides are 0."
+    }
+  ]
+}
