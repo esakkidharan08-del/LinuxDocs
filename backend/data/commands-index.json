@@ -96,7 +96,28 @@
         "whois",
         "dnsrecon"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "Shodan",
+          "url": "https://www.shodan.io",
+          "description": "Search engine for internet-exposed devices, open ports, and services worldwide."
+        },
+        {
+          "name": "Censys",
+          "url": "https://search.censys.io",
+          "description": "Internet-wide scan data for hosts, certificates, and service fingerprints."
+        },
+        {
+          "name": "DNSDumpster",
+          "url": "https://dnsdumpster.com",
+          "description": "One-shot passive DNS recon — subdomains, NS, MX, and A records with a map."
+        },
+        {
+          "name": "OWASP Amass",
+          "url": "https://github.com/owasp-amass/amass",
+          "description": "Deep automated subdomain enumeration and attack-surface mapping."
+        }
+      ]
     },
     {
       "id": "web",
@@ -110,7 +131,28 @@
         "ffuf",
         "wfuzz"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "OWASP ZAP",
+          "url": "https://www.zaproxy.org",
+          "description": "Free intercepting proxy, spider, and active scanner for web applications."
+        },
+        {
+          "name": "PortSwigger Web Security Academy",
+          "url": "https://portswigger.net/web-security",
+          "description": "Free hands-on labs covering every web vulnerability class, with Burp Suite."
+        },
+        {
+          "name": "Nuclei",
+          "url": "https://github.com/projectdiscovery/nuclei",
+          "description": "Template-driven scanner for CVEs, misconfigurations, and exposed panels."
+        },
+        {
+          "name": "HackTricks",
+          "url": "https://book.hacktricks.xyz",
+          "description": "Methodology and payload cheat sheets for web, network, and CTF work."
+        }
+      ]
     },
     {
       "id": "crypto",
@@ -124,7 +166,28 @@
         "gpg",
         "age"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "CyberChef",
+          "url": "https://gchq.github.io/CyberChef/",
+          "description": "Browser Swiss-army knife for encodings, ciphers, hashes, and pipelines."
+        },
+        {
+          "name": "RsaCtfTool",
+          "url": "https://github.com/RsaCtfTool/RsaCtfTool",
+          "description": "Automated attacks over the known RSA weaknesses a CTF usually hides."
+        },
+        {
+          "name": "FactorDB",
+          "url": "https://factordb.com",
+          "description": "Community factorization database — test if an RSA modulus is already factored."
+        },
+        {
+          "name": "dCode",
+          "url": "https://www.dcode.fr",
+          "description": "Hundreds of cipher solvers plus a cipher identifier for unknown text."
+        }
+      ]
     },
     {
       "id": "reverse-engineering",
@@ -141,7 +204,28 @@
         "checksec",
         "ROPgadget"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "Ghidra",
+          "url": "https://ghidra-sre.org",
+          "description": "NSA's open-source disassembler and decompiler suite for native binaries."
+        },
+        {
+          "name": "Cutter",
+          "url": "https://cutter.re",
+          "description": "GUI front-end built on radare2 for interactive binary analysis."
+        },
+        {
+          "name": "angr",
+          "url": "https://github.com/angr/angr",
+          "description": "Symbolic execution framework that automates path solving in challenges."
+        },
+        {
+          "name": "Decompiler Explorer",
+          "url": "https://dogbolt.org",
+          "description": "Run a binary through several decompilers side by side in the browser."
+        }
+      ]
     },
     {
       "id": "forensics",
@@ -154,7 +238,23 @@
         "foremost",
         "volatility"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "The Sleuth Kit",
+          "url": "https://www.sleuthkit.org",
+          "description": "Filesystem analysis toolkit (ils, fls, icat) behind most disk forensics."
+        },
+        {
+          "name": "Autopsy",
+          "url": "https://www.autopsy.com",
+          "description": "Full GUI investigation suite for disk images, built on The Sleuth Kit."
+        },
+        {
+          "name": "Wireshark",
+          "url": "https://www.wireshark.org",
+          "description": "Interactive deep packet inspection for network capture analysis."
+        }
+      ]
     },
     {
       "id": "pwn",
@@ -166,7 +266,33 @@
         "gdb",
         "pwntools-snippets"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "GEF",
+          "url": "https://github.com/hugsy/gef",
+          "description": "Modern GDB plugin tuned for exploit development and debugging."
+        },
+        {
+          "name": "pwndbg",
+          "url": "https://github.com/pwndbg/pwndbg",
+          "description": "Alternative GDB extension with rich heap/ROP/stack visualization."
+        },
+        {
+          "name": "libc-database",
+          "url": "https://libc.blukat.me",
+          "description": "Identify a target's libc version from leaked GOT offsets, then ret2libc."
+        },
+        {
+          "name": "pwn.college",
+          "url": "https://pwn.college",
+          "description": "Structured coursework with challenge emulator — baby steps to kernel pwn."
+        },
+        {
+          "name": "Exploit Education",
+          "url": "https://exploit.education",
+          "description": "Vulnerable local VMs (Phoenix, Protostar, Nebula) for practicing CTFs."
+        }
+      ]
     },
     {
       "id": "osint",
@@ -178,7 +304,28 @@
         "dnsrecon",
         "nmap"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "Have I Been Pwned",
+          "url": "https://haveibeenpwned.com",
+          "description": "Breach database lookup for emails and domains tied to leaked credentials."
+        },
+        {
+          "name": "OSINT Framework",
+          "url": "https://osintframework.com",
+          "description": "Curated directory of OSINT tools grouped by collection task."
+        },
+        {
+          "name": "Google Hacking Database",
+          "url": "https://www.exploit-db.com/google-hacking-database",
+          "description": "Community-maintained Google dorks for exposed files, panels, and data."
+        },
+        {
+          "name": "Wayback Machine",
+          "url": "https://web.archive.org",
+          "description": "Historical snapshots — recover deleted pages, old files, and past endpoints."
+        }
+      ]
     },
     {
       "id": "mobile",
@@ -189,7 +336,23 @@
         "apktool",
         "jadx"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "MobSF",
+          "url": "https://github.com/MobSF/Mobile-Security-Framework-MobSF",
+          "description": "Automated static and dynamic analysis of Android and iOS apps."
+        },
+        {
+          "name": "Frida",
+          "url": "https://frida.re",
+          "description": "Dynamic instrumentation toolkit — hook live functions on running apps."
+        },
+        {
+          "name": "Objection",
+          "url": "https://github.com/sensepost/objection",
+          "description": "Runtime exploration and SSL-pinning bypass toolkit on top of Frida."
+        }
+      ]
     },
     {
       "id": "containers",
@@ -198,7 +361,28 @@
       "tools": [
         "trivy"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "Docker Bench",
+          "url": "https://github.com/docker/docker-bench-security",
+          "description": "Official script auditing a host against the CIS Docker benchmark."
+        },
+        {
+          "name": "Grype",
+          "url": "https://github.com/anchore/grype",
+          "description": "Vulnerability matcher for container images and SBOMs."
+        },
+        {
+          "name": "Falco",
+          "url": "https://falco.org",
+          "description": "Runtime detection of suspicious syscall behavior inside containers."
+        },
+        {
+          "name": "kube-bench",
+          "url": "https://github.com/aquasecurity/kube-bench",
+          "description": "CIS Kubernetes benchmark checks for clusters."
+        }
+      ]
     },
     {
       "id": "cloud",
@@ -208,7 +392,23 @@
         "aws-cli-enumeration",
         "trivy"
       ],
-      "recommendedExternalTools": []
+      "recommendedExternalTools": [
+        {
+          "name": "Prowler",
+          "url": "https://github.com/prowler-cloud/prowler",
+          "description": "Security audits across AWS, Azure, and GCP against hundreds of controls."
+        },
+        {
+          "name": "ScoutSuite",
+          "url": "https://github.com/nccgroup/ScoutSuite",
+          "description": "Multi-cloud configuration review with a readable HTML report."
+        },
+        {
+          "name": "Pacu",
+          "url": "https://github.com/RhinoSecurityLabs/pacu",
+          "description": "AWS exploitation framework for post-compromise privilege escalation."
+        }
+      ]
     }
   ],
   "counts": {
