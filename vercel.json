@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://linuxdocs-api.onrender.com/api/:path*"
+      "destination": "https://linuxdocs-2vto.onrender.com/api/:path*"
     },
     {
       "source": "/:path*",
