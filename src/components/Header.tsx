@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Terminal, Search, Menu, Shield, User, LogOut, Settings, Bookmark, ChevronDown } from 'lucide-react';
+import { Terminal, Search, Menu, Shield, User, LogOut, Settings, Bookmark, ChevronDown, Compass } from 'lucide-react';
 import { Link, useLocation, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ThemeSwitch } from './unlumen-ui/theme-switch';
@@ -76,30 +76,35 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onToggleSidebar })
           <nav aria-label="Primary" className="ml-6 hidden items-center gap-1 md:flex">
             <NavLink
               to="/"
+              data-tour="nav-reference"
               className={({ isActive }) => `nav-link rounded-md px-3 py-2 text-sm ${isActive ? '' : 'hover:bg-[var(--bg-surface-elevated)]'}`}
             >
               Linux Reference
             </NavLink>
             <NavLink
               to="/ctf"
+              data-tour="nav-ctf"
               className={({ isActive }) => `nav-link nav-link--ctf rounded-md px-3 py-2 text-sm ${isActive ? '' : 'hover:bg-[var(--bg-surface-elevated)]'}`}
             >
               CTF &amp; Security
             </NavLink>
             <NavLink
               to="/cheat-sheets"
+              data-tour="nav-cheatsheet"
               className={({ isActive }) => `nav-link rounded-md px-3 py-2 text-sm ${isActive ? '' : 'hover:bg-[var(--bg-surface-elevated)]'}`}
             >
               Cheat Sheets
             </NavLink>
             <NavLink
               to="/learn"
+              data-tour="nav-learn"
               className={({ isActive }) => `nav-link rounded-md px-3 py-2 text-sm ${isActive ? '' : 'hover:bg-[var(--bg-surface-elevated)]'}`}
             >
               Learn
             </NavLink>
             <NavLink
               to="/flashcards"
+              data-tour="nav-flashcards"
               className={({ isActive }) => `nav-link rounded-md px-3 py-2 text-sm ${isActive ? '' : 'hover:bg-[var(--bg-surface-elevated)]'}`}
             >
               Flashcards
@@ -111,6 +116,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onToggleSidebar })
           <button
             type="button"
             onClick={onOpenSearch}
+            data-tour="search"
             className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-muted)] hover:border-[var(--text-muted)]/40 hover:text-[var(--text)] sm:w-64"
           >
             <span className="flex items-center gap-2">
@@ -125,11 +131,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onToggleSidebar })
 
           <ThemeSwitch />
 
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event('linuxdocs:start-tour'))}
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-2 text-[var(--text-muted)] hover:border-[var(--text-muted)]/40 hover:text-[var(--text)]"
+            aria-label="Take the quick site tour"
+            title="Take the quick site tour"
+          >
+            <Compass className="h-4 w-4" />
+          </button>
+
           {user ? (
             <div className="relative" ref={userMenuRef}>
               <button
                 type="button"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
+                data-tour="account"
                 className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-[var(--text)] hover:border-[var(--text-muted)]/40"
                 aria-expanded={userMenuOpen}
                 aria-haspopup="true"

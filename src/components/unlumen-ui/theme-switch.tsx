@@ -113,6 +113,7 @@ function ThemeSwitch({ iconSize = 16, className }: ThemeSwitchProps) {
   return (
     <motion.button
       onClick={toggle}
+      data-tour='theme'
       className={cn(
         'relative flex items-center justify-center size-9 rounded-full',
         'bg-[var(--bg-surface)] border border-[var(--border)] cursor-pointer',

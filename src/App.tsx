@@ -9,6 +9,7 @@ import { ProgressProvider, useProgress } from './context/ProgressContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Footer } from './components/Footer';
+import { OnboardingTour, START_TOUR_EVENT, isTourDone, markTourDone } from './components/OnboardingTour';
 import { ShortcutsDialog } from './components/ShortcutsDialog';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -63,11 +64,12 @@ function introSeen() {
 
 function AppShell() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { recordVisit } = useProgress();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
 
   /* daily streak: one record per app load, and once more when a session
      lands (boot refresh / sign-in) — the provider no-ops signed-out loads */
@@ -76,6 +78,10 @@ function AppShell() {
   }, [user?.id, recordVisit]);
 
   const closeShortcuts = useCallback(() => setShortcutsOpen(false), []);
+  const closeTour = useCallback(() => {
+    setTourOpen(false);
+    markTourDone(); // closing at any point = seen, never nag again automatically
+  }, []);
 
   // Part 1: the intro plays once per session but ONLY for a signed-in user.
   // A logged-out visitor on '/' is redirected to sign-in before anything
@@ -100,6 +106,24 @@ function AppShell() {
     window.addEventListener('keydown', handleShortcut);
     return () => window.removeEventListener('keydown', handleShortcut);
   }, [showIntro]);
+
+  // First-visit tour: starts once per browser ~1.5s after the (already
+  // seen) intro would have finished — never over the changing intro — and
+  // is always re-openable via the header compass (START_TOUR_EVENT).
+  useEffect(() => {
+    if (!user || loading || showIntro) return;
+    const timer = setTimeout(() => {
+      const authPage = location.pathname === '/sign-in' || location.pathname === '/sign-up';
+      if (!authPage && !isTourDone()) setTourOpen(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [user, loading, showIntro, location.pathname]);
+
+  useEffect(() => {
+    const openTour = () => setTourOpen(true);
+    window.addEventListener(START_TOUR_EVENT, openTour);
+    return () => window.removeEventListener(START_TOUR_EVENT, openTour);
+  }, []);
 
   if (showIntro) {
     return (
@@ -178,6 +202,7 @@ function AppShell() {
         </Suspense>
       )}
       <ShortcutsDialog open={shortcutsOpen} onClose={closeShortcuts} />
+      <OnboardingTour open={tourOpen} onClose={closeTour} />
     </div>
   );
 }
