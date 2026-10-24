@@ -2,6 +2,14 @@ from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import re
 
+def get_current_user_id() -> int:
+    """Return the authenticated JWT identity as an integer database ID."""
+    identity = get_jwt_identity()
+    try:
+        return int(identity)
+    except (TypeError, ValueError):
+        raise ValueError("Invalid user identity in access token")
+
 from . import db
 from .models import User, Bookmark, UserNote, RecentlyViewed, Session, UserProgress
 from .progress_merge import merge_progress_data
@@ -27,7 +35,7 @@ SLUG_PATTERN = re.compile(r'^[a-z0-9/-]+$')
 @user_bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_me():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -38,7 +46,7 @@ def get_me():
 @user_bp.route('/bookmarks', methods=['GET'])
 @jwt_required()
 def get_bookmarks():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     bookmarks = Bookmark.query.filter_by(user_id=user_id).order_by(Bookmark.created_at.desc()).all()
     return jsonify({'bookmarks': [b.to_dict() for b in bookmarks]}), 200
 
@@ -46,7 +54,7 @@ def get_bookmarks():
 @user_bp.route('/bookmarks/toggle', methods=['POST'])
 @jwt_required()
 def toggle_bookmark():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     data = request.get_json(silent=True) or {}
     slug = (data.get('command_slug') or '').strip()
 
@@ -73,7 +81,7 @@ def set_bookmark():
     """Idempotent desired-state set for sync replays: unlike /toggle, replaying
     ``wanted=true`` can never delete an existing bookmark (offline queue ops may
     arrive for records that already exist server-side)."""
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     data = request.get_json(silent=True) or {}
     slug = (data.get('command_slug') or '').strip()
     wanted = data.get('wanted')
@@ -103,7 +111,7 @@ def set_bookmark():
 @user_bp.route('/notes', methods=['GET'])
 @jwt_required()
 def get_notes():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     notes = UserNote.query.filter_by(user_id=user_id).order_by(UserNote.updated_at.desc()).all()
     return jsonify({'notes': [n.to_dict() for n in notes]}), 200
 
@@ -111,7 +119,7 @@ def get_notes():
 @user_bp.route('/notes', methods=['POST'])
 @jwt_required()
 def upsert_note():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     data = request.get_json(silent=True) or {}
     slug = (data.get('command_slug') or '').strip()
     text = data.get('text', '')
@@ -140,7 +148,7 @@ def upsert_note():
 @user_bp.route('/notes/<string:command_slug>', methods=['DELETE'])
 @jwt_required()
 def delete_note(command_slug):
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     note = UserNote.query.filter_by(user_id=user_id, command_slug=command_slug).first()
     if not note:
         return jsonify({'error': 'Note not found'}), 404
@@ -153,7 +161,7 @@ def delete_note(command_slug):
 @user_bp.route('/history', methods=['GET'])
 @jwt_required()
 def get_history():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     history = RecentlyViewed.query.filter_by(user_id=user_id).order_by(RecentlyViewed.viewed_at.desc()).limit(15).all()
     return jsonify({'history': [h.to_dict() for h in history]}), 200
 
@@ -161,7 +169,7 @@ def get_history():
 @user_bp.route('/history/add', methods=['POST'])
 @jwt_required()
 def add_history():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     data = request.get_json(silent=True) or {}
     slug = (data.get('command_slug') or '').strip()
 
@@ -178,7 +186,7 @@ def add_history():
 @user_bp.route('/data/import', methods=['POST'])
 @jwt_required()
 def import_data():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     data = request.get_json(silent=True) or {}
     version = data.get('version', 1)
     if not isinstance(version, int) or isinstance(version, bool) or version not in (1, 2):
@@ -248,7 +256,7 @@ def import_data():
 @user_bp.route('/progress', methods=['GET'])
 @jwt_required()
 def get_progress():
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     rows = UserProgress.query.filter_by(user_id=user_id).all()
     progress = {row.key: {'version': row.version, 'data': row.data} for row in rows}
     return jsonify({'progress': progress}), 200
@@ -257,7 +265,7 @@ def get_progress():
 @user_bp.route('/progress/<key>', methods=['PUT'])
 @jwt_required()
 def put_progress(key):
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     if key not in PROGRESS_KEYS:
         return jsonify({'error': f'unknown progress key {key!r} (valid: {", ".join(PROGRESS_KEYS)})'}), 400
 
@@ -312,7 +320,7 @@ def change_password():
     if rejection:
         return rejection
 
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -363,7 +371,7 @@ def delete_account():
     if rejection:
         return rejection
 
-    user_id = get_jwt_identity()
+    user_id = get_current_user_id()
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
