@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Terminal, Sun, Moon, Search, Menu, Shield, User, LogOut, Settings, Bookmark, ChevronDown } from 'lucide-react';
+import { Terminal, Search, Menu, Shield, User, LogOut, Settings, Bookmark, ChevronDown } from 'lucide-react';
 import { Link, useLocation, NavLink } from 'react-router-dom';
-import { useTheme } from './ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { ThemeSwitch } from './unlumen-ui/theme-switch';
 
 interface HeaderProps {
   onOpenSearch: () => void;
@@ -10,7 +10,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onToggleSidebar }) => {
-  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const { user, logout, loading } = useAuth();
   const isCTF = location.pathname.startsWith('/ctf');
@@ -124,14 +123,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onToggleSidebar })
             </kbd>
           </button>
 
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-2 text-[var(--text-muted)] hover:border-[var(--text-muted)]/40 hover:text-[var(--text)]"
-            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
-          >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
+          <ThemeSwitch />
 
           {user ? (
             <div className="relative" ref={userMenuRef}>
