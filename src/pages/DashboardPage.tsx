@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark, FileText, History, Clock, Trash2, ExternalLink, GraduationCap, Layers, Target, Flame, Trophy, ArrowRight, Star, Award, Shield, BookOpen, Zap } from 'lucide-react';
+import { Bookmark, FileText, History, Clock, Trash2, ExternalLink, GraduationCap, Layers, Target, Flame, Trophy, ArrowRight, Star, Award, Shield, BookOpen, Zap, Share2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getPathForLight, useCatalog } from '../context/CatalogContext';
@@ -96,6 +96,109 @@ const AchievementsPanel = () => {
 };
 
 /** Aggregate numbers from Learn, the practice terminal and the streak log. */
+type ProgressStats = {
+  pathsDone: number;
+  totalPaths: number;
+  lessonsRead: number;
+  totalLessons: number;
+  quizAvg: number | null;
+  quizTaken: number;
+  missionsSolved: number;
+  streak: { current?: number; best?: number };
+};
+
+/** Canvas render of the progress summary — downloads (or shares, when the
+    browser supports it) as a PNG card with no network round-trip. */
+async function shareCard(stats: ProgressStats) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1000;
+  canvas.height = 560;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  try {
+    await document.fonts.ready;
+  } catch {
+    /* non-loading fonts simply fall back in the canvas */
+  }
+
+  const INK = '#e9e3da';
+  const MUTED = '#a69d90';
+  const GREEN = '#52c79e';
+  const DARK = '#131110';
+
+  ctx.fillStyle = DARK;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = 'rgba(82, 199, 158, 0.35)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(24, 24, canvas.width - 48, canvas.height - 48);
+
+  /* header */
+  ctx.fillStyle = GREEN;
+  ctx.font = '600 26px "JetBrains Mono", ui-monospace, monospace';
+  ctx.fillText('linuxdocs', 64, 100);
+  ctx.fillStyle = MUTED;
+  ctx.font = '500 20px "JetBrains Mono", ui-monospace, monospace';
+  ctx.fillText('learning progress report', 270, 100);
+  ctx.fillStyle = MUTED;
+  ctx.font = '400 16px "JetBrains Mono", ui-monospace, monospace';
+  ctx.fillText(new Date().toISOString().slice(0, 10), canvas.width - 64 - ctx.measureText(new Date().toISOString().slice(0, 10)).width, 100);
+
+  /* rule */
+  ctx.strokeStyle = 'rgba(233, 227, 218, 0.15)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(64, 128);
+  ctx.lineTo(canvas.width - 64, 128);
+  ctx.stroke();
+
+  /* stat rows */
+  const rows: Array<[string, string]> = [
+    ['learning paths', `${stats.pathsDone}/${stats.totalPaths} complete`],
+    ['lessons read', `${stats.lessonsRead}/${stats.totalLessons}`],
+    ['quiz average', stats.quizAvg === null ? 'no quizzes yet' : `${stats.quizAvg}% across ${stats.quizTaken} paths`],
+    ['terminal missions', `${stats.missionsSolved}/13 solved`],
+    ['learning streak', `${stats.streak.current ?? 0}d current · ${stats.streak.best ?? 0}d best`],
+  ];
+  ctx.font = '500 24px "JetBrains Mono", ui-monospace, monospace';
+  let y = 178;
+  for (const [label, value] of rows) {
+    ctx.fillStyle = MUTED;
+    ctx.fillText(label, 64, y);
+    ctx.fillStyle = INK;
+    ctx.font = '700 24px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillText(value, 360, y);
+    ctx.font = '500 24px "JetBrains Mono", ui-monospace, monospace';
+    y += 52;
+  }
+
+  /* footer */
+  ctx.fillStyle = MUTED;
+  ctx.font = '400 16px "JetBrains Mono", ui-monospace, monospace';
+  const link = 'linuxdocs-frontend.vercel.app';
+  ctx.fillText(link, 64, canvas.height - 64);
+  ctx.fillStyle = GREEN;
+  ctx.fillText('>_ keep the streak alive', canvas.width - 64 - ctx.measureText('>_ keep the streak alive').width, canvas.height - 64);
+
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+  if (!blob) return;
+  const file = new File([blob], 'linuxdocs-progress.png', { type: 'image/png' });
+  const canShare = typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] });
+  if (canShare) {
+    try {
+      await navigator.share({ files: [file], title: 'My LinuxDocs progress' });
+      return;
+    } catch {
+      /* user cancelled or the sheet failed — fall through to download */
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = file.name;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 const LearningSummary = () => {
   const { progress: synced } = useProgress();
   const stats = useMemo(() => {
@@ -172,7 +275,17 @@ const LearningSummary = () => {
     <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-display text-lg font-semibold text-[var(--text-heading)]">Your learning progress</h2>
-        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">synced to your account</span>
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">synced to your account</span>
+          <button
+            type="button"
+            onClick={() => void shareCard(stats)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 font-mono text-xs text-[var(--text-muted)] transition-colors hover:border-[var(--terminal-green)]/60 hover:text-[var(--terminal-green)]"
+            title="Render your progress as a shareable image"
+          >
+            <Share2 className="h-3.5 w-3.5" /> Share card
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
