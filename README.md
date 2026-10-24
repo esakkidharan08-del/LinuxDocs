@@ -12,7 +12,7 @@ A hand-checked MDN-style reference for **95 Linux utilities + 37 CTF & security 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org)
 [![Flask](https://img.shields.io/badge/Flask-3-000?logo=flask)](https://flask.palletsprojects.com)
 [![PostgreSQL ready](https://img.shields.io/badge/SQLite%20%E2%86%92%20PostgreSQL-ready-4169E1?logo=postgresql)](#deploy-your-own)
-[![Tests](https://img.shields.io/badge/tests-217%20passing-2EA043)](#how-it-is-verified)
+[![Tests](https://img.shields.io/badge/tests-227%20passing-2EA043)](#how-it-is-verified)
 
 ▶ **Live app:** *[https://linuxdocs-frontend.vercel.app](https://linuxdocs-frontend.vercel.app)* — **Demo GIF below** 👇
 
@@ -41,11 +41,11 @@ So LinuxDocs is:
 | Area | Details |
 |---|---|
 | 📚 **Reference** | 95 Linux + 37 CTF tools — syntax, flag tables with per-flag examples, worked examples with sample output, related commands, tags; Ctrl+K command palette (keyboard-first, reachable from every page) |
-| 🎓 **Learn** | 8 paths × 24 lessons (Linux foundations → permissions → processes → systemd; CTF recon → web → crypto → forensics), quiz builder with difficulty + question-count controls |
-| 🖥️ **Practice terminal** | Simulated filesystem (`ls`, `cat`, `man`, `grep`, pipes…) + 13 missions over 3 ranks; helpers are retired as you rank up; ↑ history, Ctrl+L clear |
-| 🔁 **Flashcards** | Flip-style spaced repetition over every Linux utility with "Again / Got it" marking |
-| ⚡ **Speed drill** | Timed command-identification drill with per-session scoring |
-| 🏆 **Progress** | Achievements, streaks, per-path progress, all synced to your account when signed in |
+| 🎓 **Learn** | 8 paths × 24 lessons (Linux foundations → permissions → processes → systemd; CTF recon → web → crypto → forensics), quiz builder with difficulty + question-count controls — plus a 48-question conceptual bank and an auto-generated "fresh from the whole dataset" quiz source (practice runs never touch path bests) |
+| 🖥️ **Practice terminal** | Simulated filesystem (`ls`, `cat`, `man`, `grep`, pipes…) + 13 missions over 3 ranks; helpers are retired as you rank up; ↑ history, Ctrl+L clear; speedrun mode times an all-13 sweep and keeps your personal best |
+| 🔁 **Flashcards** | Flip-style spaced repetition with "Again / Got it" marking and a real SRS queue — Got it schedules the card (1→180-day Leitner buckets), Again resets it to tomorrow; a "N cards due" review banner sweeps due cards across every deck |
+| ⚡ **Speed drill** | Timed command-identification drill with per-session scoring and a bookmarks-only mode for drilling just your starred commands |
+| 🏆 **Progress** | Achievements, streaks (with self-restoring streak-freeze tokens for one missed day), per-path progress, a shareable progress card PNG, Markdown/JSON notes export, printable cheat sheets, 21 curated command-comparison match-ups — all synced to your account when signed in |
 | 🔐 **Accounts** | Register / sign in / silent refresh / sign out; bookmarks, per-command notes (Ctrl+S autosave), history — synced across devices. **Sign-in first:** every page except the auth pages, legal pages and 404 sits behind `ProtectedRoute`; a signed-out deep link bounces to `/sign-in?next=<where>` and login returns you exactly there |
 
 <div align="center">
@@ -85,8 +85,8 @@ npm run qa                                   # the one-shot full gate
 Individual suites:
 
 ```powershell
-# 217 pytest backend tests (catalog, auth, DB config, migrations/RLS, health, mailer, user-data, dataset suites)
-cd backend; .\venv\Scripts\pytest           # 217 passed
+# 227 pytest backend tests (catalog, auth, DB config, migrations/RLS, health, mailer, user-data, dataset suites)
+cd backend; .\venv\Scripts\pytest           # 227 passed
 
 # 19-step API smoke test (stdlib only): register → login → catalog under JWT →
 # refresh → logout → revoked-after-logout → unauth 401 gates on every
@@ -235,7 +235,7 @@ LinuxDocs/
 │   ├── data/                 #   132 per-slug docs + generated aggregate/index (source of truth)
 │   ├── scripts/              #   build_commands.mjs (regenerate aggregate/index; fails on violations)
 │   ├── migrations/           #   Alembic chain 001_initial → 002_user_progress → 003_rls_lockdown
-│   ├── tests/                #   217 pytest cases (catalog, auth, DB config, migrations/RLS, health, mailer…)
+│   ├── tests/                #   227 pytest cases (catalog, auth, DB config, migrations/RLS, health, mailer…)
 │   └── requirements.txt      #   pinned (gunicorn + psycopg 3 (binary) for Render)
 ├── docs/                     # README assets + deploy guides (DEPLOY_SUPABASE.md, BACKEND_GUIDE.md)
 ├── qa/                        # browser_check.py / smoke_api.py (gitignored)
