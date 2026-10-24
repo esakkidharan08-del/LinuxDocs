@@ -129,8 +129,9 @@ def _send_via_resend(msg: EmailMessage) -> tuple[str, str]:
         'https://api.resend.com/emails',
         data=json.dumps(payload).encode(),
         headers={
-            'Authorization': f"Bearer {os.getenv('RESEND_API_KEY') or ''}",
-            'Content-Type': 'application/json',
+           'Authorization': f"Bearer {os.getenv('RESEND_API_KEY') or ''}",
+           'Content-Type': 'application/json',
+           'User-Agent': 'LinuxDocs/1.0',
         }, method='POST')
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
