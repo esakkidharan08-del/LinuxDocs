@@ -17,6 +17,7 @@ import pytest
 from app import create_app, db
 
 FIRST = '001_initial'
+HEAD = '004_recovery_challenges'
 
 
 @pytest.fixture
@@ -59,9 +60,9 @@ def test_existing_database_upgrade_and_downgrade(app):
     db.session.commit()
     user_id = user.id
 
-    # --- upgrade: adds user_progress, existing rows untouched ------------------
-    upgrade()  # head = 003_rls_lockdown (002_user_progress + RLS lockdown)
-    assert _version_num() == '003_rls_lockdown'
+    # --- upgrade: adds user_progress + recovery challenges, rows untouched ----
+    upgrade()  # head = 004_recovery_challenges (002 → 003 RLS → 004 recovery)
+    assert _version_num() == HEAD
     assert 'user_progress' in _table_names()
     assert db.session.get(User, user_id) is not None
 
@@ -87,17 +88,18 @@ def test_existing_database_upgrade_and_downgrade(app):
 
     # and the chain can be replayed forward again
     upgrade()
-    assert 'user_progress' in _table_names() and _version_num() == '003_rls_lockdown'
+    assert 'user_progress' in _table_names() and _version_num() == HEAD
 
 
 def test_fresh_database_full_chain(app):
     from flask_migrate import upgrade
 
     upgrade()  # empty file → all revisions in one go
-    assert _version_num() == '003_rls_lockdown'
+    assert _version_num() == HEAD
     tables = _table_names()
     assert {'users', 'sessions', 'password_reset_tokens', 'bookmarks',
-            'user_notes', 'recently_viewed', 'user_progress'} <= tables
+            'user_notes', 'recently_viewed', 'user_progress',
+            'password_recovery_challenges'} <= tables
 
 
 def test_orm_map_matches_migrated_table(app):
@@ -122,7 +124,7 @@ def test_upgrade_is_idempotent(app):
 
     upgrade()
     upgrade()  # second run: already at head, must be a no-op
-    assert _version_num() == '003_rls_lockdown'
+    assert _version_num() == HEAD
 
 
 def test_downgrade_chain_to_base_and_replay(app):
@@ -135,12 +137,12 @@ def test_downgrade_chain_to_base_and_replay(app):
     # only alembic's own version table survives; app tables are all dropped
     assert _table_names() == {'alembic_version'}
     upgrade()
-    assert _version_num() == '003_rls_lockdown'
+    assert _version_num() == HEAD
     assert {'users', 'user_progress'} <= _table_names()
 
 
 class TestRlsLockdown:
-    """The 003 migration guards the Supabase Data API surface."""
+    """The 003+004 migrations guard the Supabase Data API surface."""
 
     def test_app_table_list_matches_models(self):
         """APP_TABLES must stay in lockstep with the ORM's tables."""
@@ -148,20 +150,24 @@ class TestRlsLockdown:
         from pathlib import Path
         from app.models import db
 
-        path = Path(__file__).resolve().parents[1] / 'migrations' / 'versions' \
-            / '003_rls_lockdown.py'
-        spec = importlib.util.spec_from_file_location('rls_migration_003', path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        assert set(module.APP_TABLES) == set(db.metadata.tables.keys())
+        versions = Path(__file__).resolve().parents[1] / 'migrations' / 'versions'
+        app_tables = set()
+        for name, ident in (('003_rls_lockdown.py', 'rls_migration_003'),
+                            ('004_recovery_challenges.py', 'recovery_migration_004')):
+            path = versions / name
+            spec = importlib.util.spec_from_file_location(ident, path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            app_tables |= set(module.APP_TABLES)
+        assert app_tables == set(db.metadata.tables.keys())
 
     def test_rls_migration_is_a_noop_on_sqlite(self, app):
         """SQLite has no RLS: the chain must complete and tables stay usable."""
         from flask_migrate import upgrade
         from app.models import User
 
-        upgrade()  # → 003_rls_lockdown on sqlite = metadata-only pass
-        assert _version_num() == '003_rls_lockdown'
+        upgrade()  # → 004 on sqlite = create tables, RLS parts skipped
+        assert _version_num() == HEAD
 
         user = User(username='rlsnoop', email='rlsnoop@example.com')
         user.set_password('Password-rlsnoop9!')

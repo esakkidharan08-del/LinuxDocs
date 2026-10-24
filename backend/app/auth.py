@@ -19,9 +19,8 @@ from .security import (
 from .sessions import (
     create_session, verify_session_token, rotate_session, revoke_session,
     set_refresh_cookie, clear_refresh_cookie, get_refresh_token_from_request,
-    create_reset_token, consume_reset_token, prune_expired_sessions,
+    prune_expired_sessions,
 )
-from . import mailer as mail_delivery
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -154,93 +153,6 @@ def register():
     resp.status_code = 201
     _warn_security('user_registered', user_id=user.id, ip=client_ip())
     return resp
-
-
-@auth_bp.route('/request-password-reset', methods=['POST'])
-@rate_limit('reset-request:ip:{ip}', lambda: env_int('RESET_REQUEST_RATE_LIMIT', 5), 3600)
-def request_password_reset():
-    """Email a single-use reset link to the account holder.
-
-    The public response is GENERIC and identical for registered and unknown
-    addresses — no reset material ever reaches the API response, the UI, or
-    the logs. Timing is equalized for unknown addresses with a dummy bcrypt
-    verify so the two paths cost comparable work. Delivery failures are
-    soft-failed by the mailer and never change the response.
-    """
-    rejection = require_trusted_origin()
-    if rejection:
-        return rejection
-
-    generic = {
-        'message': 'If an account exists for that email, a reset link will be '
-                   'sent. It expires in 30 minutes and works exactly once.',
-        'email_configured': mail_delivery.is_email_configured(),
-    }
-    data = request.get_json(silent=True) or {}
-    email = data.get('email', '').strip().lower()
-
-    # Only well-formed, plausibly real addresses are even looked up. Every
-    # other input takes the same generic path below.
-    if email and EMAIL_REGEX.match(email):
-        user = User.query.filter_by(email=email).first()
-        if user is not None:
-            token = create_reset_token(user.id)       # also invalidates old tokens
-            db.session.commit()
-            outcome, detail = mail_delivery.send_reset_email(email, user.username, token)
-            # Sanitized event only: outcome category — never the token or address.
-            _warn_security('reset_email', user_id=user.id, ip=client_ip(),
-                           outcome=outcome, detail=detail)
-        else:
-            # Equalize the work between the two paths (a real request hashes a
-            # token + sends; an unknown address burns one bcrypt round).
-            verify_against_dummy('linuxdocs-timing-equalization-dummy-password')
-
-    return jsonify(generic), 202
-
-
-@auth_bp.route('/reset-password', methods=['POST'])
-@rate_limit('reset:ip:{ip}', lambda: env_int('RESET_RATE_LIMIT', 10), 3600)
-def reset_password():
-    rejection = require_trusted_origin()
-    if rejection:
-        return rejection
-    data = request.get_json(silent=True) or {}
-    password = data.get('password', '')
-    confirm = data.get('confirm_password', '')
-
-    # Claiming the token is single-use — validate everything that doesn't
-    # depend on the account BEFORE spending it, so a mistyped password or a
-    # mismatched confirmation never burns a perfectly good link.
-    errors = {}
-    content = password_content_errors(password)
-    if content:
-        errors['password'] = content[0]
-    if password != confirm:
-        errors['confirm_password'] = 'Passwords do not match'
-    if errors:
-        return jsonify({'errors': errors}), 400
-
-    user = consume_reset_token(data.get('token', ''))
-    if user is None:
-        # One neutral message for invalid, expired AND already-used tokens —
-        # no distinction that could reveal anything about accounts.
-        return jsonify({'errors': {'token': 'Reset link is invalid or expired'}}), 400
-
-    # Identity-bound policy (new password contains own username/email) can
-    # only fail after the claim; in that rare case the token is spent and a
-    # fresh request must be made.
-    content_errors = set(password_content_errors(password))
-    identity_errors = [e for e in
-                       password_policy_errors(password, user.username, user.email)
-                       if e not in content_errors]
-    if identity_errors:
-        return jsonify({'errors': {'password': identity_errors[0]}}), 400
-
-    user.set_password(password)
-    _revoke_all_auth(user.id, keep_current=False)   # reset = kill every session
-    db.session.commit()
-    _warn_security('password_reset', user_id=user.id, ip=client_ip())
-    return jsonify({'message': 'Password reset successfully'}), 200
 
 
 @auth_bp.route('/login', methods=['POST'])

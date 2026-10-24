@@ -207,6 +207,7 @@ def create_app():
     from .auth import auth_bp
     from .user import user_bp
     from .commands import commands_bp
+    from .recovery import recovery_bp
     from .persistence import (
         configure_persistence, prime_backup, start_maintenance, register_cli,
     )
@@ -214,6 +215,7 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(user_bp, url_prefix='/api/user')
     app.register_blueprint(commands_bp, url_prefix='/api')
+    app.register_blueprint(recovery_bp, url_prefix='/api/auth')
     register_cli(app)
 
     @app.route('/api/health')

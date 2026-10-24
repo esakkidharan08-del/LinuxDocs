@@ -12,7 +12,7 @@ A hand-checked MDN-style reference for **95 Linux utilities + 37 CTF & security 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org)
 [![Flask](https://img.shields.io/badge/Flask-3-000?logo=flask)](https://flask.palletsprojects.com)
 [![PostgreSQL ready](https://img.shields.io/badge/SQLite%20%E2%86%92%20PostgreSQL-ready-4169E1?logo=postgresql)](#deploy-your-own)
-[![Tests](https://img.shields.io/badge/tests-227%20passing-2EA043)](#how-it-is-verified)
+[![Tests](https://img.shields.io/badge/tests-222%20passing-2EA043)](#how-it-is-verified)
 
 ▶ **Live app:** *[https://linuxdocs-frontend.vercel.app](https://linuxdocs-frontend.vercel.app)* — **Demo GIF below** 👇
 
@@ -85,8 +85,8 @@ npm run qa                                   # the one-shot full gate
 Individual suites:
 
 ```powershell
-# 227 pytest backend tests (catalog, auth, DB config, migrations/RLS, health, mailer, user-data, dataset suites)
-cd backend; .\venv\Scripts\pytest           # 227 passed
+# 222 pytest backend tests (catalog, auth, DB config, migrations/RLS, health, recovery, user-data, dataset suites)
+cd backend; .\venv\Scripts\pytest           # 222 passed
 
 # 19-step API smoke test (stdlib only): register → login → catalog under JWT →
 # refresh → logout → revoked-after-logout → unauth 401 gates on every
@@ -185,14 +185,7 @@ Required `.env` variables (in `backend/.env` — never commit it):
 
 Then update `FRONTEND_ORIGIN`/`ALLOWED_HOSTS` on Render with the final Vercel URL and redeploy once — accounts, refresh cookies, and rate limiting all work across the proxy exactly like they do locally.
 
-**5. Password-reset email delivery** — Set the mail provider on the `linuxdocs-api` service (Resend is simplest, no SMTP ports involved):
-
-| Variable | Set to |
-|---|---|
-| `RESEND_API_KEY` | `re_…` from the Resend dashboard (or use `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASSWORD` for any SMTP server) |
-| `MAIL_FROM` | `LinuxDocs <no-reply@yourdomain.com>` (or `onboarding@resend.dev` for testing) |
-
-From then on, `/password-reset` emails the registered address a branded message with a **single-use, 30-minute link** — tokens are never returned by the API, never logged, and stored only as SHA-256 hashes. The request response is **byte-identical whether or not the address is registered** (no user enumeration), delivery failures answer the same generic response, a successful reset signs the user out of every session, and both reset endpoints are rate-limited (5 requests/hour/IP + 10 token attempts/hour/IP). Local development needs no provider at all: with nothing configured the mailer writes the message into a dev mailbox at `backend/instance/dev_outbox/*.eml` that you open like a real inbox.
+**5. Password recovery — knowledge quiz (no email)** — Recovering a forgotten password no longer sends any email. The user answers **10 questions about their own learning activity** (paths read, lessons, quiz bests, streaks, drill records, bookmarks); **8 or more correct** continues the flow, wrong rounds are limited to **3 attempts** before a fresh question set is required. Grants are opaque, hashed at rest, single-use, and expire in 15 minutes. **Accounts with learning activity get the quiz; brand-new accounts (nothing to lose) skip straight to the new-password form.** Every endpoint is rate-limited (5 starts/hour/IP + 10 verifications & completions/hour/IP) and a successful reset signs the user out of every session. Quiz answers are generated server-side from live progress data — the correct choice never reaches the browser, and the whole flow needs **zero external services**.
 
 *Why the rewrite matters:* with `/api` on the site's own origin, the HttpOnly refresh cookie is first-party `SameSite=Strict`. The whole scary class of cross-site auth issues (third-party cookie deprecation, `SameSite=None` + cross-domain CSRF) simply does not apply.
 
@@ -211,8 +204,9 @@ All under `/api` (CORS restricted to `FRONTEND_ORIGIN`):
 | GET | `/auth/me` | Access token | Current user |
 | GET | `/catalog/index` | Access token | Light catalog: categories, domains, counts + a name/summary/tags index (ETag/304, private cache) |
 | GET | `/commands/:slug` | Access token | Full doc for one command (ETag); the legacy full-doc list route was removed |
-| POST | `/auth/request-password-reset` | - | Email-token reset (generic response) |
-| POST | `/auth/reset-password` | — | Complete reset with token |
+| POST | `/auth/recovery/start` | `{email}` | Begin recovery: quiz (or direct mode for empty accounts) |
+| POST | `/auth/recovery/verify` | `{grant, answers}` | Grade a 10-answer bundle (8+ passes) |
+| POST | `/auth/recovery/complete` | `{grant, password, ...}` | Redeem a verified/valid grant to set a new password |
 | GET/POST | `/user/bookmarks` (+`/toggle`) | Access token | Bookmark sync |
 | GET/POST/DELETE | `/user/notes[/:slug]` | Access token | Per-command notes |
 | GET/POST | `/user/history` (+`/add`) | Access token | Recently viewed |
@@ -235,9 +229,9 @@ LinuxDocs/
 │   ├── data/                 #   132 per-slug docs + generated aggregate/index (source of truth)
 │   ├── scripts/              #   build_commands.mjs (regenerate aggregate/index; fails on violations)
 │   ├── migrations/           #   Alembic chain 001_initial → 002_user_progress → 003_rls_lockdown
-│   ├── tests/                #   227 pytest cases (catalog, auth, DB config, migrations/RLS, health, mailer…)
+│   ├── tests/                #   222 pytest cases (catalog, auth, DB config, migrations/RLS, health, mailer…)
 │   └── requirements.txt      #   pinned (gunicorn + psycopg 3 (binary) for Render)
-├── docs/                     # README assets + deploy guides (DEPLOY_SUPABASE.md, BACKEND_GUIDE.md)
+├── docs/                     # README assets + deploy guides (DEPLOY_SUPABASE.md, BACKEND_GUIDE.md, PASSWORD_RECOVERY.md)
 ├── qa/                        # browser_check.py / smoke_api.py (gitignored)
 ├── render.yaml                # Render blueprint: linuxdocs-api service (DATABASE_URL stays dashboard-only)
 └── vercel.json                # /api/* proxy + SPA fallback

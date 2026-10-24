@@ -19,7 +19,6 @@ import os
 from datetime import timedelta
 
 from flask import current_app, make_response, jsonify, request
-from sqlalchemy import update as sa_update
 
 from . import db
 from .models import Session, utcnow, ensure_tz
@@ -212,65 +211,9 @@ def get_refresh_token_from_request() -> str:
 
 
 # ---------------------------------------------------------------------------
-# Password reset tokens (opaque + hashed)
+# (Legacy) reset tokens live only in the model + migration history — email
+# password reset was replaced by the knowledge-quiz recovery (recovery.py).
 # ---------------------------------------------------------------------------
-
-def invalidate_outstanding_reset_tokens(user_id: int) -> int:
-    """Delete unused reset tokens for a user — only the newest email counts.
-
-    Used (already-clicked) rows stay for audit. Returns the number removed.
-    """
-    from .models import PasswordResetToken
-    deleted = (db.session.query(PasswordResetToken)
-               .filter(PasswordResetToken.user_id == user_id,
-                       PasswordResetToken.used_at.is_(None))
-               .delete(synchronize_session=False))
-    return deleted
-
-
-def create_reset_token(user_id: int) -> str:
-    """Create a single-use hashed reset token; caller must commit."""
-    from .models import PasswordResetToken
-    invalidate_outstanding_reset_tokens(user_id)
-    token = generate_opaque_token(40)
-    ttl = timedelta(minutes=max(1, env_int('RESET_TOKEN_TTL_MINUTES', 30)))
-    db.session.add(PasswordResetToken(
-        user_id=user_id,
-        token_hash=sha256_hex(token),
-        expires_at=utcnow() + ttl,
-    ))
-    return token
-
-
-def consume_reset_token(raw_token: str):
-    """Atomically validate + claim a reset token; return the owning user or None.
-
-    The claim is a single conditional UPDATE: ``used_at`` is only ever set when
-    it is still NULL, so two concurrent callers can never both succeed — one
-    UPDATE matches (rowcount 1), the other misses (rowcount 0) regardless of
-    interleaving. Expiry is checked in Python with timezone-safe helpers to
-    stay identical across SQLite and Postgres.
-    """
-    from .models import PasswordResetToken
-    if not raw_token:
-        return None
-    token_hash = sha256_hex(raw_token)
-    record = PasswordResetToken.query.filter_by(token_hash=token_hash).first()
-    if record is None or record.used_at is not None or record.is_expired():
-        db.session.commit()          # release the read transaction cleanly
-        return None
-    result = db.session.execute(
-        sa_update(PasswordResetToken)
-        .where(PasswordResetToken.id == record.id,
-               PasswordResetToken.used_at.is_(None))
-        .values(used_at=utcnow())
-        .execution_options(synchronize_session=False))
-    claimed = result.rowcount == 1
-    db.session.commit()
-    if not claimed:
-        return None
-    db.session.refresh(record)
-    return record.user
 
 
 def make_api_response(payload, status: int):

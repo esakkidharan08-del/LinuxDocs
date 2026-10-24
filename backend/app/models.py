@@ -67,6 +67,8 @@ class User(db.Model):
                                cascade='all, delete-orphan', passive_deletes=True)
     reset_tokens = db.relationship('PasswordResetToken', backref='user', lazy='dynamic',
                                    cascade='all, delete-orphan', passive_deletes=True)
+    recovery_challenges = db.relationship('PasswordRecoveryChallenge', backref='user', lazy='dynamic',
+                                          cascade='all, delete-orphan', passive_deletes=True)
     progress = db.relationship('UserProgress', backref='user', lazy='dynamic',
                                cascade='all, delete-orphan')
 
@@ -137,7 +139,13 @@ class Session(db.Model):
 
 
 class PasswordResetToken(db.Model):
-    """Opaque, single-use, hashed password-reset tokens (30 minute TTL)."""
+    """Legacy single-use, hashed email-reset tokens (30 minute TTL).
+
+    Email-based reset was replaced by the knowledge-quiz recovery
+    (``recovery.py`` / ``password_recovery_challenges``). The table is kept
+    so old rows can still be audited and ``_revoke_all_auth`` can retire any
+    outstanding tokens; no new rows are written.
+    """
 
     __tablename__ = 'password_reset_tokens'
 
@@ -153,6 +161,35 @@ class PasswordResetToken(db.Model):
 
     def is_used(self) -> bool:
         return self.used_at is not None
+
+
+class PasswordRecoveryChallenge(db.Model):
+    """One knowledge-quiz recovery attempt (no email involved).
+
+    ``grant`` is an opaque random string that only ever lives in the
+    HTTP response to /recovery/start; only its SHA-256 hash is stored
+    (``challenge_hash``). ``questions`` holds the generated question set
+    INCLUDING the correct option indexes — the server never sends them.
+    ``verified_at`` (8+/10 correct) must be set before /recovery/complete
+    will spend the grant; ``attempts`` counts wrong answer bundles (3 burns
+    the grant); ``used_at`` makes it strictly single-use.
+    """
+
+    __tablename__ = 'password_recovery_challenges'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    mode = db.Column(db.String(16), nullable=False, default='challenge')  # 'challenge' | 'direct'
+    challenge_hash = db.Column(db.String(64), unique=True, nullable=False, index=True)
+    questions = db.Column(db.JSON, nullable=False, default=list)
+    attempts = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
+    expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    verified_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    used_at = db.Column(db.DateTime(timezone=True), nullable=True)
+
+    def is_expired(self) -> bool:
+        return ensure_tz(self.expires_at) <= utcnow()
 
 
 class Bookmark(db.Model):

@@ -100,11 +100,19 @@ export const authApi = {
   me: () =>
     request<{ user: User }>('/auth/me'),
 
-  requestPasswordReset: (email: string) =>
-    request<{ message: string; email_configured: boolean }>('/auth/request-password-reset', { method: 'POST', body: JSON.stringify({ email }) }),
+  /* Knowledge-based recovery (no email): the quiz is about the user's own
+     learning activity, generated server-side; answers are graded there. */
+  recoveryStart: (email: string) =>
+    request<{ mode: 'challenge' | 'direct' | 'unavailable'; grant: string; questions: Array<{ prompt: string; options: string[]; tag?: string }> | null; message: string }>(
+      '/auth/recovery/start', { method: 'POST', body: JSON.stringify({ email }) }),
 
-  resetPassword: (data: { token: string; password: string; confirm_password: string }) =>
-    request<{ message: string }>('/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
+  recoveryVerify: (grant: string, answers: number[]) =>
+    request<{ passed: boolean; correct?: number; attemptsLeft?: number; burned?: boolean }>(
+      '/auth/recovery/verify', { method: 'POST', body: JSON.stringify({ grant, answers }) }),
+
+  recoveryComplete: (grant: string, password: string, confirm_password: string) =>
+    request<{ message: string }>(
+      '/auth/recovery/complete', { method: 'POST', body: JSON.stringify({ grant, password, confirm_password }) }),
 };
 
 export const userApi = {

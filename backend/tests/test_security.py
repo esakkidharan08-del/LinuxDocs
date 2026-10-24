@@ -178,34 +178,9 @@ def test_samesite_is_configurable(client, app, user, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Password reset tokens (opaque, single-use)
+# (Email password reset was removed — replaced by the knowledge-quiz
+# recovery covered in tests/test_recovery.py)
 # ---------------------------------------------------------------------------
-
-def test_reset_token_single_use(client, app, user):
-    with app.app_context():
-        token = session_svc.create_reset_token(user)
-        db.session.commit()
-
-    resp = client.post('/api/auth/reset-password', json={
-        'token': token, 'password': 'FreshPass456!', 'confirm_password': 'FreshPass456!'})
-    assert resp.status_code == 200
-
-    # Token is now single-use.
-    resp = client.post('/api/auth/reset-password', json={
-        'token': token, 'password': 'FreshPass789!', 'confirm_password': 'FreshPass789!'})
-    assert resp.status_code == 400
-
-    # New password actually works.
-    resp = client.post('/api/auth/login', json={
-        'email': 'test@example.com', 'password': 'FreshPass456!'})
-    assert resp.status_code == 200
-
-
-def test_reset_request_uniform_response(client, app, user):
-    r1 = client.post('/api/auth/request-password-reset', json={'email': 'test@example.com'})
-    r2 = client.post('/api/auth/request-password-reset', json={'email': 'nobody@example.com'})
-    assert r1.status_code == r2.status_code == 202
-    assert r1.get_json()['message'] == r2.get_json()['message']
 
 
 # ---------------------------------------------------------------------------
