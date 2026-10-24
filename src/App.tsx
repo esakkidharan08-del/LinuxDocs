@@ -9,7 +9,7 @@ import { ProgressProvider, useProgress } from './context/ProgressContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Footer } from './components/Footer';
-import { OnboardingTour, START_TOUR_EVENT, isTourDone, markTourDone } from './components/OnboardingTour';
+import { OnboardingTour, isTourDone, markTourDone } from './components/OnboardingTour';
 import { ShortcutsDialog } from './components/ShortcutsDialog';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -118,12 +118,6 @@ function AppShell() {
     }, 1500);
     return () => clearTimeout(timer);
   }, [user, loading, showIntro, location.pathname]);
-
-  useEffect(() => {
-    const openTour = () => setTourOpen(true);
-    window.addEventListener(START_TOUR_EVENT, openTour);
-    return () => window.removeEventListener(START_TOUR_EVENT, openTour);
-  }, []);
 
   if (showIntro) {
     return (

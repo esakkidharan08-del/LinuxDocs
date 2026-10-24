@@ -1,11 +1,12 @@
 /* OnboardingTour — first-visit guided tour of the site.
  *
  * Spotlight walkthrough: dims the page, highlights one UI spot per step and
- * animates a tooltip next to it. Plays once automatically for signed-in
- * users (AppShell) and can be re-run anytime from the compass button in the
- * Header (START_TOUR_EVENT). Steps whose target is missing (e.g. the
- * sidebar on small screens) are dropped when the tour opens, so it degrades
- * gracefully on any viewport.
+ * animates a tooltip next to it. Plays ONE time automatically for first-time
+ * users (AppShell, gated by the `linuxdocs_tour_done` localStorage marker);
+ * it never re-opens on its own and there is no replay control — clearing the
+ * marker is the only way to see it again. Steps whose target is missing
+ * (e.g. the account button when signed out) are dropped when the tour opens,
+ * so it degrades gracefully on any viewport.
  *
  * Targets are stable `data-tour="…"` attributes / aria-labels in the shell,
  * not text — nav link labels change, IDs don't.
@@ -17,7 +18,6 @@ import { ChevronLeft, ChevronRight, Compass, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const DONE_KEY = 'linuxdocs_tour_done';
-export const START_TOUR_EVENT = 'linuxdocs:start-tour';
 
 export const isTourDone = (): boolean => {
   try {
@@ -89,7 +89,7 @@ const STEPS: TourStep[] = [
   },
   {
     title: 'You are set — power tips',
-    body: 'Ctrl+K opens search from anywhere · the "?" key lists every keyboard shortcut · the compass button in the header replays this tour.',
+    body: 'Ctrl+K opens search from anywhere · the "?" key lists every keyboard shortcut. That was the one-time tour — reload this page and it stays put.',
   },
 ];
 

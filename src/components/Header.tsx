@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Terminal, Search, Menu, Shield, User, LogOut, Settings, Bookmark, ChevronDown, Compass } from 'lucide-react';
+import { Terminal, Search, Menu, Shield, User, LogOut, Settings, Bookmark, ChevronDown } from 'lucide-react';
 import { Link, useLocation, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ThemeSwitch } from './unlumen-ui/theme-switch';
@@ -130,16 +130,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onToggleSidebar })
           </button>
 
           <ThemeSwitch />
-
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event('linuxdocs:start-tour'))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-2 text-[var(--text-muted)] hover:border-[var(--text-muted)]/40 hover:text-[var(--text)]"
-            aria-label="Take the quick site tour"
-            title="Take the quick site tour"
-          >
-            <Compass className="h-4 w-4" />
-          </button>
 
           {user ? (
             <div className="relative" ref={userMenuRef}>
