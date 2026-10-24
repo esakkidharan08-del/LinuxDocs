@@ -309,7 +309,10 @@ export const CommandDetailPage = () => {
                   <tbody className="divide-y divide-[var(--border-subtle)]">
                     {command.options.map((opt, i) => (
                       <tr key={i} className="hover:bg-[var(--bg-surface-hover)]">
-                        <td className="whitespace-nowrap p-3 font-mono font-semibold text-[var(--terminal-green)]">
+                        <td
+                          className="whitespace-nowrap p-3 font-mono font-semibold text-[var(--terminal-green)]"
+                          title={`${command.name} ${opt.flag} — ${opt.description}`}
+                        >
                           {opt.flag}
                         </td>
                         <td className="p-3 leading-relaxed text-[var(--text)]">{opt.description}</td>

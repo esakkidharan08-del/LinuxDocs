@@ -13,6 +13,7 @@ interface CommandPaletteProps {
 export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -20,17 +21,55 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
   // from the catalog, never from a bundled dataset.
   const { lights, loading: catalogLoading, error: catalogError } = useCatalog();
 
+  /* #tag chips: leading "#word" tokens in the query filter by tag without
+     polluting the fuzzy text match. "#", alone or at the word start. */
+  const tagToken = useMemo(() => {
+    const match = /(?:^|\s)#([a-z0-9-]+)/i.exec(query.trim());
+    return match ? match[1].toLowerCase() : null;
+  }, [query]);
+  const textQuery = useMemo(
+    () => (tagToken ? query.replace(/#\S+/, '').replace(/\s+/g, ' ').trim() : query.trim()),
+    [query, tagToken],
+  );
+
+  useEffect(() => {
+    setActiveTag(tagToken);
+  }, [tagToken]);
+
+  /* top tag chips typed by any light, sorted by usage depth (max 10) */
+  const tagChips = useMemo(() => {
+    const freq = new Map<string, number>();
+    for (const light of lights) for (const tag of light.tags) freq.set(tag, (freq.get(tag) ?? 0) + 1);
+    return Array.from(freq.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 10)
+      .map(([tag]) => tag);
+  }, [lights]);
+
+  /* searching only the tag-matched subset keeps results consistent */
+  const searchScope = useMemo(
+    () => (activeTag ? lights.filter((light) => light.tags.includes(activeTag)) : lights),
+    [lights, activeTag],
+  );
+
   const fuse = useMemo(
     () =>
-      new Fuse(lights, {
+      new Fuse(searchScope, {
         keys: ['name', 'summary', 'tags', 'slug'],
         threshold: 0.35,
         distance: 100,
       }),
-    [lights],
+    [searchScope],
   );
 
-  const results: CommandLight[] = query.trim() ? fuse.search(query).map((res) => res.item) : lights.slice(0, 10);
+  const results: CommandLight[] = useMemo(() => {
+    if (activeTag && !textQuery) {
+      /* tag-only mode: list that tag's commands, freshest names first */
+      return lights.filter((light) => light.tags.includes(activeTag)).slice(0, 50);
+    }
+    if (searchScope.length === 0) return [];
+    return textQuery ? fuse.search(textQuery).map((res) => res.item) : searchScope.slice(0, 10);
+  }, [activeTag, textQuery, searchScope, lights, fuse]);
 
   useEffect(() => {
     if (isOpen) {
@@ -38,8 +77,13 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
       setSelectedIndex(0);
     } else {
       setQuery('');
+      setActiveTag(null);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [results.length, activeTag]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -105,6 +149,30 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        {tagChips.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-[var(--border-subtle)] px-4 py-2">
+            <span className="py-1 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">#tags</span>
+            {tagChips.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => {
+                  const turningOn = activeTag !== tag;
+                  setActiveTag(turningOn ? tag : null);
+                  setQuery(turningOn ? `#${tag} ` : '');
+                  setSelectedIndex(0);
+                }}
+                className={`rounded-full border px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                  activeTag === tag
+                    ? 'border-[var(--terminal-green)] bg-[var(--terminal-green)]/10 text-[var(--terminal-green)]'
+                    : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--terminal-green)]'
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div
           id="command-search-results"
@@ -177,10 +245,11 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
         </div>
 
         <div className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--bg-surface-elevated)] px-4 py-2 font-mono text-[11px] text-[var(--text-muted)]">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span>↑↓ navigate</span>
             <span>↵ open</span>
             <span>esc close</span>
+            <span>#tag restricts</span>
           </div>
           <span>
             {results.length} {results.length === 1 ? 'result' : 'results'}
