@@ -21,6 +21,9 @@ import { buildPools, buildQuestion, type Drill, type DrillPools } from '../lib/d
 
 type DrillStore = { best: number; plays: number };
 const ROUND_SECONDS = 60;
+/* bookmark-only rounds need a real pool: fewer than this and the
+   generator cannot build believable distractors for 60 seconds */
+const BOOKMARK_MIN = 5;
 
 export function SpeedDrillPage() {
   /* Personal best + rounds live in the synced account store (Part 2);
@@ -61,7 +64,17 @@ export function SpeedDrillPage() {
       return false;
     }
   });
+  const [lockNote, setLockNote] = useState(false);
+  /* the preference is only ACTIVE with enough bookmarks: un-starring back
+     under the minimum quietly falls back to the full-catalog drill */
+  const bookmarkOnlyActive = bookmarkOnly && bookmarks.size >= BOOKMARK_MIN;
   const toggleBookmarkOnly = useCallback(() => {
+    if (bookmarks.size < BOOKMARK_MIN) {
+      /* locked — tell the user exactly what unlocks it */
+      setLockNote(true);
+      return;
+    }
+    setLockNote(false);
     setBookmarkOnly((prev) => {
       const next = !prev;
       try {
@@ -71,16 +84,16 @@ export function SpeedDrillPage() {
       }
       return next;
     });
-  }, []);
+  }, [bookmarks.size]);
 
   // The question generator draws from the full docs, loaded on demand
   // (first visit pays one fetch wave; after that it is all in memory).
   const { commands, loading: docsLoading, error: docsError } = useAllCommands();
   const poolCommands = useMemo(() => {
     /* bookmarks-only mode: drill just the commands the user starred */
-    if (bookmarkOnly && bookmarks.size) return commands.filter((c) => bookmarks.has(c.slug));
+    if (bookmarkOnlyActive) return commands.filter((c) => bookmarks.has(c.slug));
     return commands;
-  }, [commands, bookmarkOnly, bookmarks]);
+  }, [commands, bookmarkOnlyActive, bookmarks]);
   const ready = poolCommands.length > 0;
   const poolsRef = useRef<DrillPools | null>(null);
   if (poolCommands.length) {
@@ -226,24 +239,33 @@ export function SpeedDrillPage() {
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <button
                 onClick={toggleBookmarkOnly}
-                aria-pressed={bookmarkOnly}
+                aria-pressed={bookmarkOnly && bookmarks.size >= BOOKMARK_MIN}
                 className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-xs transition-colors ${
-                  bookmarkOnly
+                  bookmarkOnly && bookmarks.size >= BOOKMARK_MIN
                     ? 'border-[var(--terminal-green)] bg-[var(--terminal-green)]/10 text-[var(--terminal-green)]'
-                    : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--terminal-green)]'
+                    : bookmarks.size < BOOKMARK_MIN
+                      ? 'cursor-not-allowed border-[var(--border)] text-[var(--text-muted)] opacity-70'
+                      : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--terminal-green)]'
                 }`}
               >
-                <Bookmark className={`h-3.5 w-3.5 ${bookmarkOnly ? 'fill-current' : ''}`} />
-                Bookmarked commands only {bookmarkOnly ? '· on' : '· off'}
+                <Bookmark className={`h-3.5 w-3.5 ${bookmarkOnly && bookmarks.size >= BOOKMARK_MIN ? 'fill-current' : ''}`} />
+                Bookmarked commands only {bookmarkOnly && bookmarks.size >= BOOKMARK_MIN ? '· on' : '· off'}
               </button>
-              {bookmarkOnly && (
+              {bookmarks.size < BOOKMARK_MIN ? (
                 <span className="font-mono text-xs text-[var(--text-muted)]">
-                  {bookmarks.size
-                    ? `${poolCommands.length} bookmarked command${poolCommands.length === 1 ? '' : 's'} in the pool`
-                    : 'no bookmarks yet — drill everything until you star some'}
+                  locked — bookmark {BOOKMARK_MIN - bookmarks.size} more command{BOOKMARK_MIN - bookmarks.size === 1 ? '' : 's'} ({bookmarks.size}/{BOOKMARK_MIN}) to unlock
+                </span>
+              ) : bookmarkOnly && (
+                <span className="font-mono text-xs text-[var(--text-muted)]">
+                  {poolCommands.length} bookmarked command{poolCommands.length === 1 ? '' : 's'} in the pool
                 </span>
               )}
             </div>
+            {lockNote && bookmarks.size < BOOKMARK_MIN && (
+              <p className="mt-3 font-mono text-xs text-amber-400">
+                bookmark-only rounds need at least {BOOKMARK_MIN} starred commands — star them from any command page
+              </p>
+            )}
             {docsLoading && !ready ? (
               <p className="mt-8 rounded-xl border border-dashed border-[var(--border)] px-6 py-3.5 text-center font-mono text-sm text-[var(--text-muted)]">
                 loading question banks<span className="blinking">_</span>
