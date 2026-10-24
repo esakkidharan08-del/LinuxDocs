@@ -109,7 +109,7 @@ type ProgressStats = {
 
 /** Canvas render of the progress summary — downloads (or shares, when the
     browser supports it) as a PNG card with no network round-trip. */
-async function shareCard(stats: ProgressStats) {
+async function shareCard(stats: ProgressStats, username: string) {
   const canvas = document.createElement('canvas');
   canvas.width = 1000;
   canvas.height = 560;
@@ -141,7 +141,8 @@ async function shareCard(stats: ProgressStats) {
   ctx.fillText('learning progress report', 270, 100);
   ctx.fillStyle = MUTED;
   ctx.font = '400 16px "JetBrains Mono", ui-monospace, monospace';
-  ctx.fillText(new Date().toISOString().slice(0, 10), canvas.width - 64 - ctx.measureText(new Date().toISOString().slice(0, 10)).width, 100);
+  const stamp = `@${username} · ${new Date().toISOString().slice(0, 10)}`;
+  ctx.fillText(stamp, canvas.width - 64 - ctx.measureText(stamp).width, 100);
 
   /* rule */
   ctx.strokeStyle = 'rgba(233, 227, 218, 0.15)';
@@ -201,6 +202,7 @@ async function shareCard(stats: ProgressStats) {
 
 const LearningSummary = () => {
   const { progress: synced } = useProgress();
+  const { user } = useAuth();
   const stats = useMemo(() => {
     const learning = (synced.learning as Record<string, ProgressEntry> | undefined) ?? {};
     const pathsDone = LEARNING_PATHS.filter((path) => learning[path.id]?.completed).length;
@@ -279,7 +281,7 @@ const LearningSummary = () => {
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">synced to your account</span>
           <button
             type="button"
-            onClick={() => void shareCard(stats)}
+            onClick={() => void shareCard(stats, user?.username?.slice(0, 24) ?? 'guest')}
             className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 font-mono text-xs text-[var(--text-muted)] transition-colors hover:border-[var(--terminal-green)]/60 hover:text-[var(--terminal-green)]"
             title="Render your progress as a shareable image"
           >
