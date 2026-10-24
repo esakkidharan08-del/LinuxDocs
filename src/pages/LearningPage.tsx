@@ -732,8 +732,9 @@ export function LearningPage() {
       if (!drillPools) return;
       // every run invents fresh questions from the full dataset
       const questions: Question[] = [];
+      const used = new Set<string>();
       for (let i = 0; i < effectiveCount; i += 1) {
-        const drill = buildQuestion(drillPools);
+        const drill = buildQuestion(drillPools, used);
         questions.push({ q: drill.prompt, options: drill.options, answer: drill.answer, difficulty: 'medium', tag: drill.tag });
       }
       setQuizQuestions(questions);

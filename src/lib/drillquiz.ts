@@ -56,7 +56,12 @@ function finalize(prompt: string, tag: string, correctFirst: string[]): Drill {
   return { prompt, tag, options: shuffled, answer: shuffled.indexOf(correct) };
 }
 
-export function buildQuestion(pools: DrillPools): Drill {
+/* The unique identity of a generated question: same kind + same command +
+   same flag = the same question again. Passing `usedKeys` makes the builder
+   skip identities it has already handed out this round; when every
+   candidate is a repeat (tiny pools), the history resets so the drill can
+   continue instead of stalling. */
+function gen(pools: DrillPools): { key: string; drill: Drill } {
   const kind = randItem(['flag-purpose', 'command-summary', 'summary-command', 'flag-name']);
 
   if (kind === 'flag-purpose' && pools.withOptions.length > 0) {
@@ -68,7 +73,10 @@ export function buildQuestion(pools: DrillPools): Drill {
       3,
     );
     if (distractorsFound.length === 3) {
-      return finalize(`${command.name}, what does ${option.flag} do?`, 'flag · purpose', [option.description, ...distractorsFound]);
+      return {
+        key: `flag-purpose:${command.slug}:${option.flag}`,
+        drill: finalize(`${command.name}, what does ${option.flag} do?`, 'flag · purpose', [option.description, ...distractorsFound]),
+      };
     }
   }
 
@@ -82,7 +90,10 @@ export function buildQuestion(pools: DrillPools): Drill {
       3,
     );
     if (otherFlags.length === 3) {
-      return finalize(`In ${command.name}, which flag means "${option.description}"?`, 'purpose · flag', [option.flag, ...otherFlags]);
+      return {
+        key: `flag-name:${command.slug}:${option.description}`,
+        drill: finalize(`In ${command.name}, which flag means "${option.description}"?`, 'purpose · flag', [option.flag, ...otherFlags]),
+      };
     }
   }
 
@@ -94,7 +105,10 @@ export function buildQuestion(pools: DrillPools): Drill {
       3,
     );
     if (others.length === 3) {
-      return finalize(`Which command matches: "${command.summary}"`, 'summary · command', [command.name, ...others]);
+      return {
+        key: `summary-command:${command.slug}`,
+        drill: finalize(`Which command matches: "${command.summary}"`, 'summary · command', [command.name, ...others]),
+      };
     }
   }
 
@@ -107,12 +121,38 @@ export function buildQuestion(pools: DrillPools): Drill {
   );
   if (others.length < 3) {
     /* guaranteed-valid shape for the full dataset */
-    return finalize(`What does ${command.name} do?`, 'command · summary', [
-      command.summary,
-      'Reboots the system without confirmation.',
-      'Prints the kernel ring buffer.',
-      'Renames the current shell session.',
-    ]);
+    return {
+      key: `command-summary:${command.slug}`,
+      drill: finalize(`What does ${command.name} do?`, 'command · summary', [
+        command.summary,
+        'Reboots the system without confirmation.',
+        'Prints the kernel ring buffer.',
+        'Renames the current shell session.',
+      ]),
+    };
   }
-  return finalize(`What does ${command.name} do?`, 'command · summary', [command.summary, ...others]);
+  return {
+    key: `command-summary:${command.slug}`,
+    drill: finalize(`What does ${command.name} do?`, 'command · summary', [command.summary, ...others]),
+  };
+}
+
+export function buildQuestion(pools: DrillPools, usedKeys?: Set<string>): Drill {
+  let repeat: { key: string; drill: Drill } | null = null;
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const candidate = gen(pools);
+    if (!usedKeys) return candidate.drill;
+    if (usedKeys.has(candidate.key)) {
+      repeat = candidate;
+      continue;
+    }
+    usedKeys.add(candidate.key);
+    return candidate.drill;
+  }
+  /* the pool is effectively exhausted — retire the history so the round
+     can keep going (repeats only reappear once everything has been seen) */
+  usedKeys?.clear();
+  const fallback = repeat ?? gen(pools);
+  if (usedKeys) usedKeys.add(fallback.key);
+  return fallback.drill;
 }

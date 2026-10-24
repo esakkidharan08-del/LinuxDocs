@@ -86,6 +86,9 @@ export function SpeedDrillPage() {
   if (poolCommands.length) {
     poolsRef.current = buildPools(poolCommands);
   }
+  /* identities handed out during the ACTIVE round — the generator skips
+     them so a round never repeats a question until the pool is exhausted */
+  const usedKeysRef = useRef<Set<string>>(new Set());
 
   const answeredRef = useRef(false);
   const advanceTimer = useRef<number | undefined>(undefined);
@@ -148,7 +151,7 @@ export function SpeedDrillPage() {
         () => {
           setPicked(null);
           answeredRef.current = false;
-          setQuestion(poolsRef.current ? buildQuestion(poolsRef.current) : null);
+          setQuestion(poolsRef.current ? buildQuestion(poolsRef.current, usedKeysRef.current) : null);
         },
         isCorrect ? 320 : 900,
       );
@@ -170,6 +173,7 @@ export function SpeedDrillPage() {
   const start = () => {
     if (!poolsRef.current) return;
     savedRef.current = false;
+    usedKeysRef.current = new Set(); // fresh no-repeat window per round
     setScore(0);
     setAsked(0);
     setCorrectCount(0);
@@ -178,7 +182,7 @@ export function SpeedDrillPage() {
     setSecondsLeft(ROUND_SECONDS);
     setPicked(null);
     answeredRef.current = false;
-    setQuestion(buildQuestion(poolsRef.current));
+    setQuestion(buildQuestion(poolsRef.current, usedKeysRef.current));
     setPhase('playing');
   };
 
