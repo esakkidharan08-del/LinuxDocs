@@ -27,6 +27,33 @@ const DocsGate = ({ loading, error, children }: { loading: boolean; error: strin
   return <>{children}</>;
 };
 
+/** Curated classic-versus pairs — one click loads both sides. Slugs are
+    validated against the dataset when this list changes (a pair whose
+    slug is missing from the index simply does not render). */
+const CURATED_PAIRS: Array<{ a: string; b: string; why: string }> = [
+  { a: 'grep', b: 'sed', why: 'filter vs edit in-line' },
+  { a: 'awk', b: 'grep', why: 'patterns vs per-field programs' },
+  { a: 'ripgrep', b: 'grep', why: 'the fast modern re-implementation' },
+  { a: 'head', b: 'tail', why: 'two ends of the same file' },
+  { a: 'cat', b: 'less', why: 'dump everything vs page through' },
+  { a: 'find', b: 'ls', why: 'recursive search vs one listing' },
+  { a: 'locate', b: 'find', why: 'prebuilt index vs live walk' },
+  { a: 'rm', b: 'rmdir', why: 'anything vs empty directories only' },
+  { a: 'cp', b: 'mv', why: 'duplicate vs relocate' },
+  { a: 'dd', b: 'cp', why: 'device-level bytes vs files' },
+  { a: 'chmod', b: 'chown', why: 'bits vs ownership' },
+  { a: 'useradd', b: 'passwd', why: 'account vs its credential' },
+  { a: 'ps', b: 'top', why: 'snapshot vs live monitor' },
+  { a: 'kill', b: 'pkill', why: 'by pid vs by name' },
+  { a: 'systemctl', b: 'journalctl', why: 'control services vs read their logs' },
+  { a: 'curl', b: 'wget', why: 'APIs and pipes vs resumable downloads' },
+  { a: 'ssh', b: 'scp', why: 'remote shell vs file copy over the same auth' },
+  { a: 'tar', b: 'gzip', why: 'bundle vs compress' },
+  { a: 'nmap', b: 'nikto', why: 'port surface vs web app checks' },
+  { a: 'john', b: 'hashcat', why: 'cpu rules vs gpu engines' },
+  { a: 'netstat', b: 'ss', why: 'the classic vs its faster successor' },
+];
+
 export const ComparePage = () => {
   const [leftSlug, setLeftSlug] = useState('grep');
   const [rightSlug, setRightSlug] = useState('sed');
@@ -50,6 +77,29 @@ export const ComparePage = () => {
 
   return <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6"><header className="space-y-4"><div className="flex flex-wrap items-center gap-3"><div className="inline-flex items-center gap-2 rounded border border-[var(--terminal-green)]/30 bg-[var(--terminal-green-bg)] px-3 py-1 font-mono text-xs text-[var(--terminal-green)]"><GitCompare className="h-4 w-4" /> Side-by-Side Comparison</div><button onClick={() => setViewAll(!viewAll)} className="inline-flex items-center gap-2 rounded border border-[var(--border)] px-3 py-1 font-mono text-xs text-[var(--text-muted)] hover:text-[var(--terminal-green)] hover:border-[var(--terminal-green)]">{viewAll ? 'Show Linux only' : 'Show all commands (Linux + CTF)'}</button></div><div><h1 className="font-display text-4xl sm:text-5xl font-bold text-[var(--text-heading)] tracking-tight">Compare Commands</h1><p className="mt-3 text-lg text-[var(--text-muted)] max-w-3xl">Compare purpose, syntax, options, use cases, examples, and related commands side-by-side. Perfect for understanding differences between similar tools.</p></div></header>
     <DocsGate loading={loading || !lights.length} error={error}>
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+        <p className="mb-3 font-mono text-xs uppercase tracking-widest text-[var(--text-muted)]">Curated classic match-ups</p>
+        <div className="flex flex-wrap gap-2">
+          {CURATED_PAIRS.map((pair) => {
+            const known = cmdLights.some((light) => light.slug === pair.a) && cmdLights.some((light) => light.slug === pair.b);
+            if (!known) return null;
+            const active = leftSlug === pair.a && rightSlug === pair.b;
+            return (
+              <button
+                key={`${pair.a}|${pair.b}`}
+                onClick={() => { setLeftSlug(pair.a); setRightSlug(pair.b); }}
+                title={pair.why}
+                className={`rounded-full border px-3 py-1.5 font-mono text-xs transition-colors ${
+                  active ? 'border-[var(--terminal-green)] bg-[var(--terminal-green)]/10 text-[var(--terminal-green)]' : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--terminal-green)]'
+                }`}
+              >
+                {pair.a} <span className="text-[var(--text-muted)]">vs</span> {pair.b}
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-3 text-xs text-[var(--text-muted)]">Hover a chip to see why the pairing is interesting. Anything in either dropdown stays fully free-form.</p>
+      </div>
       {hasBoth && (
         <>
           <div className="grid gap-6 lg:grid-cols-2"><article className="space-y-4 rounded-xl border-2 border-[var(--border)] bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg)] p-6 shadow-lg"><label className="block space-y-2"><span className="font-mono text-xs uppercase tracking-widest text-[var(--terminal-green)]">Command A</span>{select(leftSlug, setLeftSlug)}</label><CommandColumn command={left!} /></article><article className="space-y-4 rounded-xl border-2 border-[var(--border)] bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg)] p-6 shadow-lg"><label className="block space-y-2"><span className="font-mono text-xs uppercase tracking-widest text-[var(--terminal-green)]">Command B</span>{select(rightSlug, setRightSlug)}</label><CommandColumn command={right!} /></article></div><ComparisonSummary left={left!} right={right!} />
