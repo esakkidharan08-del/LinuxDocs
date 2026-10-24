@@ -5,123 +5,21 @@ import { Flame, GraduationCap, RotateCcw, Target, Trophy, Zap, ArrowRight } from
 import { useAllCommands } from '../context/CatalogContext';
 import { useProgress } from '../context/ProgressContext';
 import { mergeProgressData } from '../lib/progress';
-import type { Command } from '../types';
 
 /* ============================================================
    Speed Drill - a 60 second rapid quiz generated from the
    authed catalog (Part 1). No hand-written content: every round
    invents fresh questions from the summary, flags and
-   descriptions of the real commands. The full docs for the whole
-   dataset are fetched once on demand and stay in memory after.
+   descriptions of the real commands (generation rules live in
+   src/lib/drillquiz.ts and also power the learning quiz's
+   auto-generated source). The full docs for the whole dataset are
+   fetched once on demand and stay in memory after.
    ============================================================ */
 
-type Drill = { prompt: string; tag: string; options: string[]; answer: number };
+import { buildPools, buildQuestion, type Drill, type DrillPools } from '../lib/drillquiz';
+
 type DrillStore = { best: number; plays: number };
 const ROUND_SECONDS = 60;
-
-/* Question pools, derived once per loaded-docs revision (a ref keeps a
-   round mid-flight stable even if the catalog refetches underneath). */
-type DrillPools = {
-  commands: Command[];
-  withOptions: Command[];
-  allNames: string[];
-  allSummaries: string[];
-  allFlagDescriptions: string[];
-};
-
-function buildPools(commands: Command[]): DrillPools {
-  return {
-    commands,
-    withOptions: commands.filter((c) => c.options.length >= 2),
-    allNames: commands.map((c) => c.name),
-    allSummaries: Array.from(new Set(commands.map((c) => c.summary))),
-    allFlagDescriptions: Array.from(new Set(commands.flatMap((c) => c.options.map((o) => o.description)))),
-  };
-}
-
-
-function randItem<T>(items: T[]): T {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
-/** Build distinct distractors from a pool, excluding the answer text itself. */
-function distractors(pool: string[], answer: string, count: number): string[] {
-  const picked = new Set<string>();
-  for (let guard = 0; guard < count * 40 && picked.size < count; guard += 1) {
-    const candidate = randItem(pool);
-    if (candidate && candidate !== answer && !picked.has(candidate)) picked.add(candidate);
-  }
-  return Array.from(picked);
-}
-
-/** options[0] must be the correct answer; it gets shuffled into place here. */
-function finalize(prompt: string, tag: string, correctFirst: string[]): Drill {
-  const correct = correctFirst[0].replace(/\s+/g, ' ').trim();
-  const options = [correct, ...correctFirst.slice(1).map((text) => text.replace(/\s+/g, ' ').trim())].slice(0, 4);
-  const shuffled = [...options].sort(() => Math.random() - 0.5);
-  return { prompt, tag, options: shuffled, answer: shuffled.indexOf(correct) };
-}
-
-function buildQuestion(pools: DrillPools): Drill {
-  const kind = randItem(['flag-purpose', 'command-summary', 'summary-command', 'flag-name']);
-
-  if (kind === 'flag-purpose' && pools.withOptions.length > 0) {
-    const command = randItem(pools.withOptions);
-    const option = randItem(command.options);
-    const distractorsFound = distractors(
-      pools.allFlagDescriptions.filter((d) => d !== option.description),
-      option.description,
-      3,
-    );
-    if (distractorsFound.length === 3) {
-      return finalize(`${command.name}, what does ${option.flag} do?`, 'flag · purpose', [option.description, ...distractorsFound]);
-    }
-  }
-
-  if (kind === 'flag-name' && pools.withOptions.length > 0) {
-    const command = randItem(pools.withOptions);
-    const option = randItem(command.options);
-    const wrongFlags = command.options.filter((o) => o.flag !== option.flag).map((o) => o.flag);
-    const otherFlags = distractors(
-      pools.withOptions.flatMap((c) => c.options.map((o) => o.flag)).filter((f) => !wrongFlags.includes(f)),
-      option.flag,
-      3,
-    );
-    if (otherFlags.length === 3) {
-      return finalize(`In ${command.name}, which flag means "${option.description}"?`, 'purpose · flag', [option.flag, ...otherFlags]);
-    }
-  }
-
-  if (kind === 'summary-command') {
-    const command = randItem(pools.commands);
-    const others = distractors(
-      pools.allNames.filter((n) => n !== command.name),
-      command.name,
-      3,
-    );
-    if (others.length === 3) {
-      return finalize(`Which command matches: "${command.summary}"`, 'summary · command', [command.name, ...others]);
-    }
-  }
-
-  /* fallback + 'command-summary' path */
-  const command = randItem(pools.commands);
-  const others = distractors(
-    pools.allSummaries.filter((s) => s !== command.summary),
-    command.summary,
-    3,
-  );
-  if (others.length < 3) {
-    /* guaranteed-valid shape for the full dataset */
-    return finalize(`What does ${command.name} do?`, 'command · summary', [
-      command.summary,
-      'Reboots the system without confirmation.',
-      'Prints the kernel ring buffer.',
-      'Renames the current shell session.',
-    ]);
-  }
-  return finalize(`What does ${command.name} do?`, 'command · summary', [command.summary, ...others]);
-}
 
 export function SpeedDrillPage() {
   /* Personal best + rounds live in the synced account store (Part 2);

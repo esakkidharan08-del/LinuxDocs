@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useCatalog, getPathForLight } from '../context/CatalogContext';
+import { useAllCommands } from '../context/CatalogContext';
+import { buildPools, buildQuestion } from '../lib/drillquiz';
+import { CONCEPTUAL_QUESTIONS } from '../data/conceptualQuestions';
 import { useProgress } from '../context/ProgressContext';
 import type { StreakDataSynced } from '../lib/progress';
 
@@ -17,7 +20,8 @@ import type { StreakDataSynced } from '../lib/progress';
    ============================================================ */
 
 type Difficulty = 'easy' | 'medium' | 'hard';
-type Question = { q: string; options: string[]; answer: number; difficulty: Difficulty };
+type Question = { q: string; options: string[]; answer: number; difficulty: Difficulty; tag?: string };
+type QuizSource = 'path' | 'concepts' | 'auto';
 type Lesson = { title: string; intro: string; bullets: string[]; commands: string[] };
 type LearningPath = {
   id: string;
@@ -634,6 +638,7 @@ export function LearningPage() {
   const [flash, setFlash] = useState<string | null>(null);
 
   const [quizFilter, setQuizFilter] = useState<'easy' | 'medium' | 'hard' | 'mixed'>('mixed');
+  const [quizSource, setQuizSource] = useState<QuizSource>('path');
   const [quizCount, setQuizCount] = useState(5);
   const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
   const [quizChoices, setQuizChoices] = useState<QuizChoice[]>([]);
@@ -643,6 +648,12 @@ export function LearningPage() {
 
   const selected = useMemo(() => PATHS.find((p) => p.id === selectedId) ?? PATHS[0], [selectedId]);
   const streak = synced.streak as StreakDataSynced | undefined;
+
+  /* auto-generated questions share the speed drill's generator — the full
+     docs wave loads on demand exactly like there (cached by ETag). */
+  const { commands: allCommands, loading: docsLoading } = useAllCommands();
+  const drillPools = useMemo(() => (allCommands.length ? buildPools(allCommands) : null), [allCommands]);
+  const conceptPool = CONCEPTUAL_QUESTIONS[selectedId] ?? [];
 
   /* ---- derived global stats ---- */
   const pathsDone = PATH_ORDER.filter((id) => progress[id]?.completed).length;
@@ -697,20 +708,41 @@ export function LearningPage() {
   const openSetup = () => {
     setQuizFilter('mixed');
     setQuizCount(5);
+    setQuizSource('path');
     setView('setup');
   };
 
   /* strict cap: never more than 10, never more than the pool offers */
   const pool = useMemo(() => {
+    if (quizSource === 'concepts') {
+      return quizFilter === 'mixed' ? conceptPool : conceptPool.filter((q) => q.difficulty === quizFilter);
+    }
+    if (quizSource === 'auto') return [] as Question[]; // generated at start time
     if (!selected) return [] as Question[];
     return quizFilter === 'mixed' ? selected.questions : selected.questions.filter((q) => q.difficulty === quizFilter);
-  }, [selected, quizFilter]);
+  }, [selected, quizFilter, quizSource, conceptPool]);
 
-  const maxCount = Math.max(1, Math.min(MAX_QUESTIONS, pool.length));
+  const maxCount = quizSource === 'auto' ? MAX_QUESTIONS : Math.max(1, Math.min(MAX_QUESTIONS, pool.length));
   const effectiveCount = Math.min(quizCount, maxCount);
 
   const startQuiz = () => {
     if (!selected) return;
+    if (quizSource === 'auto') {
+      if (!drillPools) return;
+      // every run invents fresh questions from the full dataset
+      const questions: Question[] = [];
+      for (let i = 0; i < effectiveCount; i += 1) {
+        const drill = buildQuestion(drillPools);
+        questions.push({ q: drill.prompt, options: drill.options, answer: drill.answer, difficulty: 'medium', tag: drill.tag });
+      }
+      setQuizQuestions(questions);
+      setQuizChoices(Array(questions.length).fill(null));
+      setQuizScore(0);
+      setStep(0);
+      setChoice(null);
+      setView('quiz');
+      return;
+    }
     const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, effectiveCount);
     if (!shuffled.length) return;
     setQuizQuestions(shuffled);
@@ -742,16 +774,20 @@ export function LearningPage() {
       return;
     }
     const total = quizQuestions.length;
-    const entry = progress[selected.id];
-    setProgress((current) => ({
-      ...current,
-      [selected.id]: {
-        completed: true,
-        bestScore: Math.max(entry?.bestScore ?? 0, quizScore),
-        bestTotal: Math.max(entry?.bestTotal ?? 0, total),
-        lessons: entry?.lessons ?? [],
-      },
-    }));
+    /* only the path bank updates the path's best score — conceptual and
+       auto-generated runs are practice and do not certify the path */
+    if (quizSource === 'path') {
+      const entry = progress[selected.id];
+      setProgress((current) => ({
+        ...current,
+        [selected.id]: {
+          completed: true,
+          bestScore: Math.max(entry?.bestScore ?? 0, quizScore),
+          bestTotal: Math.max(entry?.bestTotal ?? 0, total),
+          lessons: entry?.lessons ?? [],
+        },
+      }));
+    }
     setView('results');
   };
 
@@ -1006,11 +1042,12 @@ export function LearningPage() {
      ============================================================ */
   function setupView() {
     const path = selected;
+    const activeBank = quizSource === 'concepts' ? conceptPool : path.questions;
     const counts = {
-      easy: path.questions.filter((q) => q.difficulty === 'easy').length,
-      medium: path.questions.filter((q) => q.difficulty === 'medium').length,
-      hard: path.questions.filter((q) => q.difficulty === 'hard').length,
-      mixed: path.questions.length,
+      easy: activeBank.filter((q) => q.difficulty === 'easy').length,
+      medium: activeBank.filter((q) => q.difficulty === 'medium').length,
+      hard: activeBank.filter((q) => q.difficulty === 'hard').length,
+      mixed: activeBank.length,
     };
     const filterOptions: Array<{ id: 'easy' | 'medium' | 'hard' | 'mixed'; label: string }> = [
       { id: 'mixed', label: 'Mixed (all levels)' },
@@ -1018,6 +1055,12 @@ export function LearningPage() {
       { id: 'medium', label: 'Medium' },
       { id: 'hard', label: 'Hard' },
     ];
+    const sourceOptions: Array<{ id: QuizSource; label: string; blurb: string }> = [
+      { id: 'path', label: 'Path bank', blurb: `${path.questions.length} handwritten questions for ${path.title}` },
+      { id: 'concepts', label: 'Conceptual', blurb: `${conceptPool.length} why/when mental-model questions` },
+      { id: 'auto', label: 'Auto-generated', blurb: 'Fresh flag/summary questions from every command' },
+    ];
+    const autoReady = quizSource !== 'auto' || (Boolean(drillPools) && !docsLoading);
 
     return (
       <div>
@@ -1033,29 +1076,55 @@ export function LearningPage() {
             Quiz · <span style={{ color: path.color }}>{path.title}</span>
           </h2>
           <p className="mt-2 text-sm text-[var(--text-muted)] sm:text-base">
-            Step 1 — pick a difficulty. Step 2 — choose how many questions, up to a strict maximum of {MAX_QUESTIONS}.
+            Choose where the questions come from, then pick a difficulty and a count, up to a strict maximum of {MAX_QUESTIONS}.
           </p>
         </header>
 
-        <section aria-label="Difficulty">
-          <p className="mb-3 font-mono text-xs uppercase tracking-wider text-[var(--text-muted)]">Step 1 · difficulty</p>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {filterOptions.map((option) => (
+        <section aria-label="Question source" className="mb-8">
+          <p className="mb-3 font-mono text-xs uppercase tracking-wider text-[var(--text-muted)]">Step 0 · question source</p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {sourceOptions.map((option) => (
               <button
                 key={option.id}
-                onClick={() => setQuizFilter(option.id)}
+                onClick={() => setQuizSource(option.id)}
                 className={`rounded-xl border px-4 py-3.5 text-left transition-colors ${
-                  quizFilter === option.id ? 'border-[var(--terminal-green)] bg-[var(--terminal-green)]/10' : 'border-[var(--border)] hover:border-[var(--text-muted)]'
+                  quizSource === option.id ? 'border-[var(--terminal-green)] bg-[var(--terminal-green)]/10' : 'border-[var(--border)] hover:border-[var(--text-muted)]'
                 }`}
               >
-                <span className={`inline-block rounded-full px-2.5 py-0.5 font-mono text-xs uppercase tracking-wider ${quizFilterStyle[option.id]}`}>
-                  {option.label}
-                </span>
-                <span className="mt-2 block text-sm text-[var(--text-muted)]">{counts[option.id]} questions available</span>
+                <span className="block text-sm font-semibold">{option.label}</span>
+                <span className="mt-1 block text-xs text-[var(--text-muted)]">{option.blurb}</span>
               </button>
             ))}
           </div>
         </section>
+
+        {quizSource === 'auto' ? (
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text-muted)]">
+            Auto-generated questions are always <span className="font-semibold text-[var(--text)]">mixed difficulty</span> — flag↔purpose and
+            command↔summary pairs are invented fresh from the whole dataset on every run. These runs are practice only and do not change the
+            path's best score.
+          </div>
+        ) : (
+          <section aria-label="Difficulty">
+            <p className="mb-3 font-mono text-xs uppercase tracking-wider text-[var(--text-muted)]">Step 1 · difficulty</p>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {filterOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => setQuizFilter(option.id)}
+                  className={`rounded-xl border px-4 py-3.5 text-left transition-colors ${
+                    quizFilter === option.id ? 'border-[var(--terminal-green)] bg-[var(--terminal-green)]/10' : 'border-[var(--border)] hover:border-[var(--text-muted)]'
+                  }`}
+                >
+                  <span className={`inline-block rounded-full px-2.5 py-0.5 font-mono text-xs uppercase tracking-wider ${quizFilterStyle[option.id]}`}>
+                    {option.label}
+                  </span>
+                  <span className="mt-2 block text-sm text-[var(--text-muted)]">{counts[option.id]} questions available</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section aria-label="Question count" className="mt-8">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -1106,9 +1175,10 @@ export function LearningPage() {
 
         <button
           onClick={startQuiz}
-          className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--terminal-green)] px-6 py-3.5 font-semibold text-black transition-opacity hover:opacity-90 sm:w-auto"
+          disabled={!autoReady}
+          className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--terminal-green)] px-6 py-3.5 font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
         >
-          <ZapLike /> Start quiz — {effectiveCount} question{effectiveCount === 1 ? '' : 's'}
+          <ZapLike /> {!autoReady ? 'Loading the dataset…' : `Start quiz — ${effectiveCount} question${effectiveCount === 1 ? '' : 's'}`}
         </button>
       </div>
     );
@@ -1136,8 +1206,8 @@ export function LearningPage() {
           >
             <ChevronRight className="h-4 w-4 rotate-180" /> Quit
           </button>
-          <span className={`rounded-full px-3 py-1 font-mono text-xs uppercase tracking-wider ${quizFilterStyle[question.difficulty]}`}>
-            {question.difficulty}
+          <span className={`rounded-full px-3 py-1 font-mono text-xs uppercase tracking-wider ${quizFilterStyle[question.tag ?? question.difficulty] ?? 'bg-[var(--border)] text-[var(--text-muted)]'}`}>
+            {question.tag ?? question.difficulty}
           </span>
         </div>
 
@@ -1223,8 +1293,10 @@ export function LearningPage() {
             {quizScore}<span className="text-xl text-[var(--text-muted)]">/{total}</span>
           </h2>
           <p className="mt-1 text-sm text-[var(--text-muted)] sm:text-base">
-            {passed ? `Passed - ${pct}% (pass mark ${PASS_THRESHOLD}%).` : `${pct}% - pass mark is ${PASS_THRESHOLD}%.`} Best on this path:{' '}
-            {entry ? Math.round((entry.bestScore / entry.bestTotal) * 100) : pct}%.
+            {passed ? `Passed - ${pct}% (pass mark ${PASS_THRESHOLD}%).` : `${pct}% - pass mark is ${PASS_THRESHOLD}%.`}{' '}
+            {quizSource === 'path'
+              ? <>Best on this path: {entry ? Math.round((entry.bestScore / entry.bestTotal) * 100) : pct}%.</>
+              : <>Practice run — {quizSource === 'concepts' ? 'conceptual' : 'auto-generated'} questions; path best scores are unchanged.</>}
           </p>
 
           {quizChoices.some((choiceValue, index) => choiceValue !== quizQuestions[index]?.answer) && (
