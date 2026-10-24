@@ -1,11 +1,51 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Lock, User, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, AlertCircle, CheckCircle, Trash2, FileDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { SystemStatus } from '../components/SystemStatus';
 
 const SettingsContent: React.FC = () => {
-  const { user, changePassword, deleteAccount } = useAuth();
+  const { user, notes, changePassword, deleteAccount } = useAuth();
+  const noteCount = notes.size;
+
+  /** Download every note as Markdown or the backend's native JSON shape. */
+  const exportNotes = (format: 'md' | 'json') => {
+    const list = Array.from(notes.entries()).sort(([a], [b]) => a.localeCompare(b));
+    const today = new Date().toISOString().slice(0, 10);
+    let content: string;
+    let filename: string;
+    let mime: string;
+    if (format === 'json') {
+      content = JSON.stringify(
+        {
+          exported: new Date().toISOString(),
+          count: list.length,
+          notes: list.map(([slug, text]) => ({ command_slug: slug, text })),
+        },
+        null,
+        2,
+      );
+      filename = `linuxdocs-notes-${today}.json`;
+      mime = 'application/json';
+    } else {
+      content = [
+        `# LinuxDocs notes — ${user?.username ?? 'user'}`,
+        '',
+        `Exported ${today} · ${list.length} note${list.length === 1 ? '' : 's'}`,
+        '',
+        ...list.map(([slug, text]) => [`## ${slug}`, '', text, '', '---', '' ].join('\n')),
+      ].join('\n');
+      filename = `linuxdocs-notes-${today}.md`;
+      mime = 'text/markdown';
+    }
+    const blob = new Blob([content], { type: `${mime};charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -245,6 +285,43 @@ const SettingsContent: React.FC = () => {
                   )}
                 </button>
               </form>
+            </div>
+          </div>
+
+          <div className="terminal-window bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden">
+            <div className="terminal-header bg-[var(--bg-surface-elevated)] border-b border-[var(--border)] px-4 py-3">
+              <div className="flex items-center gap-2">
+                <FileDown className="w-5 h-5 text-[var(--terminal-green)]" />
+                <span className="font-mono text-[var(--text-heading)]">Notes Export</span>
+              </div>
+            </div>
+            <div className="terminal-body p-6">
+              <div className="mb-4">
+                <h3 className="mb-1 font-display text-lg font-semibold text-[var(--text)]">Your notes, offline</h3>
+                <p className="text-[var(--text-muted)] text-sm">
+                  {noteCount
+                    ? `${noteCount} note${noteCount === 1 ? '' : 's'} on this account. Download them as a readable Markdown file or as raw JSON.`
+                    : 'No notes on this account yet — star a command and write one, then come back to export.'}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => exportNotes('md')}
+                  disabled={!noteCount}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--terminal-green)] px-4 py-2.5 font-mono text-sm font-semibold text-[var(--bg)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <FileDown className="w-4 h-4" /> Markdown (.md)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => exportNotes('json')}
+                  disabled={!noteCount}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2.5 font-mono text-sm font-semibold text-[var(--text)] transition-colors hover:border-[var(--terminal-green)] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <FileDown className="w-4 h-4" /> JSON (.json)
+                </button>
+              </div>
             </div>
           </div>
 
