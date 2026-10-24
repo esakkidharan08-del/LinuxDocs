@@ -89,12 +89,24 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const today = dayKey(new Date());
     if (prev.lastDay === today) return; // one record per day
     const yesterday = dayKey(new Date(Date.now() - 86_400_000));
-    const continued = prev.lastDay === yesterday;
+    const prevFreezes = Math.max(0, prev.freezes ?? 0);
+    let continued = prev.lastDay === yesterday;
+    /* Streak-freeze token (v2): exactly one missed day can be bridged by
+       burning a token — the chain survives, totalDays still counts today. */
+    let usedFreeze = false;
+    const gapDays = Number.isNaN(Date.parse(`${today}T00:00:00Z`)) || Number.isNaN(Date.parse(`${prev.lastDay.slice(0, 10)}T00:00:00Z`))
+      ? null
+      : Math.round((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${prev.lastDay.slice(0, 10)}T00:00:00Z`)) / 86_400_000);
+    if (!continued && gapDays === 2 && prevFreezes > 0) {
+      continued = true;
+      usedFreeze = true;
+    }
     applyPayload('streak', {
       lastDay: today,
       current: continued ? prev.current + 1 : 1,
       best: Math.max(prev.best, continued ? prev.current + 1 : 1),
       totalDays: prev.totalDays + 1,
+      ...(usedFreeze || prevFreezes > 0 ? { freezes: usedFreeze ? prevFreezes - 1 : prevFreezes } : {}),
     });
   }, [applyPayload]);
 

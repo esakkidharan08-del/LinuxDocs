@@ -11,6 +11,7 @@ import {
   executeCommand, evaluateMissions, setManualLookup, toneClass,
 } from '../lib/terminal';
 import type { Line, MissionLevel } from '../lib/terminal';
+import type { TerminalData } from '../lib/progress';
 import { useCatalog } from '../context/CatalogContext';
 import { useProgress } from '../context/ProgressContext';
 import { mergeProgressData } from '../lib/progress';
@@ -109,6 +110,72 @@ export function PracticeTerminalPage() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [welcome, setWelcome] = useState(true);
 
+  /* -------- speedrun: solve all 13 missions in one fresh sweep --------
+     The run scores from the CURRENT mission state snapshot at start;
+     solved missions stay solved, the run only counts missions first
+     cleared during the run. Best time + run count sync as terminal v2. */
+  const [runActive, setRunActive] = useState(false);
+  const [runElapsed, setRunElapsed] = useState(0);
+  const [runBanner, setRunBanner] = useState<string | null>(null);
+  const runStartRef = useRef<number | null>(null);
+  const runBaseRef = useRef<Set<string>>(new Set());
+  const runMadeRef = useRef<Set<string>>(new Set());
+
+  const terminalStats = (progress.terminal as TerminalData | undefined) ?? undefined;
+  const bestRun = terminalStats?.bestRunSeconds ?? 0;
+  const runCount = terminalStats?.runs ?? 0;
+
+  const formatRun = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  };
+
+  const startSpeedrun = () => {
+    runBaseRef.current = new Set(solvedMissions);
+    runMadeRef.current = new Set();
+    runStartRef.current = Date.now();
+    setRunElapsed(0);
+    setRunBanner(null);
+    setRunActive(true);
+  };
+
+  const cancelSpeedrun = () => {
+    runStartRef.current = null;
+    setRunActive(false);
+    setRunBanner('Speedrun cancelled.');
+  };
+
+  const endSpeedrun = (seconds: number) => {
+    runStartRef.current = null;
+    setRunActive(false);
+    const newBest = bestRun === 0 || seconds < bestRun;
+    setRunBanner(
+      `Speedrun complete in ${formatRun(seconds)}${newBest ? ' — new personal best!' : ` (best ${formatRun(bestRun)})`}`,
+    );
+    if (progressReady) {
+      updateProgress('terminal', (prev) =>
+        mergeProgressData('terminal', prev, {
+          solved: solvedMissions,
+          commandsRun,
+          bestRunSeconds: seconds,
+          runs: ((prev as TerminalData | null)?.runs ?? 0) + 1,
+        }),
+      );
+    }
+  };
+
+  /* live ticking timer while a run is active */
+  const endRunRef = useRef<(seconds: number) => void>(null!);
+  endRunRef.current = endSpeedrun;
+  useEffect(() => {
+    if (!runActive) return;
+    const interval = window.setInterval(() => {
+      if (runStartRef.current) setRunElapsed(Math.round((Date.now() - runStartRef.current) / 1000));
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [runActive]);
+
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -161,6 +228,19 @@ export function PracticeTerminalPage() {
       const transcript = [...lines, inputLine, ...result.lines];
       const solvedNow = evaluateMissions(transcript);
       if (solvedNow.length) setSolvedMissions((current) => Array.from(new Set([...current, ...solvedNow])));
+
+      /* speedrun accounting: only missions first cleared DURING the run count */
+      if (runStartRef.current) {
+        for (const missionId of solvedNow) {
+          if (!runBaseRef.current.has(missionId)) runMadeRef.current.add(missionId);
+        }
+        if (runMadeRef.current.size >= TOTAL_MISSIONS) {
+          const elapsed = Math.max(1, Math.round((Date.now() - runStartRef.current) / 1000));
+          runStartRef.current = null;
+          setRunActive(false);
+          endRunRef.current?.(elapsed);
+        }
+      }
     },
     [cwd, lines],
   );
@@ -247,7 +327,7 @@ export function PracticeTerminalPage() {
         </header>
 
         {/* ---------------- progress dashboard ---------------- */}
-        <section aria-label="Your progress" className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <section aria-label="Your progress" className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
             <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Rank</p>
             <p className="mt-1 flex items-center gap-2 text-lg font-bold sm:text-xl">
@@ -277,7 +357,43 @@ export function PracticeTerminalPage() {
             <p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">{commandsRun}</p>
             <p className="mt-1 text-xs text-[var(--text-muted)]">Saved on this device with your progress.</p>
           </div>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Speedrun</p>
+            {runActive ? (
+              <>
+                <p className="mt-1 flex items-center gap-2 text-lg font-bold tabular-nums sm:text-xl">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                  {formatRun(runElapsed)}
+                </p>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">Solve all {TOTAL_MISSIONS} missions in this sweep.</p>
+                <button
+                  onClick={cancelSpeedrun}
+                  className="mt-2 rounded-lg border border-[var(--border)] px-2.5 py-1 font-mono text-xs text-[var(--text-muted)] transition-colors hover:border-rose-400/60 hover:text-rose-400"
+                >
+                  cancel run
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="mt-1 text-lg font-bold tabular-nums sm:text-xl">{bestRun ? formatRun(bestRun) : '—'}</p>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">{runCount ? `${runCount} finished run${runCount === 1 ? '' : 's'} · best time kept` : 'No finished run yet.'}</p>
+                <button
+                  onClick={startSpeedrun}
+                  className="mt-2 rounded-lg border border-[var(--terminal-green)]/50 bg-[var(--terminal-green)]/10 px-2.5 py-1 font-mono text-xs font-semibold text-[var(--terminal-green)] transition-colors hover:bg-[var(--terminal-green)]/20"
+                >
+                  {bestRun ? 'start new run' : 'start speedrun'}
+                </button>
+              </>
+            )}
+          </div>
         </section>
+
+        {runBanner && (
+          <div role="status" className="mb-3 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-sm">
+            <span className="font-medium text-amber-300">{runBanner}</span>
+            <button onClick={() => setRunBanner(null)} className="ml-3 font-mono text-xs text-amber-400/70 hover:text-amber-300">dismiss</button>
+          </div>
+        )}
 
         {advancedFromPrevious && (
           <div className="mb-6 rounded-xl border border-[var(--terminal-green)]/40 bg-[var(--terminal-green)]/10 px-4 py-2.5 text-sm">

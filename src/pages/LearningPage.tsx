@@ -12,6 +12,7 @@ import { buildPools, buildQuestion } from '../lib/drillquiz';
 import { CONCEPTUAL_QUESTIONS } from '../data/conceptualQuestions';
 import { useProgress } from '../context/ProgressContext';
 import type { StreakDataSynced } from '../lib/progress';
+import { mergeProgressData } from '../lib/progress';
 
 /* ============================================================
    Learning system: two stages, 8 paths.
@@ -778,6 +779,7 @@ export function LearningPage() {
        auto-generated runs are practice and do not certify the path */
     if (quizSource === 'path') {
       const entry = progress[selected.id];
+      const pctPass = Math.round((quizScore / total) * 100) >= PASS_THRESHOLD;
       setProgress((current) => ({
         ...current,
         [selected.id]: {
@@ -787,6 +789,16 @@ export function LearningPage() {
           lessons: entry?.lessons ?? [],
         },
       }));
+      /* streak-freeze token: passing a quiz restores one, held up to 3 */
+      if (pctPass) {
+        updateProgress('streak', (prevStreak) => {
+          const s = (prevStreak as StreakDataSynced | null) ?? { lastDay: '', current: 0, best: 0, totalDays: 0 };
+          return mergeProgressData('streak', prevStreak ?? {}, {
+            ...s,
+            freezes: Math.min(Math.max(0, s.freezes ?? 0) + 1, 3),
+          });
+        });
+      }
     }
     setView('results');
   };
