@@ -573,3 +573,62 @@ html.light .noise-overlay {
     padding-left: 0 !important;
   }
 }
+
+/* Cheat-sheet / reference printing: ink-friendly paper output (the
+   cheat-sheets page drives window.print() itself). */
+@page {
+  margin: 14mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  /* strip the app chrome: translucent surfaces, glows, animations */
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .blinking {
+    animation: none !important;
+  }
+
+  code,
+  pre,
+  h1,
+  h2,
+  h3 {
+    color: #111 !important;
+  }
+
+  /* decorative code-block tint becomes a light rule instead */
+  .terminal-window {
+    border: none !important;
+  }
+
+  /* interactive controls have no business on paper */
+  button {
+    display: none !important;
+  }
+
+  a,
+  a code {
+    text-decoration: none !important;
+    color: #111 !important;
+  }
+
+  /* keep list rows from splitting across a page boundary */
+  [class*='rounded-xl'],
+  [class*='rounded-lg'],
+  tr,
+  .grid {
+    break-inside: avoid;
+  }
+}
