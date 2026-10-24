@@ -12,9 +12,9 @@ A hand-checked MDN-style reference for **95 Linux utilities + 37 CTF & security 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org)
 [![Flask](https://img.shields.io/badge/Flask-3-000?logo=flask)](https://flask.palletsprojects.com)
 [![PostgreSQL ready](https://img.shields.io/badge/SQLite%20%E2%86%92%20PostgreSQL-ready-4169E1?logo=postgresql)](#deploy-your-own)
-[![Tests](https://img.shields.io/badge/tests-102%20passing-2EA043)](#how-it-is-verified)
+[![Tests](https://img.shields.io/badge/tests-217%20passing-2EA043)](#how-it-is-verified)
 
-▶ **Live app:** *[[your deployed URL here]]* — **Demo GIF below** 👇
+▶ **Live app:** *[https://linuxdocs-frontend.vercel.app](https://linuxdocs-frontend.vercel.app)* — **Demo GIF below** 👇
 
 </div>
 
@@ -85,8 +85,8 @@ npm run qa                                   # the one-shot full gate
 Individual suites:
 
 ```powershell
-# 117 pytest backend tests (incl. the 8-case catalog-API suite)
-cd backend; .\venv\Scripts\pytest           # 117 passed
+# 217 pytest backend tests (catalog, auth, DB config, migrations/RLS, health, mailer, user-data, dataset suites)
+cd backend; .\venv\Scripts\pytest           # 217 passed
 
 # 19-step API smoke test (stdlib only): register → login → catalog under JWT →
 # refresh → logout → revoked-after-logout → unauth 401 gates on every
@@ -123,12 +123,12 @@ Browser ──(one origin)──► Vercel  ──/api/* proxy──► Render (
                           └── static React SPA (Vite)     └── host-allowlist + rate limits + CORS
 ```
 
-- **Frontend** — Vite + React 19 + TypeScript + Tailwind CSS v4. Route-level code splitting (the intro's 3D scene loads only on `/intro` or first visit). All state flows through typed services (`src/services/api.ts`).
+- **Frontend** — Vite + React 19 + TypeScript + Tailwind CSS v4. Route-level code splitting (the intro's 3D scene loads only on `/intro` or first visit). Route changes animate through Animate UI's view-transition **page transition (the `bands` effect)** while the shell stays put. All state flows through typed services (`src/services/api.ts`).
 - **Dataset API** — the documentation corpus lives only in `backend/data` (132 per-slug JSON files + a generated aggregate/index) and is served through two JWT-protected endpoints: `GET /api/catalog/index` (categories, domains, counts, plus a light index with only `name/summary/tags/slug/category`) and `GET /api/commands/<slug>` (the full doc), both ETag/304-stamped with `Cache-Control: private`. The SPA fetches the light index once after login and every command doc on demand into an in-memory cache cleared on logout/account switch — the shipped bundle carries zero command prose.
 - **Auth model** — JWT access token lives **in memory only** (15 min); the refresh credential is an **HttpOnly, SameSite=Strict cookie** (30 days) backed by opaque rotating session tokens with reuse (theft) detection. A single-flight refresh promise stops a tab full of failing requests from stampeding the auth endpoint.
 - **The same-origin trick** — `vercel.json` proxies `/api/*` to the Render API, so the browser only ever talks to one domain. That makes the refresh cookie first-party on the frontend origin — no `SameSite=None`, no third-party-cookie breakage, no CORS drama. In dev, `vite.config.ts` does the identical thing to `localhost:5000`.
-- **Backend** — Flask 3 + SQLAlchemy + Bcrypt + JWT-Extended. Env-driven config; request logging; per-endpoint **and** global rate limits; account lockout with attempt windows; CSRF origin checks; **Host-header allowlist**; payload clamps; hardened security headers (CSP/HSTS) in production.
-- **Data durability** — SQLite runs WAL + `synchronous=FULL` + automatic verified backups with self-healing restore on corruption. Point `DATABASE_URL` at managed Postgres (Supabase — see the Supabase deploy doc above) and the SQLite-only machinery disables itself cleanly — no forks, no code changes. Schema lives behind Flask-Migrate/Alembic (`migrations/versions/`), so `flask db upgrade` is the only schema step on any backend.
+- **Backend** — Flask 3 + SQLAlchemy + Bcrypt + JWT-Extended. Env-driven config; request logging; per-endpoint **and** global rate limits; account lockout with attempt windows; CSRF origin checks; **Host-header allowlist**; payload clamps; hardened security headers (CSP/HSTS) in production. The `DATABASE_URL` is normalized at boot (legacy schemes rewritten, TLS pinned for remote hosts, session/transaction pool mode auto-detected with a bounded connect-retry for cold-started databases), and **`/api/ready`** answers a live `SELECT 1` with latency + mode — when the database is unreachable, every data view fails as a clean `503 {error, request_id}` instead of a raw 500.
+- **Data durability** — SQLite runs WAL + `synchronous=FULL` + automatic verified backups with self-healing restore on corruption. Point `DATABASE_URL` at Supabase Postgres and the SQLite-only machinery disables itself cleanly — no forks, no code changes. Schema lives behind Flask-Migrate/Alembic (`migrations/versions/`), so `flask db upgrade` is the only schema step on any backend, and `003_rls_lockdown` enables Row Level Security with zero permissive policies on every table (the Supabase Data API is additionally disabled — see the deploy doc).
 
 ## Quick start (local)
 
@@ -202,6 +202,8 @@ All under `/api` (CORS restricted to `FRONTEND_ORIGIN`):
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
+| GET | `/health` | — | Liveness probe, no DB touch (Render `healthCheckPath`) |
+| GET | `/ready` | — | Live `SELECT 1` + `latency_ms` + connection mode; `503 {error, request_id}` when the DB is unreachable |
 | POST | `/auth/register` | — | Register (rate-limited) |
 | POST | `/auth/login` | — | Login → access token + HttpOnly refresh cookie |
 | POST | `/auth/refresh` | Refresh cookie | New access token (single-flight on client) |
@@ -229,14 +231,15 @@ LinuxDocs/
 │   ├── pages/                #   Reference, Learn, PracticeTerminal, Flashcards, …
 │   └── services/api.ts       #   Typede API client + single-flight refresh
 ├── backend/                  # Flask 3 API
-│   ├── app/                  #   factory, models, auth, user, security, sessions, persistence
+│   ├── app/                  #   factory, models, auth, user, security, sessions, persistence, database.py
 │   ├── data/                 #   132 per-slug docs + generated aggregate/index (source of truth)
 │   ├── scripts/              #   build_commands.mjs (regenerate aggregate/index; fails on violations)
-│   ├── tests/                #   117 pytest cases (incl. catalog, mailer, user-data, dataset suites)
-│   └── requirements.txt      #   pinned (incl. gunicorn + psycopg2 for Render)
-├── docs/screenshots/          # README assets (captured by the QA run)
+│   ├── migrations/           #   Alembic chain 001_initial → 002_user_progress → 003_rls_lockdown
+│   ├── tests/                #   217 pytest cases (catalog, auth, DB config, migrations/RLS, health, mailer…)
+│   └── requirements.txt      #   pinned (gunicorn + psycopg 3 (binary) for Render)
+├── docs/                     # README assets + deploy guides (DEPLOY_SUPABASE.md, BACKEND_GUIDE.md)
 ├── qa/                        # browser_check.py / smoke_api.py (gitignored)
-├── render.yaml                # Render blueprint: API + Postgres
+├── render.yaml                # Render blueprint: linuxdocs-api service (DATABASE_URL stays dashboard-only)
 └── vercel.json                # /api/* proxy + SPA fallback
 ```
 
