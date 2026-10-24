@@ -1,27 +1,45 @@
-# Render blueprint for the LinuxDocs API (Flask + Partners Postgres).
+# Render blueprint for the LinuxDocs API (Flask + Supabase Postgres).
 #
-# Deploy with:  Render dashboard -> New + -> Blueprint -> pick this repo.
-# After the first deploy, set FRONTEND_ORIGIN and ALLOWED_HOSTS to your real
-# Vercel URLs (see README "Deploy your own") so CORS + the Host-header
-# allowlist accept browser traffic routed through Vercel's /api/* rewrites.
+# Deploy the whole stack in one click with: Render dashboard -> New + ->
+# Blueprint -> pick this repo. The service uses the env vars below; the
+# database itself lives in Supabase — its DATABASE_URL is NEVER stored in
+# this file (sync:false leaves an empty slot to fill in the dashboard).
 #
-# The app reads DATABASE_URL for SQLAlchemy, which points at Postgres here;
-# the SQLite-only persistence machinery (WAL, backups, maintenance) detects
-# a non-SQLite URI and disables itself automatically.
+# After the first deploy verify:
+#   * https://<service>.onrender.com/api/health  -> {"status": "ok"}
+#   * https://<service>.onrender.com/api/ready   -> DB latency + mode
+#
+# Schema changes run automatically and idempotently: every start executes
+# `flask db upgrade` (alembic no-ops at head) BEFORE gunicorn boots. That
+# command must reach Supabase through the SESSION pooler (port 5432) — the
+# transaction pooler (:6543) cannot run migrations/DDL reliably.
+#
+# Frontend: Vercel rewrites /api/* to this service's URL (see vercel.json —
+# the single documented place where the Render URL is stored).
+#
+# Reset-email delivery (optional): MAIL_DRIVER=resend with RESEND_API_KEY +
+# MAIL_FROM (recommended; no SMTP ports on Render), or MAIL_DRIVER=smtp with
+# SMTP_* — tokens are only ever emailed, never returned or logged.
 
 services:
   - type: web
     name: linuxdocs-api
     runtime: python
+    plan: free
+    region: singapore
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 60 --access-logfile -
+    startCommand: flask --app index db upgrade && gunicorn "app:create_app()" --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 60 --access-logfile -
     healthCheckPath: /api/health
     envVars:
+      # Python for the runtime image (matches the cp311 wheels in requirements).
+      - key: PYTHON_VERSION
+        value: "3.11.x"
+      # Paste YOUR Supabase session-pooler URI in the dashboard (ends in
+      # .pooler.supabase.com:5432; take it from Project Settings -> Database
+      # -> Connection string and replace the placeholder password).
       - key: DATABASE_URL
-        fromDatabase:
-          name: linuxdocs-db
-          property: connectionString
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
@@ -30,21 +48,13 @@ services:
         value: production
       - key: TRUST_PROXY_HEADERS
         value: "1"
-      # Replace the two placeholders with your exact URLs after creating the
-      # services (front = Vercel site, api = this service's *.onrender.com URL).
+      - key: SESSION_COOKIE_SAMESITE
+        value: Lax
+      # Replace with your real Vercel site + this service's *.onrender.com
+      # host. Both are allowlisted: with TRUST_PROXY_HEADERS=1 the Host check
+      # sees X-Forwarded-Host (the Vercel domain) for browser traffic, while
+      # direct health checks use the onrender.com host.
       - key: FRONTEND_ORIGIN
         value: https://your-site.vercel.app
       - key: ALLOWED_HOSTS
-        value: linuxdocs-api.onrender.com
-      # (Optional) password-reset email delivery — set in the dashboard once:
-      #   MAIL_DRIVER=resend with RESEND_API_KEY + MAIL_FROM (recommended; no
-      #   SMTP ports on Render), or MAIL_DRIVER=smtp with
-      #   SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASSWORD + MAIL_FROM.
-      # Reset tokens are only ever emailed — never returned by the API or logged.
-
-databases:
-  - name: linuxdocs-db
-    plan: free
-    databaseName: linuxdocs
-    user: linuxdocs
-    postgresMajorVersion: "16"
+        value: linuxdocs-api.onrender.com,your-site.vercel.app

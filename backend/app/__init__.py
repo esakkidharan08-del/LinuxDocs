@@ -3,8 +3,11 @@ import sys
 import base64
 import hashlib
 import logging
+import time
 from pathlib import Path
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, g
+from sqlalchemy import text as sa_text
+from sqlalchemy.exc import OperationalError, DisconnectionError
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
@@ -50,6 +53,9 @@ def _setup_logging(app):
         handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s [%(name)s] %(message)s'))
         app.logger.addHandler(handler)
+    # Flask's app.logger inherits WARNING from the root logger, which would
+    # swallow the credential-free startup line (INFO). Align it explicitly.
+    app.logger.setLevel(level)
     for name in ('linuxdocs.security',):  # noqa: C901
         logger = logging.getLogger(name)
         if not logger.handlers:
@@ -116,7 +122,22 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    # DATABASE_URL normalization + Supabase engine policy (docs in app/database.py).
+    # Malformed URLs abort startup with a fixed message that never echoes
+    # the URL itself (it contains the password).
+    from .database import (
+        normalize_database_url, is_postgres, postgres_engine_options,
+        connection_mode, log_line,
+    )
+    _uri = normalize_database_url(os.getenv('DATABASE_URL'))
+    app.config['SQLALCHEMY_DATABASE_URI'] = _uri
+    if is_postgres(_uri):
+        # Pool sizing + connect retry live in the engine options; sqlite
+        # keeps SQLAlchemy's own defaults so tests/dev behave exactly as before.
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = postgres_engine_options(_uri)
+        app.config['DB_MODE'] = connection_mode(_uri)
+    else:
+        app.config['DB_MODE'] = 'sqlite'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 900))
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES', 2592000))
@@ -168,6 +189,7 @@ def create_app():
         return response
 
     _setup_logging(app)
+    app.logger.info(log_line(app.config['SQLALCHEMY_DATABASE_URI']))
 
     db.init_app(app)
     bcrypt.init_app(app)
@@ -198,6 +220,31 @@ def create_app():
     def health():
         return jsonify({'status': 'ok'})
 
+    @app.route('/api/ready')
+    def ready():
+        """Readiness probe: one real round-trip to the database.
+
+        Survives a paused or waking managed database (Supabase free projects
+        sleep after ~7 idle days): failure is a clear 503 with a request id
+        for correlation — never a stack trace, never credentials.
+        """
+        started = time.perf_counter()
+        try:
+            engine = app.extensions['sqlalchemy'].engines[None]
+            with engine.connect() as conn:
+                conn.execute(sa_text('SELECT 1'))
+        except Exception:                                     # noqa: BLE001
+            _warn_security('database_unreachable', path=request.path)
+            return jsonify({
+                'error': 'Database is not ready. It may be waking up — '
+                         'please retry shortly.',
+                'request_id': getattr(g, 'request_id', None),
+            }), 503
+        latency_ms = round((time.perf_counter() - started) * 1000)
+        return jsonify({'status': 'ok', 'database': 'ready',
+                        'latency_ms': latency_ms,
+                        'mode': app.config.get('DB_MODE', 'unknown')}), 200
+
     @app.errorhandler(404)
     def not_found(e):
         return jsonify({'error': 'Not found'}), 404
@@ -212,6 +259,21 @@ def create_app():
 
     @app.errorhandler(500)
     def server_error(e):
+        # A paused or unreachable managed database is an availability state,
+        # not an application crash: answer 503 with a clear, request-id'd
+        # message instead of a generic 500 (and never a stack trace).
+        # Flask hands the 500 handler an InternalServerError wrapper whose
+        # .original_exception carries the real raised exception.
+        from sqlalchemy.exc import DBAPIError
+        real = getattr(e, 'original_exception', None) or e
+        if isinstance(real, (OperationalError, DisconnectionError,
+                            DBAPIError, ConnectionError, OSError)):
+            _warn_security('database_unreachable', path=request.path)
+            return jsonify({
+                'error': 'Database is not ready. It may be waking up — '
+                         'please retry shortly.',
+                'request_id': getattr(g, 'request_id', None),
+            }), 503
         _warn_security('server_error', path=request.path)
         return jsonify({'error': 'Internal server error'}), 500
 
@@ -230,13 +292,19 @@ def create_app():
     with app.app_context():
         # Verify/repair the database BEFORE the first connection touches it,
         # then create anything missing, snapshot it, and start maintenance.
-        # Skipped when the schema belongs to alembic instead: while a
+        # Sqlite (dev/tests) keeps the create_all() fallback; a managed
+        # Postgres like Supabase is owned by the alembic chain instead, so
+        # create_all must never shadow migrations there (schema drift risk:
+        # auto-created tables without alembic_version rows). While a
         # `flask db …` command runs (argv contains "db") or tests opt out with
-        # SKIP_DB_CREATE_ALL=1, migrations own the table set.
+        # SKIP_DB_CREATE_ALL=1, migrations own the table set too.
+        from .database import is_postgres
         db_path = configure_persistence(app)
         migrate.init_app(app, db, directory=os.path.join(os.path.dirname(__file__), '..', 'migrations'))
         if _running_db_command() or os.getenv('SKIP_DB_CREATE_ALL') == '1':
-            db_path = None
+            db_path = None  # migrations own the schema; nothing to snapshot
+        elif is_postgres(app.config['SQLALCHEMY_DATABASE_URI']):
+            db_path = None  # managed schema: `flask db upgrade`, never create_all
         else:
             db.create_all()
         if db_path:

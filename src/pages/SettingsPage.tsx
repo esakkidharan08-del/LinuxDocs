@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, User, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { SystemStatus } from '../components/SystemStatus';
 
 const SettingsContent: React.FC = () => {
   const { user, changePassword, deleteAccount } = useAuth();
@@ -79,6 +80,7 @@ const SettingsContent: React.FC = () => {
         </div>
 
         <div className="space-y-6">
+          <SystemStatus />
           <div className="terminal-window bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden">
             <div className="terminal-header bg-[var(--bg-surface-elevated)] border-b border-[var(--border)] px-4 py-3">
               <div className="flex items-center gap-2">
