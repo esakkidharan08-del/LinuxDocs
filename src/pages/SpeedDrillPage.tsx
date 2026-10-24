@@ -1,8 +1,9 @@
 /* eslint-disable */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Flame, GraduationCap, RotateCcw, Target, Trophy, Zap, ArrowRight } from 'lucide-react';
+import { Flame, GraduationCap, RotateCcw, Target, Trophy, Zap, ArrowRight, Bookmark } from 'lucide-react';
 import { useAllCommands } from '../context/CatalogContext';
+import { useAuth } from '../context/AuthContext';
 import { useProgress } from '../context/ProgressContext';
 import { mergeProgressData } from '../lib/progress';
 
@@ -25,6 +26,7 @@ export function SpeedDrillPage() {
   /* Personal best + rounds live in the synced account store (Part 2);
      the question pools remain in-memory (they are documents, not progress). */
   const { ready: progressReady, progress, updateProgress } = useProgress();
+  const { bookmarks } = useAuth();
   const syncedDrill = (progress.speeddrill as DrillStore | undefined) ?? undefined;
 
   const [store, setStore] = useState<DrillStore>(() => ({ best: 0, plays: 0 }));
@@ -49,13 +51,40 @@ export function SpeedDrillPage() {
   const [secondsLeft, setSecondsLeft] = useState(ROUND_SECONDS);
   const [prevBest, setPrevBest] = useState(0);
 
+  /* bookmarks-only rounds: device preference (localStorage), so the
+     session type comes back on the next visit */
+  const BOOKMARK_ONLY_KEY = 'linuxdocs.drill-bookmarks';
+  const [bookmarkOnly, setBookmarkOnly] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(BOOKMARK_ONLY_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggleBookmarkOnly = useCallback(() => {
+    setBookmarkOnly((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(BOOKMARK_ONLY_KEY, next ? '1' : '0');
+      } catch {
+        /* private mode — session-only, fine */
+      }
+      return next;
+    });
+  }, []);
+
   // The question generator draws from the full docs, loaded on demand
   // (first visit pays one fetch wave; after that it is all in memory).
   const { commands, loading: docsLoading, error: docsError } = useAllCommands();
-  const ready = commands.length > 0;
+  const poolCommands = useMemo(() => {
+    /* bookmarks-only mode: drill just the commands the user starred */
+    if (bookmarkOnly && bookmarks.size) return commands.filter((c) => bookmarks.has(c.slug));
+    return commands;
+  }, [commands, bookmarkOnly, bookmarks]);
+  const ready = poolCommands.length > 0;
   const poolsRef = useRef<DrillPools | null>(null);
-  if (commands.length) {
-    poolsRef.current = buildPools(commands);
+  if (poolCommands.length) {
+    poolsRef.current = buildPools(poolCommands);
   }
 
   const answeredRef = useRef(false);
@@ -190,6 +219,27 @@ export function SpeedDrillPage() {
               <li>• Wrong answers cost nothing except time: a short red pause, then the drill moves on.</li>
               <li>• Combo rule: 3 hits in a row +1 bonus point, 6 in a row +2, and so on.</li>
             </ul>
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+              <button
+                onClick={toggleBookmarkOnly}
+                aria-pressed={bookmarkOnly}
+                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-xs transition-colors ${
+                  bookmarkOnly
+                    ? 'border-[var(--terminal-green)] bg-[var(--terminal-green)]/10 text-[var(--terminal-green)]'
+                    : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--terminal-green)]'
+                }`}
+              >
+                <Bookmark className={`h-3.5 w-3.5 ${bookmarkOnly ? 'fill-current' : ''}`} />
+                Bookmarked commands only {bookmarkOnly ? '· on' : '· off'}
+              </button>
+              {bookmarkOnly && (
+                <span className="font-mono text-xs text-[var(--text-muted)]">
+                  {bookmarks.size
+                    ? `${poolCommands.length} bookmarked command${poolCommands.length === 1 ? '' : 's'} in the pool`
+                    : 'no bookmarks yet — drill everything until you star some'}
+                </span>
+              )}
+            </div>
             {docsLoading && !ready ? (
               <p className="mt-8 rounded-xl border border-dashed border-[var(--border)] px-6 py-3.5 text-center font-mono text-sm text-[var(--text-muted)]">
                 loading question banks<span className="blinking">_</span>
