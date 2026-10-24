@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowRight, Bookmark, Layers, RotateCcw, Shield, Shuffle, Terminal,
+  ArrowLeft, ArrowRight, AlarmClock, Bookmark, Layers, RotateCcw, Shield, Shuffle, Terminal,
   X, CheckCircle2, GraduationCap,
 } from 'lucide-react';
 import type { Command, CommandLight } from '../types';
@@ -17,9 +17,9 @@ import { useAuth } from '../context/AuthContext';
    Flip cards, mark got it / again, session summary at the end.
    ============================================================ */
 
-type Deck = { id: string; title: string; blurb: string; accent: 'linux' | 'ctf'; lights: CommandLight[] };
+type Deck = { id: string; title: string; blurb: string; accent: 'linux' | 'ctf'; lights: CommandLight[]; review?: boolean };
 
-type FlashcardStore = { lastDeck: string | null; completes: Record<string, number> };
+type FlashcardStore = { lastDeck: string | null; completes: Record<string, number>; srs: Record<string, SrsCard> };
 const STORE_KEY = 'linuxdocs.flashcards';
 
 /** Device-local preference only (the synced part arrives via useProgress). */
@@ -36,8 +36,9 @@ function readLastDeck(): string | null {
   return null;
 }
 
-import type { FlashcardsData } from '../lib/progress';
+import type { FlashcardsData, SrsCard } from '../lib/progress';
 import { mergeProgressData } from '../lib/progress';
+import { srsDayKey, srsIsDue, srsNext } from '../lib/srs';
 import { useProgress } from '../context/ProgressContext';
 
 function shuffled<T>(items: T[]): T[] {
@@ -59,6 +60,7 @@ export function FlashcardsPage() {
   const [storeState, setStoreState] = useState<FlashcardStore>(() => ({
     lastDeck: readLastDeck(),
     completes: syncedFC?.completes ?? {},
+    srs: syncedFC?.srs ?? {},
   }));
   const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
 
@@ -78,6 +80,24 @@ export function FlashcardsPage() {
       return changed ? { ...current, completes: next } : current;
     });
   }, [progressReady, syncedCompletes]);
+
+  /* adopt device-merged SRS cards (higher bucket wins, tie → later due) */
+  const syncedSrs = syncedFC?.srs;
+  useEffect(() => {
+    if (!progressReady || !syncedSrs) return;
+    setStoreState((current) => {
+      let changed = false;
+      const srs = { ...current.srs };
+      for (const [slug, entry] of Object.entries(syncedSrs)) {
+        const local = srs[slug];
+        if (!local || local.bucket < entry.bucket || (local.bucket === entry.bucket && local.due < entry.due)) {
+          srs[slug] = entry;
+          changed = true;
+        }
+      }
+      return changed ? { ...current, srs } : current;
+    });
+  }, [progressReady, syncedSrs]);
 
   const decks = useMemo<Deck[]>(() => {
     const lightIn = (section: 'linux' | 'ctf', category?: string) =>
@@ -132,7 +152,44 @@ export function FlashcardsPage() {
     return [linuxDeck, ...categoryDecks, ctfDeck, ...domainDecks, ...(bookmarkDeck ? [bookmarkDeck] : [])];
   }, [bookmarks, lights, categories, domains]);
 
-  const activeDeck = activeDeckId ? decks.find((deck) => deck.id === activeDeckId) ?? null : null;
+  /* spaced repetition: cards whose due day has arrived, across every deck */
+  const dueLights = useMemo<CommandLight[]>(() => {
+    const today = srsDayKey(new Date());
+    const lightBySlug = new Map(lights.map((light) => [light.slug, light]));
+    return Object.entries(storeState.srs)
+      .filter(([, entry]) => srsIsDue(entry, today))
+      .map(([slug]) => lightBySlug.get(slug))
+      .filter((light): light is CommandLight => Boolean(light));
+  }, [storeState.srs, lights]);
+
+  const reviewDeck = useMemo<Deck | null>(() => {
+    if (!dueLights.length) return null;
+    return {
+      id: 'review',
+      title: 'Review due',
+      blurb: 'Cards you marked before — the spaced-repetition queue keeps them returning right about when you would forget.',
+      accent: 'linux',
+      lights: dueLights,
+      review: true,
+    };
+  }, [dueLights]);
+
+  const activeDeck = activeDeckId ? (decks.find((deck) => deck.id === activeDeckId) ?? reviewDeck) : null;
+
+  /** Fold an in-session flip verdict into the synced SRS schedule. */
+  const bumpSrs = useCallback(
+    (slug: string, mark: 'ok' | 'again') => {
+      setStoreState((current) => {
+        const srs = { ...current.srs, [slug]: srsNext(current.srs[slug], mark, srsDayKey(new Date())) };
+        if (progressReady) {
+          // merge-shaped: fold this verdict into the provider's current value
+          updateProgress('flashcards', (prev) => mergeProgressData('flashcards', prev, { completes: current.completes, srs }));
+        }
+        return { ...current, srs };
+      });
+    },
+    [progressReady, updateProgress],
+  );
 
   const openDeck = (deckId: string) => {
     const next: FlashcardStore = { ...storeState, lastDeck: deckId };
@@ -178,9 +235,17 @@ export function FlashcardsPage() {
             completes={storeState.completes[activeDeck.id] ?? 0}
             onExit={() => setActiveDeckId(null)}
             onRestartCompleted={() => recordComplete(activeDeck.id)}
+            onMark={bumpSrs}
           />
         ) : (
-          <DecksView decks={decks} lastDeck={lastDeck} completes={storeState.completes} onOpen={openDeck} />
+          <DecksView
+            decks={decks}
+            lastDeck={lastDeck}
+            completes={storeState.completes}
+            dueCount={dueLights.length}
+            onDue={() => setActiveDeckId('review')}
+            onOpen={openDeck}
+          />
         )}
       </div>
     </div>
@@ -195,15 +260,32 @@ function DecksView({
   decks,
   lastDeck,
   completes,
+  dueCount,
+  onDue,
   onOpen,
 }: {
   decks: Deck[];
   lastDeck: Deck | null;
   completes: Record<string, number>;
+  dueCount: number;
+  onDue: () => void;
   onOpen: (deckId: string) => void;
 }) {
   return (
     <div className="space-y-6">
+      {dueCount > 0 && (
+        <button
+          onClick={onDue}
+          className="flex w-full flex-wrap items-center gap-3 rounded-xl border border-amber-400/40 bg-amber-400/5 px-4 py-3 text-left transition-colors hover:bg-amber-400/10"
+        >
+          <AlarmClock className="h-4 w-4 shrink-0 text-amber-400" />
+          <span className="text-sm">
+            <span className="font-semibold">{dueCount}</span> card{dueCount === 1 ? '' : 's'} due for review
+            <span className="text-[var(--text-muted)]"> · spaced repetition queue</span>
+          </span>
+          <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-amber-400" />
+        </button>
+      )}
       {lastDeck && (
         <button
           onClick={() => onOpen(lastDeck.id)}
@@ -270,11 +352,13 @@ function FlashcardSession({
   completes,
   onExit,
   onRestartCompleted,
+  onMark,
 }: {
   deck: Deck;
   completes: number;
   onExit: () => void;
   onRestartCompleted: () => void;
+  onMark: (slug: string, mark: 'ok' | 'again') => void;
 }) {
   type Mark = 'ok' | 'again';
   // The session fetches this deck's full docs on demand (cached per session).
@@ -328,10 +412,11 @@ function FlashcardSession({
     (kind: Mark) => {
       if (!card) return;
       setMarks((current) => ({ ...current, [card.slug]: kind }));
+      onMark(card.slug, kind); // fold into the spaced-repetition schedule
       setIndex((current) => current + 1);
       setFlipped(false);
     },
-    [card],
+    [card, onMark],
   );
 
   const goNext = useCallback(() => {
@@ -622,9 +707,9 @@ function SessionSummary({
   return (
     <div className="mx-auto max-w-2xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-center sm:p-8">
       <GraduationCap className={`mx-auto h-10 w-10 ${isCTF ? 'text-[var(--ctf-red)]' : 'text-[var(--terminal-green)]'}`} />
-      <h2 className="mt-3 text-2xl font-bold">Deck complete</h2>
+      <h2 className="mt-3 text-2xl font-bold">{deck.review ? 'Review complete' : 'Deck complete'}</h2>
       <p className="mt-1 text-sm text-[var(--text-muted)]">
-        {okCount}/{total} got it · {pct}% retention
+        {okCount}/{total} got it · {pct}% retention{deck.review ? ' · next dues scheduled' : ''}
       </p>
       <div className="mx-auto mt-4 h-2 max-w-sm overflow-hidden rounded-full bg-[var(--border)]">
         <div className="h-full rounded-full bg-emerald-400 transition-all" style={{ width: `${pct}%` }} />
