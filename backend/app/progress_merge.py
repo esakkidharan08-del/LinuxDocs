@@ -32,7 +32,7 @@ from datetime import date
 
 from .progress_schemas import PROGRESS_KEYS
 
-PROGRESS_MERGE_VERSION = 1  # bumped with the vectors file contract version
+PROGRESS_MERGE_VERSION = 2  # bumped with the vectors file contract version
 
 
 def _clean(value: object) -> dict:
@@ -66,20 +66,48 @@ def _merge_learning(a: object, b: object) -> dict:
 
 
 def _merge_terminal(a: object, b: object) -> dict:
-    return {
+    out = {
         'solved': _union_sorted(_clean(a).get('solved'), _clean(b).get('solved')),
         'commandsRun': max(_as_int(_clean(a).get('commandsRun')), _as_int(_clean(b).get('commandsRun'))),
     }
+    # Faster full-run times are the personal best (min over set values); the
+    # run counter is cumulative, so max wins there.
+    run_times = [v for v in (_as_int(_clean(a).get('bestRunSeconds')), _as_int(_clean(b).get('bestRunSeconds'))) if v > 0]
+    if run_times:
+        out['bestRunSeconds'] = min(run_times)
+    runs = max(_as_int(_clean(a).get('runs')), _as_int(_clean(b).get('runs')))
+    if runs > 0:
+        out['runs'] = runs
+    return out
 
 
 def _merge_flashcards(a: object, b: object) -> dict:
     completes: dict[str, int] = {}
+    srs: dict[str, dict] = {}
     ca, cb = _clean(a).get('completes'), _clean(b).get('completes')
+    sa, sb = _clean(a).get('srs'), _clean(b).get('srs')
     for deck_id in sorted(set(_clean(ca)) | set(_clean(cb))):
         merged_deck = max(_as_int(_clean(ca).get(deck_id)), _as_int(_clean(cb).get(deck_id)))
         if merged_deck > 0:
             completes[deck_id] = merged_deck
-    return {'completes': completes}
+    # SRS cards: the device with the HIGHER bucket carries the later review
+    # state; equal buckets resolve to the LATER due day. Deterministic join.
+    for slug in sorted(set(_clean(sa)) | set(_clean(sb))):
+        ea, eb = _clean(sa.get(slug)), _clean(sb.get(slug))
+        if not ea and not eb:
+            continue
+        bucket_a, bucket_b = _as_int(ea.get('bucket')), _as_int(eb.get('bucket'))
+        due_a, due_b = str(ea.get('due') or ''), str(eb.get('due') or '')
+        if bucket_a > bucket_b:
+            srs[slug] = {'bucket': bucket_a, 'due': due_a}
+        elif bucket_b > bucket_a:
+            srs[slug] = {'bucket': bucket_b, 'due': due_b}
+        else:
+            srs[slug] = {'bucket': bucket_a, 'due': max(due_a, due_b)}
+    out: dict = {'completes': completes}
+    if srs:
+        out['srs'] = srs
+    return out
 
 
 def _merge_speeddrill(a: object, b: object) -> dict:
@@ -112,25 +140,30 @@ def _merge_streak(a: object, b: object) -> dict:
     last_a, last_b = str(ca.get('lastDay', '')), str(cb.get('lastDay', ''))
     best = max(_as_int(ca.get('best')), _as_int(cb.get('best')))
     total_days = max(_as_int(ca.get('totalDays')), _as_int(cb.get('totalDays')))
+    freezes = max(_as_int(ca.get('freezes')), _as_int(cb.get('freezes')))
+
+    def _row(last_day: str, current: int) -> dict:
+        out: dict = {'lastDay': last_day, 'current': current, 'best': best, 'totalDays': total_days}
+        if freezes > 0:
+            out['freezes'] = freezes
+        return out
 
     # The most recent visit carries the live chain (\"recomputed from the
     # last-visit date\"); empty/absent days are treated as missing and cannot
     # win. Same-day visits: the longer live chain wins. Symmetric by design.
     day_a, day_b = _parse_day(last_a), _parse_day(last_b)
     if day_a is None and day_b is None:
-        return {'lastDay': '', 'current': max(_as_int(ca.get('current')), _as_int(cb.get('current'))),
-                'best': best, 'totalDays': total_days}
+        return _row('', max(_as_int(ca.get('current')), _as_int(cb.get('current'))))
     if day_b is None:
-        return {'lastDay': last_a, 'current': _as_int(ca.get('current')), 'best': best, 'totalDays': total_days}
+        return _row(last_a, _as_int(ca.get('current')))
     if day_a is None:
-        return {'lastDay': last_b, 'current': _as_int(cb.get('current')), 'best': best, 'totalDays': total_days}
+        return _row(last_b, _as_int(cb.get('current')))
     if day_b > day_a:
-        return {'lastDay': last_b, 'current': _as_int(cb.get('current')), 'best': best, 'totalDays': total_days}
+        return _row(last_b, _as_int(cb.get('current')))
     if day_a > day_b:
-        return {'lastDay': last_a, 'current': _as_int(ca.get('current')), 'best': best, 'totalDays': total_days}
-    return {'lastDay': last_b if last_b else last_a,
-            'current': max(_as_int(ca.get('current')), _as_int(cb.get('current'))),
-            'best': best, 'totalDays': total_days}
+        return _row(last_a, _as_int(ca.get('current')))
+    return _row(last_b if last_b else last_a,
+                max(_as_int(ca.get('current')), _as_int(cb.get('current'))))
 
 
 _MERGERS = {

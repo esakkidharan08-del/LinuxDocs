@@ -19,6 +19,8 @@ from datetime import date, datetime, timedelta, timezone
 PROGRESS_KEYS = ('learning', 'terminal', 'flashcards', 'speeddrill', 'streak')
 
 KEY_ID = re.compile(r'^[a-z0-9-]{1,64}$')        # path ids / deck ids
+DECK_ID = re.compile(r'^[a-z0-9-]{1,64}(:[a-z0-9-]{1,64})?$')  # incl. scoped ids ('linux:text-tools')
+SRS_SLUG = re.compile(r'^[a-z0-9-]{1,48}(/[a-z0-9-]{1,48})*$')  # command slugs ('ctf/crypto/john')
 MISSION_ID = re.compile(r'^m\d{1,2}$')           # terminal missions m1..m13
 LESSON_REF = re.compile(r'^\d{1,3}$')            # lesson index inside a path ('0'..'99')
 DATE = re.compile(r'^\d{4}-\d{2}-\d{2}$')        # ISO calendar day
@@ -28,11 +30,15 @@ MAX_PATHS = 32                                   # 8 real paths; generous slack
 MAX_LESSONS_PER_PATH = 200                       # 1..3 real lessons per path
 MAX_MISSIONS = 64                                # 13 real missions
 MAX_DECKS = 64                                   # a handful of real decks
+MAX_SRS_CARDS = 200                              # 132 real command slugs
 MAX_QUIZ_TOTAL = 1000                            # quiz question totals are ≤ 10
 MAX_SCORE = 1000                                 # bestScore ≤ bestTotal ≤ MAX_QUIZ_TOTAL
 MAX_DRILL_BEST = 10_000                          # 60-second drill score circumstantial
 MAX_PLAYS = 100_000                              # drill rounds / terminal click counter
 MAX_STREAK = 3650                                # 10 years of consecutive days
+MAX_RUN_SECONDS = 86_400                         # a speedrun day is enough
+MAX_FREEZES = 99                                 # streak freeze tokens
+MAX_SRS_BUCKET = 8                               # 8 review intervals
 
 
 def _is_int(value: object) -> bool:
@@ -76,7 +82,7 @@ def _check_learning(data: dict) -> str | None:
 
 
 def _check_terminal(data: dict) -> str | None:
-    unknown = set(data) - {'solved', 'commandsRun'}
+    unknown = set(data) - {'solved', 'commandsRun', 'bestRunSeconds', 'runs'}
     if unknown:
         return f'terminal: unknown field(s) {sorted(unknown)}'
     solved = data.get('solved')
@@ -90,11 +96,17 @@ def _check_terminal(data: dict) -> str | None:
     commands_run = data.get('commandsRun')
     if not _is_int(commands_run) or not 0 <= commands_run <= MAX_PLAYS:
         return f'terminal.commandsRun: integer 0..{MAX_PLAYS} required'
+    for field, cap in (('bestRunSeconds', MAX_RUN_SECONDS), ('runs', MAX_PLAYS)):
+        value = data.get(field)
+        if value is None:
+            continue  # optional (v2) — devices that never speedran stay valid
+        if not _is_int(value) or not 0 <= value <= cap:
+            return f'terminal.{field}: integer 0..{cap} required'
     return None
 
 
 def _check_flashcards(data: dict) -> str | None:
-    unknown = set(data) - {'completes'}
+    unknown = set(data) - {'completes', 'srs'}
     if unknown:
         return f'flashcards: unknown field(s) {sorted(unknown)}'
     completes = data.get('completes')
@@ -103,10 +115,28 @@ def _check_flashcards(data: dict) -> str | None:
     if len(completes) > MAX_DECKS:
         return f'flashcards: too many decks ({len(completes)} > {MAX_DECKS})'
     for deck_id, count in completes.items():
-        if not isinstance(deck_id, str) or not KEY_ID.fullmatch(deck_id):
+        if not isinstance(deck_id, str) or not DECK_ID.fullmatch(deck_id):
             return f"flashcards: bad deck id {deck_id!r}"
         if not _is_int(count) or not 0 <= count <= MAX_DECKS * 100:
             return f'flashcards/{deck_id}: integer 0..{MAX_DECKS * 100} required'
+    srs = data.get('srs')
+    if srs is None:
+        return None  # optional (v2) — pre-v2 payloads keep validating
+    if not isinstance(srs, dict):
+        return "flashcards: 'srs' must be an object"
+    if len(srs) > MAX_SRS_CARDS:
+        return f'flashcards: too many srs cards ({len(srs)} > {MAX_SRS_CARDS})'
+    for slug, entry in srs.items():
+        if not isinstance(slug, str) or not SRS_SLUG.fullmatch(slug):
+            return f"flashcards: bad srs slug {slug!r}"
+        if not isinstance(entry, dict) or set(entry) - {'bucket', 'due'}:
+            return f"flashcards/{slug}: srs entry must be an object with bucket/due"
+        bucket = entry.get('bucket')
+        if not _is_int(bucket) or not 0 <= bucket <= MAX_SRS_BUCKET:
+            return f'flashcards/{slug}.bucket: integer 0..{MAX_SRS_BUCKET} required'
+        due = entry.get('due')
+        if not isinstance(due, str) or not DATE.fullmatch(due) or _parse_day(due) is None:
+            return f"flashcards/{slug}.due: real 'YYYY-MM-DD' required"
     return None
 
 
@@ -134,7 +164,7 @@ def _parse_day(value: str) -> date | None:
 
 
 def _check_streak(data: dict, today: date) -> str | None:
-    unknown = set(data) - {'lastDay', 'current', 'best', 'totalDays'}
+    unknown = set(data) - {'lastDay', 'current', 'best', 'totalDays', 'freezes'}
     if unknown:
         return f'streak: unknown field(s) {sorted(unknown)}'
     last_day = data.get('lastDay')
@@ -154,6 +184,11 @@ def _check_streak(data: dict, today: date) -> str | None:
             return f'streak.{field}: integer 0..{MAX_STREAK} required'
     if data['best'] < data['current']:
         return 'streak: best cannot be below current'
+    freezes = data.get('freezes')
+    if freezes is None:
+        return None  # optional (v2)
+    if not _is_int(freezes) or not 0 <= freezes <= MAX_FREEZES:
+        return f'streak.freezes: integer 0..{MAX_FREEZES} required'
     return None
 
 
